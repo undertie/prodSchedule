@@ -1,0 +1,111 @@
+html {
+	margin: auto;
+	width: 768px;
+	height: 1000px;
+	background-color: #FFF;
+	font-size: 14px;
+	color:#000;
+}
+
+.changeling-neo {
+    position: absolute;
+    top: 0;
+    left: 38%;
+    
+}
+
+
+#container {
+	margin: 40px;
+}
+
+.smallRed {
+	font-size: 15px;
+	color: #F00;
+	font-weight: bold;
+	text-align: center;
+}
+
+.red {
+	font-size: 39px;
+	color: #F00;
+}
+
+.silver {
+	font-size: 39px;
+	color: #444;
+}
+
+.indent {
+	padding-left: 125px;
+	text-indent: -125px;
+}
+
+.display {
+	display: none;
+}
+
+h1 {
+	text-align: center;
+}
+
+hr {
+	margin-top: -10px;
+}
+
+button {
+	position: absolute;
+	top:50%;
+	right:10%;
+	border-radius: 10px;
+	background-color:  #f00;
+	color: #ffffff;
+	font-weight: bold;
+	box-shadow: 4px 6px 6px 0 rgba(0, 0, 0, 0.6);
+	padding: 50px 50px;
+	border: 0;
+	margin: auto;
+	display: block;
+	font-size: 24px;
+}
+
+.centered {
+	text-align: center;
+}
+
+.form-row {
+	font-size: 25px;
+}
+
+.form-row input{
+	font-size: 30px;
+}
+
+.form-row select{
+	font-size: 30px;
+}
+
+.descriptions {
+	font-size: 17px;
+}
+
+#footer {
+	font-size: 15px;
+	font-family: sans-serif;
+	position: absolute;
+	bottom: 20px;
+	padding-left: 28px;
+}
+span {
+	font-weight: bold;
+}
+.bold {
+	font-weight: bold;
+}
+
+/* show the timestamp at the top but not the url at the bottom of the printed cherry sheet page */
+@page {
+    size: auto;
+    margin-top: 20mm;
+    margin-bottom: 0;
+}

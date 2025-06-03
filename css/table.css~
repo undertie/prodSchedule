@@ -1,0 +1,367 @@
+	 html {
+        font-family: 'Muli', sans-serif;
+    }
+
+    #contain {
+        width: 96%;
+        margin: 0  auto;
+        text-align:center;
+        margin-left: 2%;
+        margin-right: 2%;
+    }
+
+	#leftTemplateTable {
+		position: absolute;
+		top: 45px;
+		width: 15%;
+	}
+
+	#rightTemplateTable {
+		position: absolute;
+		top: 45px;
+		width: 20%;
+		left: 77.5%;
+		text-align: left;
+	}
+
+	#templateChild {
+		padding: 10px 15px 10px 15px;
+	}
+
+	 .kern {
+		  letter-spacing: -7px;
+	 }
+
+    .red {
+        font-size: 39px;
+        color: #FF0000;
+    }
+
+    .silver {
+        font-size: 39px;
+        color: #999999;
+    }
+
+	 .smallRed {
+	  		color: #FF0000;
+	 }
+
+	 .gray {
+	  		color: #666;
+	 }
+
+	 .grey {
+	  		color: #777;
+	 }
+
+    .big-bold {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .bold {
+        font-weight: bold;
+    }
+
+    .header {
+        color: #203A54;
+        font-size: 40px;
+		  font-family: 'Lobster', serif;
+		  opacity: 0.95;
+    }
+    
+    .center {
+        text-align: center;
+    }    
+
+    .right {
+        text-align: right;
+    }
+
+	 .urgent {
+		background-color: #990000;
+		color: #FFF;
+		font-weight: bold;
+	 }	
+
+	 .late {
+		background-color: #FF9980;
+	 }
+
+	 .early {
+		background-color: #CCFFCC;
+	 }
+
+	 .onTime {
+		background-color: #FFFF99;
+	 }
+    
+	 .overNight {
+		background-color: #FFCC80;
+	 }
+
+	 .standard {
+		background-color: #F2F2F2;
+		font-size: 14px;
+	 }
+
+	 .priority {
+		background-color: #FFCC80;
+		font-size: 14px;
+	 }
+
+    .tiny {
+        font-size: 10px;
+        vertical-align: bottom;
+		  min-width: 15%;
+    }
+	
+	 .lower {
+	 	  margin-bottom: -10px;
+	 }
+
+	a:link {
+		text-decoration: none;
+		color: inherit;
+	}
+
+	a:visited {
+		text-decoration: none;
+		color: inherit;
+	}
+
+	#faBig {
+		font-size: 22px;
+	}
+
+	#faBig:hover {
+		font-size: 30px;
+		color: #777;
+	}
+    
+    table {
+        width: 100%;
+    }
+
+    th {
+        background-color: #000;
+        color: #F2F2F2;
+        padding: 10px 15px 10px 15px;
+        text-align: center;
+        font-size: 18px;
+    }
+
+    td {
+        font-size: 12px;
+        padding: 10px 15px 10px 15px;
+        vertical-align: top;
+    }
+
+    th, td {
+        border-bottom: 1px solid #DDD;
+    }
+
+    tr:hover {background-color: #D5D5D5;}
+
+    form input[type=text] {
+        max-width: 111px;
+        width: 100%;
+    }
+
+    form input {
+        color:  #5f5f5f;
+        box-sizing: border-box;
+        box-shadow: 1px 2px 4px 0 rgba(0, 0, 0, 0.08);
+        padding: 12px 18px;
+        border: 1px solid #dbdbdb;
+    }
+
+    form button {
+        border-radius: 5px;
+        background-color:  #6caee0;
+        color: #ffffff;
+        font-weight: bold;
+        box-shadow: 2px 4px 8px 0 rgba(0, 0, 0, 0.6);
+        padding: 14px 22px;
+        border: 0;
+        margin-top: 15px;
+    }
+
+    form button:hover {
+        background-color: #7dbff0;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    #misTable th:hover {
+        color: #FFF;
+        background-color: #555;
+    }
+
+    #checkColumns {
+        position: absolute;
+        top: 10px;
+        text-align: left;
+    }
+
+    #columnsButton {
+        background-color: #6caee0;
+        color: #FFF;
+        font-weight: bold;
+        box-shadow: 2px 4px 8px 0 rgba(0, 0, 0, 0.6);
+        margin: 10px 2px;
+        border-radius: 5px;
+        overflow:auto;
+        float:left;
+    }
+
+    #columnsButton:hover {
+        background-color: #7dbff0;
+    }
+
+    #columnsButton label span {
+        text-align:center;
+        padding: 14px 18px;
+        display:block;
+    }
+
+    #columnsButton label input {
+        position:absolute;
+        top:-20px;
+    }
+
+    #columnsButton input:checked + span {
+        background-color: #000;
+        color: #F2F2F2;
+    }
+
+    .columnsButton {
+        background-color: #6caee0;
+        color: #FFF;
+        font-weight: bold;
+        box-shadow: 2px 4px 8px 0 rgba(0, 0, 0, 0.6);
+        margin: 10px 2px;
+        border-radius: 5px;
+        overflow:auto;
+        float:left;
+    }
+    input[type=search] {
+        color:  #5f5f5f;
+        box-sizing: border-box;
+        box-shadow: 1px 2px 4px 0 rgba(0, 0, 0, 0.08);
+        padding: 12px 18px;
+        border: 1px solid #dbdbdb;
+        margin-bottom: 10px;
+    }
+
+	#backTop {
+		position: fixed;
+		bottom: 0;
+		left: 98%;
+		z-index: 11;
+		overflow: hidden;
+	}
+
+	.dataTables_paging { display: none; }
+
+	/* Start Penguin */
+	.penguinStamp {
+		padding-top: 15px;
+	}
+
+	/* Popup container */
+	.popup {
+		 position: relative;
+		 display: inline-block;
+		 cursor: pointer;
+		 float: right;
+	}
+
+	/* The actual popup (appears on top) */
+	.popup .popuptext {
+		 visibility: hidden;
+		 width: 150px;
+		 background-color: #555;
+		 color: #fff;
+		 text-align: center;
+		 border-radius: 6px;
+		 padding: 10px 5px;
+		 position: absolute;
+		 z-index: 1;
+		 bottom: 80%;
+		 margin-left: -137px;
+		 margin-bottom: 5px;
+	}
+
+	/* Popup arrow */
+	.popup .popuptext::after {
+		 content: "";
+		 position: absolute;
+		 top: 100%;
+		 left: 93%;
+		 margin-left: -5px;
+		 border-width: 5px;
+		 border-style: solid;
+		 border-color: #555 transparent transparent transparent;
+	}
+
+	/* Toggle this class when clicking on the popup container (hide and show the popup) */
+	.popup .show {
+		 visibility: visible;
+		 -webkit-animation: fadeIn 1s;
+		 animation: fadeIn 1s
+	}
+
+	/* Add animation (fade in the popup) */
+	@-webkit-keyframes fadeIn {
+		 from {opacity: 0;}
+		 to {opacity: 1;}
+	}
+
+	@keyframes fadeIn {
+		 from {opacity: 0;}
+		 to {opacity:1 ;}
+	} 
+	/* End Penguin */
+
+ 	/* Start Sticky Table Header */
+	.header-banner {
+	  background-color: red;
+	  width: 100%;
+	  height: 300px;
+	}
+
+	.fixed-header {
+	  position: fixed;
+	  top:0; left:0;
+	  width: 95.5%; 
+	  margin-left: 2.25%;
+	  margin-right: 2.25%;
+	}
+
+	nav {
+	  width:100%;
+	  background: #000;
+	  postion: fixed;
+	  z-index: 10;
+	}
+
+	nav ul { 
+	  list-style-type: none;
+	  margin: 0 auto;
+	  padding-left: 0;
+	  text-align: left;
+	  max-width: 100%;
+	}
+	nav ul li { 
+	  display: inline-block; 
+     background-color: #000;
+     color: #F2F2F2;
+	  font-weight: bold;
+     padding: 10px 0px 10px 0px;
+     text-align: center;
+     font-size: 18px;
+	}
+	/* End Sticky Table Header */

@@ -1,0 +1,355 @@
+/* General body styling */
+body {
+    font-family: Proxima Nova Regular,Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+    overflow: auto; /* Ensure scrolling works */
+}
+
+label {
+    font-family: Proxima Nova Regular,Arial, sans-serif;
+}
+
+/* Sticky header background */
+#headerBackground {
+    position: fixed;
+    width: 100%;
+    height: 110px;
+    top: 0; /* Stick to the top of the viewport */
+    background-color: #f6891f; /* Match your design */
+    z-index: 1000; /* Ensure it stays above other elements */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add shadow for separation */
+}
+
+#headerUnderBackground {
+    position: fixed;
+    width: 100%;
+    height: 120px;
+    top: 0; /* Stick to the top of the viewport */
+    background-color: white; /* Match your design */
+    z-index: 995; /* Ensure it stays above other elements */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add shadow for separation */
+}
+
+/* Add spacing above the table */
+#contain {
+    margin-top: 65px; /* Adjust this value to match the desired spacing */
+}
+
+/* Centered container for h1 and filters */
+#makeFixed {
+    display: flex;
+    flex-direction: column; /* Stack children vertically */
+    align-items: center; /* Center children horizontally */
+    gap: 10px; /* Space between children */
+}
+
+/* Sticky h1 */
+#makeFixed h1 {
+    margin: 0; /* Remove default margin */
+    color: #333;
+    font-size: 33px; /* Adjust as needed */
+    font-family: Proxima Nova ExtraBold,Arial, sans-serif;
+}
+
+/* Container for buttons, filters, and search */
+#makeFixed .header-row {
+    display: flex;
+    justify-content: space-between; /* Space out buttons, filters, and search */
+    align-items: center; /* Center vertically */
+    width: 100%; /* Take full width */
+    padding: 0 20px; /* Add padding for spacing */
+}
+
+/* Buttons container */
+#makeFixed .buttons-container {
+    display: flex;
+    gap: 10px; /* Space between buttons */
+    margin-left: 10px;
+}
+
+/* Filters container */
+#makeFixed .filters {
+    display: flex;
+    gap: 10px; /* Space between filter elements */
+    align-items: center; /* Center vertically */
+}
+
+/* Search container */
+#makeFixed .search-container {
+    display: flex;
+    gap: 10px; /* Space between search elements */
+    align-items: center; /* Center vertically */
+    margin-right: 50px;
+}
+
+ /* Fix to the top */
+.dataTables_filter input[type="search"] {
+    color:  #5f5f5f;
+    box-sizing: border-box;
+    box-shadow: 1px 2px 4px 0 rgba(0, 0, 0, 0.08);
+    padding: 12px 18px;
+    border: 1px solid #dbdbdb;
+}
+
+/* Filter dropdowns and labels */
+#makeFixed label {
+    font-weight: bold;
+}
+
+#makeFixed select {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+/* Start connection indicators */
+ #connection-dot {
+    position: fixed;
+    top: 10px;
+    left: 35px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: gray; /* Default/unknown state */
+    border: 2px solid white;
+    box-shadow: 0 0 3px rgba(0,0,0,0.2);
+    z-index: 9999; /* Higher than everything else */
+    transition: background-color 0.3s ease;
+}
+
+#connection-dot.connected {
+    background-color: #4CAF50; /* Green */
+}
+
+#connection-dot.disconnected {
+    background-color: #F44336; /* Red */
+}
+
+#connection-dot.reconnecting {
+    background-color: #FFC107; /* Yellow */
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+/* End connection indicators */
+
+/* Start notes fields */
+.notes-cell {
+    max-width: 250px;
+    min-width: 150px;
+}
+
+.notes-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.notes-input {
+    width: 100%;
+    min-height: 60px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical;
+}
+
+.btn-save-notes {
+    align-self: flex-end;
+}
+
+.save-status {
+    font-size: 12px;
+    color: green;
+    display: none;
+}
+/* End notes fields */
+
+/* Ensure the table respects column widths */
+#prodTable {
+    width: auto !important; /* Allow the table to grow based on content */
+    min-width: 100%; /* Ensure it takes at least the full width of the container */
+}
+
+/* Ensure table headers and cells can grow based on content */
+#prodTable th,
+#prodTable td {
+    white-space: nowrap; /* Prevent text wrapping */
+    min-width: 100px; /* Set a minimum width for columns */
+}
+
+/* Optional: Add padding to table cells for better spacing */
+#prodTable th,
+#prodTable td {
+    padding: 8px 12px;
+}
+
+/* Sticky table headers */
+#prodTable thead th {
+    background-color: #00478a;
+    color: white;
+    padding: 10px;
+    text-align: left;
+    position: sticky;
+    top: 120px; /* Adjust based on header height */
+    z-index: 998; /* Ensure headers stay above table rows */
+    font-family: Proxima Nova ExtraBold,Arial, sans-serif;
+}
+
+
+/* Make the first column header sticky for both horizontal and vertical scrolling */
+#prodTable thead th:first-child {
+    position: sticky;
+    left: 0; /* Stick to the left for horizontal scrolling */
+    z-index: 999; /* Higher z-index to ensure it stays above other headers */
+    background-color: #00478a; /* Match the header background color */
+}
+
+/* Make the first column cells sticky for horizontal scrolling */
+#prodTable tbody td:first-child {
+    position: sticky;
+    left: 0; /* Stick to the left for horizontal scrolling */
+    z-index: 2; /* Lower z-index to keep cells below the header */
+    background-color: white; /* Match the cell background color */
+}
+
+/* Optional: Add a border to the sticky column for better visibility */
+#prodTable th:first-child,
+#prodTable td:first-child {
+    border-right: 1px solid #ddd;
+}
+
+/* Table body styling */
+#prodTable tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+#prodTable tbody {
+    margin-top: 250px;
+}
+
+/* Hover effect for table rows */
+#prodTable tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Define colors for each column match */
+.match-col-Last-Cover-Process-Header { background-color: #ffcccc !important; } /* Light red */
+.match-col-Last-Body-Process-Header { background-color: #ccffcc !important; } /* Light green */
+.match-col-Next-Cover-Process-Header { background-color: #ccccff !important; } /* Light blue */
+.match-col-Next-Body-Process-Header { background-color: #ffffcc !important; } /* Light yellow */
+
+/* Define colors for each column match */
+/*.match-col-Last-Cover-Process { background-color: #ffcccc !important; } /* Light red */
+/*.match-col-Last-Body-Process { background-color: #ccffcc !important; } /* Light green */
+/*.match-col-Next-Cover-Process { background-color: #ccccff !important; } /* Light blue */
+/*.match-col-Next-Body-Process { background-color: #ffffcc !important; } /* Light yellow */
+
+
+[class*="-match-col-Last-Cover-Process"] { background-color: #ffcccc !important; } /* Light red */
+[class*="-match-col-Last-Body-Process"] { background-color: #ccffcc !important; } /* Light green */
+[class*="-match-col-Next-Cover-Process"] { background-color: #ccccff !important; } /* Light blue */
+[class*="-match-col-Next-Body-Process"] { background-color: #ffffcc !important; } /* Light yellow */
+
+/* header boxes */
+    .process-status-container {
+        display: flex;          /* Horizontal alignment */
+        gap: 8px;              /* Space between boxes */
+        margin-top: 8px;       /* Space below deptFilter */
+    }
+    
+    .process-box {
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-weight: bold;
+        text-align: center;
+        flex: 1;               /* Equal width boxes */
+        white-space: nowrap;   /* Prevent text wrapping */
+    }
+
+/* details table */
+
+/* Add some padding to the hidden row */
+#prodTable tbody td.hidden-row {
+  padding: 10px;
+}
+
+/* Style the detailed table */
+#prodTable tbody td.hidden-row table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#prodTable tbody td.hidden-row table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#prodTable tbody tr.child-row {
+    pointer-events: none;
+}
+
+/* end details table */
+
+/* designer prepress dropdown */
+.designer-select {
+    width: 100%;
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background-color: white;
+    font-size: 14px;
+}
+
+.designer-select:focus {
+    border-color: #66afe9;
+    outline: 0;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+}
+/* end designer prepress dropdown */
+
+/* Designer-specific highlighting */
+[class*="-designer-Samantha-Jaskowski"] { background-color: #FFD700 !important; }
+[class*="-designer-Kyle-Stuttgen"] { background-color: #87CEEB !important; }
+[class*="-designer-Adam-Mueller"] { background-color: #98FB98 !important; }
+
+/* Fallback for unassigned designers */
+[class*="-designer-default"] { background-color: #E6E6FA !important; }
+/* End Designer-specific highlighting */
+
+/* Responsive table */
+@media screen and (max-width: 768px) {
+    #makeFixed .header-row {
+        flex-direction: column; /* Stack elements vertically on small screens */
+        gap: 10px; /* Space between elements */
+    }
+
+    #prodTable thead {
+        display: none;
+    }
+
+    #prodTable tbody td {
+        display: block;
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+    }
+
+    #prodTable tbody td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 50%;
+        padding-right: 10px;
+        text-align: left;
+        font-weight: bold;
+    }
+}

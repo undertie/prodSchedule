@@ -1,0 +1,436 @@
+	 html {
+        font-family: 'Muli', sans-serif;
+    }
+
+    #contain {
+        width: 96%;
+        margin: 0  auto;
+        text-align:center;
+        margin-left: 2%;
+        margin-right: 2%;
+    }
+
+	#leftTemplateTable {
+		position: absolute;
+		top: 45px;
+		width: 15%;
+	}
+
+	#rightTemplateTable {
+		position: absolute;
+		top: 45px;
+		width: 15%;
+		left: 82.5%;
+		text-align: left;
+	}
+
+	#templateChild {
+		padding: 10px 15px 10px 15px;
+	}
+
+	 .kern {
+		  letter-spacing: -7px;
+	 }
+
+    .red {
+        font-size: 39px;
+        color: #FF0000;
+    }
+
+    .silver {
+        font-size: 39px;
+        color: #999999;
+    }
+
+	 .smallRed {
+	  		color: #FF0000;
+	 }
+
+	 .gray {
+	  		color: #666;
+	 }
+
+	 .grey {
+	  		color: #777;
+	 }
+
+    .big-bold {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .bold {
+        font-weight: bold;
+    }
+
+    .header {
+        color: #203A54;
+        font-size: 40px;
+		/*font-family: 'Lobster', serif;*/
+		opacity: 0.95;
+    }
+
+    .left {
+        text-align: left;
+    }  
+    
+    .center {
+        text-align: center;
+    }    
+
+    .right {
+        text-align: right;
+    }
+
+    .cell-hyphens {
+    	word-wrap: break-word;
+    	max-width: 1px;
+    	-webkit-hyphens: auto;
+    	-moz-hyphens: auto;
+    	-ms-hyphens: auto;
+    	hyphens: auto;
+    }
+
+	 .urgent {
+		background-color: #990000;
+		color: #FFF;
+		font-weight: bold;
+	 }	
+
+	 .late {
+		background-color: #FF9980;
+	 }
+
+	 .early {
+		background-color: #CCFFCC;
+	 }
+
+	 .onTime {
+		background-color: #FFFF99;
+	 }
+    
+	 .overNight {
+		background-color: #FFCC80;
+	 }
+
+ 	 .cherry {
+		background-color: #FFB3BF;
+	 }
+
+	 .standard {
+		background-color: #F2F2F2;
+		font-size: 14px;
+	 }
+
+	 .priority {
+		background-color: #FFCC80;
+		font-size: 14px;
+	 }
+
+	 .cherrySheeted {
+		background-color: #FFB3BF;
+		font-size: 14px;
+	 }
+
+	 .packagePriority {
+		background-color: #ECAB69;
+	 }
+
+	 .jobStatusFlag {
+	 	background-color: rgba(0, 0, 200, .1) !important;
+	 }
+
+	 .hideTime {
+		color: #fff;
+		font-size: 14px;
+		text-align: right;
+	 }
+
+    .tiny {
+        font-size: 10px;
+        vertical-align: bottom;
+		  min-width: 15%;
+    }
+	
+	 .lower {
+	 	  margin-bottom: -10px;
+	 }
+
+	 .onHoldBG {
+		 background-color: rgba(0, 0, 200, .1) !important;
+	 }
+
+	 .onHold {
+		color: red;
+		font-weight: bold;
+	 }
+
+	a:link {
+		text-decoration: none;
+		color: inherit;
+	}
+
+	a:visited {
+		text-decoration: none;
+		color: inherit;
+	}
+
+	#faBig {
+		font-size: 28px;
+	}
+
+	#faBig:hover {
+		color: #777;
+	}
+
+	#cherry:hover {
+		background-image: url('assets/cherriesColor.png');
+	}
+    
+	#dayTotalRow {
+		background-color: #ebebe0;
+		text-align: center; 
+		font-size: 14px;
+		font-weight: bold;
+	}
+
+    table {
+        width: 100%;
+    }
+
+    th {
+        background-color: #000;
+        color: #F2F2F2;
+        padding: 10px 15px 10px 15px;
+        text-align: center;
+        font-size: 18px;
+        position: sticky;
+        top: 0;
+    }
+
+    td {
+        font-size: 12px;
+        padding: 10px 15px 10px 15px;
+        vertical-align: top;
+    }
+
+	 .crossed {
+		  background-image: linear-gradient(to bottom left, transparent calc(50% - 1px), gray, transparent calc(50% + 1px));
+	 }
+
+	 .crossedBG {
+		  background-image: linear-gradient(to bottom left, transparent calc(50% - 1px), gray, transparent calc(50% + 1px));
+		  background-color: #FAFAFA; 
+	 }
+	
+
+    th, td {
+        border-bottom: 1px solid #DDD;
+    }
+
+    tr:hover {background-color: #D5D5D5;}
+
+    form input[type=text] {
+        max-width: 111px;
+        width: 100%;
+    }
+
+    form input {
+        color:  #5f5f5f;
+        box-sizing: border-box;
+        box-shadow: 1px 2px 4px 0 rgba(0, 0, 0, 0.08);
+        padding: 12px 18px;
+        border: 1px solid #dbdbdb;
+    }
+
+    form button {
+        border-radius: 5px;
+        background-color:  #6caee0;
+        color: #ffffff;
+        font-weight: bold;
+        box-shadow: 2px 4px 8px 0 rgba(0, 0, 0, 0.6);
+        padding: 14px 22px;
+        border: 0;
+        margin-top: 15px;
+    }
+
+    form button:hover {
+        background-color: #7dbff0;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    #misTable th:hover {
+        color: #FFF;
+        background-color: #555;
+    }
+
+    #checkColumns {
+        position: absolute;
+        top: 10px;
+        text-align: left;
+    }
+
+    #columnsButton {
+        background-color: #6caee0;
+        color: #FFF;
+        font-weight: bold;
+        box-shadow: 2px 4px 8px 0 rgba(0, 0, 0, 0.6);
+        margin: 10px 2px;
+        border-radius: 5px;
+        overflow:auto;
+        float:left;
+    }
+
+    #columnsButton:hover {
+        background-color: #7dbff0;
+    }
+
+    #columnsButton label span {
+        text-align:center;
+        padding: 14px 18px;
+        display:block;
+    }
+
+    #columnsButton label input {
+        position:absolute;
+        top:-20px;
+    }
+
+    #columnsButton input:checked + span {
+        background-color: #000;
+        color: #F2F2F2;
+    }
+
+    .columnsButton {
+        background-color: #6caee0;
+        color: #FFF;
+        font-weight: bold;
+        box-shadow: 2px 4px 8px 0 rgba(0, 0, 0, 0.6);
+        margin: 10px 2px;
+        border-radius: 5px;
+        overflow:auto;
+        float:left;
+    }
+    input[type=search] {
+        color:  #5f5f5f;
+        box-sizing: border-box;
+        box-shadow: 1px 2px 4px 0 rgba(0, 0, 0, 0.08);
+        padding: 12px 18px;
+        border: 1px solid #dbdbdb;
+        margin-bottom: 10px;
+    }
+
+	#triangle {
+		width: 500px;
+		height: 0;
+		border: 500px solid #203A54;
+		border-left: 100px solid transparent;
+		border-top: 100px solid transparent;
+	}
+
+	.dataTables_paging { display: none; }
+
+	/* Start Penguin */
+	.penguinStamp {
+		padding-top: 15px;
+	}
+
+	/* Popup container */
+	.popup {
+		 position: relative;
+		 display: inline-block;
+		 cursor: pointer;
+		 float: right;
+	}
+
+	/* The actual popup (appears on top) */
+	.popup .popuptext {
+		 visibility: hidden;
+		 width: 150px;
+		 background-color: #555;
+		 color: #fff;
+		 text-align: center;
+		 border-radius: 6px;
+		 padding: 10px 5px;
+		 position: absolute;
+		 z-index: 1;
+		 bottom: 80%;
+		 margin-left: -137px;
+		 margin-bottom: 5px;
+	}
+
+	/* Popup arrow */
+	.popup .popuptext::after {
+		 content: "";
+		 position: absolute;
+		 top: 100%;
+		 left: 93%;
+		 margin-left: -5px;
+		 border-width: 5px;
+		 border-style: solid;
+		 border-color: #555 transparent transparent transparent;
+	}
+
+	/* Toggle this class when clicking on the popup container (hide and show the popup) */
+	.popup .show {
+		 visibility: visible;
+		 -webkit-animation: fadeIn 1s;
+		 animation: fadeIn 1s
+	}
+
+	/* Add animation (fade in the popup) */
+	@-webkit-keyframes fadeIn {
+		 from {opacity: 0;}
+		 to {opacity: 1;}
+	}
+
+	@keyframes fadeIn {
+		 from {opacity: 0;}
+		 to {opacity:1 ;}
+	} 
+	/* End Penguin */
+
+	#return-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgb(0, 0, 0);
+    background: rgba(0, 0, 0, 0.7);
+    width: 50px;
+    height: 50px;
+    display: block;
+    text-decoration: none;
+    -webkit-border-radius: 35px;
+    -moz-border-radius: 35px;
+    border-radius: 35px;
+    display: none;
+    -webkit-transition: all 0.3s linear;
+    -moz-transition: all 0.3s ease;
+    -ms-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+	 z-index: 99;
+	}
+	#return-to-top i {
+		 color: #fff;
+		 margin: 0;
+		 position: relative;
+		 left: 16px;
+		 top: 13px;
+		 font-size: 19px;
+		 -webkit-transition: all 0.3s ease;
+		 -moz-transition: all 0.3s ease;
+		 -ms-transition: all 0.3s ease;
+		 -o-transition: all 0.3s ease;
+		 transition: all 0.3s ease;
+	}
+	#return-to-top:hover {
+		 background: rgba(0, 0, 0, 0.9);
+	}
+	#return-to-top:hover i {
+		 color: #fff;
+		 top: 5px;
+	}
