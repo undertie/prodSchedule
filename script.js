@@ -389,7 +389,8 @@ const columnVisibilityRules = {
 				        return `<select class="designer-select" 
 				        		data-job="${row.JobNumber}" 
 				        		data-component="${row.ComponentNumber}">
-				            <option value="">Loading...</option>
+                                data-current="${data || ''}">
+                            <option value="">Loading designers...</option>
 				        </select>`;
 				    }
 				}, // 58
@@ -451,14 +452,32 @@ const columnVisibilityRules = {
 	    });
 	}
 
+    // Function to rebuild a designer dropdown
+    function rebuildDesignerDropdown($select, selectedValue) {
+        $select.empty();
+        $select.append($('<option>').val('').text('Select designer'));
+        
+        designers.forEach(designer => {
+            const option = $('<option>')
+                .val(designer.EmployeeName)
+                .text(designer.EmployeeName)
+                .prop('selected', designer.EmployeeName === selectedValue);
+            $select.append(option);
+        });
+    }
+
 	// Handle designer change
 	$(document).on('change', '.designer-select', function() {
-	    const jobNumber = $(this).data('job');
-	    const componentNumber = $(this).data('component');
-	    const designerCode = $(this).val();
+        const $select = $(this);
+        const jobNumber = $select.data('job');
+        const componentNumber = $select.data('component');
+        const designerCode = $select.val();
+
+        // Disable the select during update
+        $select.prop('disabled', true);
 
 	     // Update the data in the table immediately
-	    const row = table.row($(this).closest('tr'));
+        const row = table.row($select.closest('tr'));
 	    const rowData = row.data();
 	    if (rowData) {
 	        rowData.Designer = designerCode;
@@ -471,7 +490,8 @@ const columnVisibilityRules = {
 	        componentNumber,
 	        designerCode
 	    }));
-	        // Reapply filters to update coloring
+
+	       // Reapply filters to update coloring
 	    const currentDept = $('#deptFilter').val();
 	    if (currentDept) {
 	        // Use setTimeout to ensure DOM updates complete
@@ -479,7 +499,8 @@ const columnVisibilityRules = {
 	            applyRowFilter(currentDept);
 	        }, 50);
 	    }
-	    socket.send(JSON.stringify({ type: 'initialData' }));
+
+        fetchDesigners();
 	});
 
     function setupNotesEditing() {
@@ -605,211 +626,97 @@ const columnVisibilityRules = {
         });
     }
 
-    // Apply department filter to rows and columns
-	// function applyDepartmentFilter() {
-	//     if (!table || !$.fn.DataTable.isDataTable('#prodTable')) {
-	//         console.error('DataTable not properly initialized');
-	//         return false;
-	//     }
-
-	//     try {
-	//         // Store state
-	//         const scrollTop = $(window).scrollTop();
-	//         const deptValue = $('#deptFilter').val();
-	//         const deptText = $('#deptFilter').find('option:selected').text().trim();
-	//         console.log('applyDeptFilter deptText:' + deptText);
-
-	//         // Disable rendering during updates
-	//         table.settings()[0]._bInitComplete = false;
-
-	//         // Clear existing filters safely
-	//         if (currentDeptFilter) {
-	//             $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(
-	//                 fn => fn !== currentDeptFilter
-	//             );
-	//             currentDeptFilter = null;
-	//         }
-
-	//         // Clear highlights
-	//         table.$('tr').removeClass(function(index, className) {
-	//             return (className.match(/(^|\s)match-col-\S+/g) || []).join(' ');
-	//         });
-
-	//         // Apply department rules
-	//         if (deptValue) {
-	//             // FIRST make columns visible
-	//             applyColumnVisibility(deptText); 
-	            
-	//             // THEN apply row filtering
-	//             currentDeptFilter = function(settings, data, dataIndex) {
-	//                 const rowData = table.row(dataIndex).data();
-	//                 if (!rowData) return false;
-
-	//                 const values = deptValue.split(',');
-	//                 const columnsToCheck = ['Last_Cover_Process', 'Last_Body_Process', 
-	//                                       'Next_Cover_Process', 'Next_Body_Process'];
-
-	//                 for (const colName of columnsToCheck) {
-	//                     const cellValue = rowData[colName];
-	//                     if (cellValue && values.includes(cellValue.toString())) {
-	//                         const rowNode = table.row(dataIndex).node();
-	//                         $(rowNode).addClass(`match-col-${colName.replace(/_/g, '-')}`);
-	//                         return true;
-	//                     }
-	//                 }
-	//                 return false;
-	//             };
-
-	//             $.fn.dataTable.ext.search.push(currentDeptFilter);
-	//         } else {
-	//             // Show all columns and rows if no filter
-	//             table.columns().visible(true);
-	//             $.fn.dataTable.ext.search = [];
-	//         }
-
-	//         // Trigger single draw
-	//         table.draw();
-
-	//         // Restore scroll
-	//         $(window).scrollTop(scrollTop);
-	//         return true;
-
-	//     } catch (e) {
-	//         console.error('Filter error:', e);
-	//         // Emergency reset if something went wrong
-	//         if ($.fn.DataTable.isDataTable('#prodTable')) {
-	//             table.columns().visible(true);
-	//             $.fn.dataTable.ext.search = [];
-	//             table.draw();
-	//         }
-	//         return false;
-	//     }
-	// }
-
-function applyDepartmentFilter() {
-    if (!table || !$.fn.DataTable.isDataTable('#prodTable')) {
-        console.error('DataTable not properly initialized');
-        return false;
-    }
-
-    try {
-        // Store state
-        const scrollTop = $(window).scrollTop();
-        const deptValue = $('#deptFilter').val();
-        const deptText = $('#deptFilter').find('option:selected').text().trim();
-
-        // Disable rendering during updates
-        table.settings()[0]._bInitComplete = false;
-
-        // Clear existing filters safely
-        if (currentDeptFilter) {
-            $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(
-                fn => fn !== currentDeptFilter
-            );
-            currentDeptFilter = null;
+    function applyDepartmentFilter() {
+        if (!table || !$.fn.DataTable.isDataTable('#prodTable')) {
+            console.error('DataTable not properly initialized');
+            return false;
         }
 
-        // ALWAYS apply row filtering
-        if (deptValue) {
-            applyRowFilter(deptValue);
-        } else {
-            $.fn.dataTable.ext.search = [];
-        }
+        try {
+            // Store state
+            const scrollTop = $(window).scrollTop();
+            const deptValue = $('#deptFilter').val();
+            const deptText = $('#deptFilter').find('option:selected').text().trim();
 
-        // Apply column visibility rules
-        if (columnVisibilityRules[deptText]) {
-            applyColumnVisibility(deptText);
-        } else {
+            // Disable rendering during updates
+            table.settings()[0]._bInitComplete = false;
+
+            // Clear existing filters safely
+            if (currentDeptFilter) {
+                $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(
+                    fn => fn !== currentDeptFilter
+                );
+                currentDeptFilter = null;
+            }
+
+            // ALWAYS apply row filtering
+            if (deptValue) {
+                applyRowFilter(deptValue);
+            } else {
+                $.fn.dataTable.ext.search = [];
+            }
+
+            // Apply column visibility rules
+            if (columnVisibilityRules[deptText]) {
+                applyColumnVisibility(deptText);
+            } else {
+                table.columns().visible(true);
+                table.colReorder.reset();
+            }
+
+            // Trigger single draw
+            table.draw();
+
+            // Restore scroll
+            $(window).scrollTop(scrollTop);
+            return true;
+
+        } catch (e) {
+            console.error('Filter error:', e);
+            // Emergency reset
             table.columns().visible(true);
+            $.fn.dataTable.ext.search = [];
             table.colReorder.reset();
+            table.draw();
+            return false;
         }
-
-        // Trigger single draw
-        table.draw();
-
-        // Restore scroll
-        $(window).scrollTop(scrollTop);
-        return true;
-
-    } catch (e) {
-        console.error('Filter error:', e);
-        // Emergency reset
-        table.columns().visible(true);
-        $.fn.dataTable.ext.search = [];
-        table.colReorder.reset();
-        table.draw();
-        return false;
     }
-}
 
-    // Filter rows based on department values
-    // changes the row colouring
-	// function applyRowFilter(deptValue) {
-	//     const values = deptValue.split(',');
-	//     const columnsToCheck = ['Last_Cover_Process', 'Last_Body_Process', 'Next_Cover_Process', 'Next_Body_Process'];
+    function applyRowFilter(deptValue) {
+    	const selectedText = $('#deptFilter option:selected').text();
+    	const isPrePress =
+    	    selectedText === 'PrePress' ||
+    	    selectedText === 'Needs Proof' ||
+    	    selectedText === 'Proof Out' ||
+    	    selectedText === 'Imposition';
 
-	//     currentDeptFilter = function(settings, data, dataIndex) {
-	//         const rowData = table.row(dataIndex).data();
-	//         if (!rowData) return false;
+        const values = deptValue.split(',');
+        const columnsToCheck = ['Next_Comp_Process'];
+        //const columnsToCheck = ['Next_Cover_Process', 'Next_Body_Process', 'C1MP_M_Proc', 'C2MP_M_Proc'];
+        //const columnsToCheck = ['Last_Cover_Process', 'Last_Body_Process', 'Next_Cover_Process', 'Next_Body_Process'];
 
-	//         let matchFound = false;
-	//         for (const colName of columnsToCheck) {
-	//             const cellValue = rowData[colName];
-	//             if (cellValue && values.includes(cellValue.toString())) {
-	//                 matchFound = true;
-	//                 const rowNode = table.row(dataIndex).node();
-	//                 $(rowNode).addClass(`match-col-${colName.replace(/_/g, '-')}`);
-	//                 break;
-	//             }
-	//         }
-	//         return matchFound;
-	//     };
+        // Clear only this session's highlight classes
+        table.$('tr').removeClass(function(index, className) {
+            return (className.match(new RegExp(`(^|\\s)${colorSessionId}-\\S+`, 'g')) || []).join(' ');
+        });
 
-	//     // Clear any existing filters first
-	//     $.fn.dataTable.ext.search.pop();
-	    
-	//     // Apply the new filter
-	//     $.fn.dataTable.ext.search.push(currentDeptFilter);
-	    
-	//     // Redraw the table to apply the filter
-	//     table.draw();
-	// }
+        currentDeptFilter = function(settings, data, dataIndex) {
+            const rowData = table.row(dataIndex).data();
+            if (!rowData) return false;
 
-	function applyRowFilter(deptValue) {
-		const selectedText = $('#deptFilter option:selected').text();
-		const isPrePress =
-		    selectedText === 'PrePress' ||
-		    selectedText === 'Needs Proof' ||
-		    selectedText === 'Proof Out' ||
-		    selectedText === 'Imposition';
+            let matchFound = false;
+            for (const colName of columnsToCheck) {
+                const cellValue = rowData[colName];
+                if (cellValue && values.includes(cellValue.toString())) {
+                    matchFound = true;
+                    const rowNode = table.row(dataIndex).node();
+                    
+                    // Remove any existing session classes
+                    $(rowNode).removeClass(function(index, className) {
+                        return (className.match(new RegExp(`(^|\\s)${colorSessionId}-\\S+`, 'g')) || []).join(' ');
+                    });
 
-	    const values = deptValue.split(',');
-	    const columnsToCheck = ['Next_Comp_Process'];
-	    //const columnsToCheck = ['Next_Cover_Process', 'Next_Body_Process', 'C1MP_M_Proc', 'C2MP_M_Proc'];
-	    //const columnsToCheck = ['Last_Cover_Process', 'Last_Body_Process', 'Next_Cover_Process', 'Next_Body_Process'];
-
-	    // Clear only this session's highlight classes
-	    table.$('tr').removeClass(function(index, className) {
-	        return (className.match(new RegExp(`(^|\\s)${colorSessionId}-\\S+`, 'g')) || []).join(' ');
-	    });
-
-	    currentDeptFilter = function(settings, data, dataIndex) {
-	        const rowData = table.row(dataIndex).data();
-	        if (!rowData) return false;
-
-	        let matchFound = false;
-	        for (const colName of columnsToCheck) {
-	            const cellValue = rowData[colName];
-	            if (cellValue && values.includes(cellValue.toString())) {
-	                matchFound = true;
-	                const rowNode = table.row(dataIndex).node();
-	                
-	                // Remove any existing session classes
-	                $(rowNode).removeClass(function(index, className) {
-	                    return (className.match(new RegExp(`(^|\\s)${colorSessionId}-\\S+`, 'g')) || []).join(' ');
-	                });
-
-	                if (isPrePress) {
+                    if (isPrePress) {
                     // PrePress department coloring logic
                     if (rowData.Designer) {
                         const designerExists = designers.some(d => d.EmployeeName === rowData.Designer);
@@ -834,146 +741,76 @@ function applyDepartmentFilter() {
             }
         }
         return matchFound;
-	    };
+        };
 
-	    // Clear any existing filters first
-	    $.fn.dataTable.ext.search.pop();
+        // Clear any existing filters first
+        $.fn.dataTable.ext.search.pop();
 
-	    // Filter management
-	    $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(
-	        fn => fn !== currentDeptFilter
-	    );
-	    $.fn.dataTable.ext.search.push(currentDeptFilter);
-	    
-	    table.draw();
-	}
-
-
-// PRETTY GOOD but needs each department to be in the column list
-// 	function applyColumnVisibility(deptText) {
-//     try {
-//         // Store current state
-//         const currentPage = table.page();
-//         const scrollTop = $(window).scrollTop();
-//         const visibleColumns = columnVisibilityRules[deptText];
-
-//         // Disable drawing during updates
-//         const settings = table.settings()[0];
-//         const oldAutoWidth = settings.oFeatures.bAutoWidth;
-//         settings.oFeatures.bAutoWidth = false;
-
-//         // Case 1: Department has specific column rules
-//         if (visibleColumns) {
-//             // Hide all columns first
-//             table.columns().visible(false);
-            
-//             // Show and order specified columns
-//             visibleColumns.forEach(colName => {
-//                 const col = table.column(`${colName}:name`);
-//                 if (col) {
-//                     col.visible(true);
-//                     // Move to desired position
-//                     table.colReorder.move(col.index(), visibleColumns.indexOf(colName));
-//                 }
-//             });
-            
-//             // Ensure JobNumber is always first as fallback
-//             if (visibleColumns[0] !== 'JobNumber') {
-//                 const jobCol = table.column('JobNumber:name');
-//                 if (jobCol) table.colReorder.move(jobCol.index(), 0);
-//             }
-//         } 
-//         // Case 2: No specific rules - show all columns in default order
-//         else {
-//             table.columns().visible(true);
-//             // Reset to original column order
-//             table.colReorder.reset();
-//         }
-
-//         // Restore settings
-//         settings.oFeatures.bAutoWidth = oldAutoWidth;
-//         table.draw(false);
-//         table.page(currentPage).draw(false);
-//         $(window).scrollTop(scrollTop);
-
-//     } catch (e) {
-//         console.error('Column visibility error:', e);
-//         // Emergency reset
-//         table.columns().visible(true);
-//         table.colReorder.reset();
-//         table.draw();
-//     }
-// }
-
-
-
-
-function applyColumnVisibility(deptText) {
-    try {
-        // Store current state
-        const currentPage = table.page();
-        const scrollTop = $(window).scrollTop();
-        const visibleColumns = columnVisibilityRules[deptText];
-
-        // Disable drawing during updates
-        const settings = table.settings()[0];
-        const oldAutoWidth = settings.oFeatures.bAutoWidth;
-        settings.oFeatures.bAutoWidth = false;
-
-        // Case 1: Department has specific column rules
-        if (visibleColumns) {
-            // Hide all columns first
-            table.columns().visible(false);
-            
-            // Show and order specified columns
-            visibleColumns.forEach(colName => {
-                const col = table.column(`${colName}:name`);
-                if (col) {
-                    col.visible(true);
-                    // Move to desired position
-                    table.colReorder.move(col.index(), visibleColumns.indexOf(colName));
-                }
-            });
-        } 
-        // Case 2: No specific rules - show all columns in original order
-        else {
-            // First hide all columns
-            table.columns().visible(false);
-            
-            // Then show all columns in their original order
-            table.columns().every(function(index) {
-                this.visible(true);
-                // Move each column back to its original position
-                table.colReorder.move(this.index(), index);
-            });
-        }
-
-        // Restore settings and redraw
-        settings.oFeatures.bAutoWidth = oldAutoWidth;
-        table.draw(false);
-        table.page(currentPage).draw(false);
-        $(window).scrollTop(scrollTop);
-
-    } catch (e) {
-        console.error('Column visibility error:', e);
-        // Emergency reset - show all columns in original order
-        table.columns().visible(true);
-        table.columns().every(function(index) {
-            table.colReorder.move(this.index(), index);
-        });
+        // Filter management
+        $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(
+            fn => fn !== currentDeptFilter
+        );
+        $.fn.dataTable.ext.search.push(currentDeptFilter);
+        
         table.draw();
     }
-}
 
+    function applyColumnVisibility(deptText) {
+        try {
+            // Store current state
+            const currentPage = table.page();
+            const scrollTop = $(window).scrollTop();
+            const visibleColumns = columnVisibilityRules[deptText];
 
+            // Disable drawing during updates
+            const settings = table.settings()[0];
+            const oldAutoWidth = settings.oFeatures.bAutoWidth;
+            settings.oFeatures.bAutoWidth = false;
 
+            // Case 1: Department has specific column rules
+            if (visibleColumns) {
+                // Hide all columns first
+                table.columns().visible(false);
+                
+                // Show and order specified columns
+                visibleColumns.forEach(colName => {
+                    const col = table.column(`${colName}:name`);
+                    if (col) {
+                        col.visible(true);
+                        // Move to desired position
+                        table.colReorder.move(col.index(), visibleColumns.indexOf(colName));
+                    }
+                });
+            } 
+            // Case 2: No specific rules - show all columns in original order
+            else {
+                // First hide all columns
+                table.columns().visible(false);
+                
+                // Then show all columns in their original order
+                table.columns().every(function(index) {
+                    this.visible(true);
+                    // Move each column back to its original position
+                    table.colReorder.move(this.index(), index);
+                });
+            }
 
+            // Restore settings and redraw
+            settings.oFeatures.bAutoWidth = oldAutoWidth;
+            table.draw(false);
+            table.page(currentPage).draw(false);
+            $(window).scrollTop(scrollTop);
 
-
-
-
-
-
+        } catch (e) {
+            console.error('Column visibility error:', e);
+            // Emergency reset - show all columns in original order
+            table.columns().visible(true);
+            table.columns().every(function(index) {
+                table.colReorder.move(this.index(), index);
+            });
+            table.draw();
+        }
+    }
 
     // variables for automatic reconnect
     let socket;
@@ -1059,7 +896,7 @@ function applyColumnVisibility(deptText) {
 		});
 
         socket.onmessage = function(event) {
-        	//console.log("Received WebSocket Message:", event.data); // Debug entire response
+        	console.log("Received WebSocket Message:", event.data); // Debug entire response
   			var response;
   			try {
     			response = JSON.parse(event.data);
@@ -1194,19 +1031,40 @@ function applyColumnVisibility(deptText) {
 			        initializeDesignerDropdown(this.node(), this.data());
 			    });
 			} else if (response.type === 'designerUpdated') {
-			    if (response.success) {
-			        // Update the DataTables data
-			        table.rows().every(function() {
-			            const data = this.data();
-			            if (data.JobNumber === response.jobNumber && 
-			                data.ComponentNumber === response.componentNumber) {
-			                data.Designer = response.designerName; // Changed from DesignerCode
-			                this.invalidate();
-			            }
-			        });
-			    }
-			}
-		};
+                const $select = $(`.designer-select[data-job="${response.jobNumber}"][data-component="${response.componentNumber}"]`);
+                if (response.success) {
+                    // Update designer list if included
+                    if (response.designers) {
+                        designers = response.designers;
+                    }
+                    
+                    // Rebuild the dropdown options
+                    //rebuildDesignerDropdown($select, response.designerCode);
+                    
+                    // Update the row data
+                    const row = table.row($select.closest('tr'));
+                    const rowData = row.data();
+                    if (rowData) {
+                        rowData.Designer = response.designerCode;
+                        row.data(rowData).invalidate();
+                    }
+                    
+                    // Re-enable the select
+                    $select.prop('disabled', false);
+                } else {
+                    // Revert to previous value if update failed
+                    const row = table.row($select.closest('tr'));
+                    const rowData = row.data();
+                    $select.val(rowData?.Designer || '');
+                    $select.prop('disabled', false);
+                    alert('Failed to update designer');
+                }
+            } else if (response.type === 'error') {
+                console.error('Server error:', response.message);
+                // Re-enable all disabled selects
+                $('.designer-select:disabled').prop('disabled', false);
+            }
+        };
 		// end socket.onmessage = function(event)
     }
     // end initializeWebSocket()
@@ -1304,3 +1162,4 @@ function applyColumnVisibility(deptText) {
     initializeWebSocket();
 });
 // end $(document).ready(function()
+

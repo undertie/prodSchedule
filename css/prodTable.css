@@ -309,6 +309,11 @@ label {
     font-size: 14px;
 }
 
+.designer-select[disabled] {
+    opacity: 0.7;
+    background-color: #f5f5f5;
+}
+
 .designer-select:focus {
     border-color: #66afe9;
     outline: 0;
