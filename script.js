@@ -444,6 +444,23 @@ const columnVisibilityRules = {
         safeSocketSend({ type: 'getDesigners' });
     }
 
+    // Initialize dropdown for a specific row
+    function initializeDesignerDropdown(row, rowData) {
+        const select = $(row).find('.designer-select');
+        const currentValue = rowData.Designer || '';
+        
+        select.empty();
+        select.append($('<option>').val('').text('Select designer'));
+        
+        designers.forEach(designer => {
+            const option = $('<option>')
+                .val(designer.EmployeeName) // Using EmployeeName as value
+                .text(designer.EmployeeName) // Using EmployeeName as display text
+                .prop('selected', designer.EmployeeName === currentValue);
+            select.append(option);
+        });
+    }
+
     // Function to rebuild a designer dropdown
     function rebuildDesignerDropdown($select, selectedValue) {
         $select.empty();
@@ -458,8 +475,8 @@ const columnVisibilityRules = {
         });
     }
 
-	// Handle designer change
-	$(document).on('change', '.designer-select', function() {
+    // Handle designer change
+    $(document).on('change', '.designer-select', function() {
         const $select = $(this);
         const jobNumber = $select.data('job');
         const componentNumber = $select.data('component');
@@ -468,32 +485,32 @@ const columnVisibilityRules = {
         // Disable the select during update
         $select.prop('disabled', true);
 
-	     // Update the data in the table immediately
+         // Update the data in the table immediately
         const row = table.row($select.closest('tr'));
-	    const rowData = row.data();
-	    if (rowData) {
-	        rowData.Designer = designerCode;
-	        row.data(rowData).invalidate();
-	    }
-	    
-	    socket.send(JSON.stringify({
-	        type: 'updateDesigner',
-	        jobNumber,
-	        componentNumber,
-	        designerCode
-	    }));
+        const rowData = row.data();
+        if (rowData) {
+            rowData.Designer = designerCode;
+            row.data(rowData).invalidate();
+        }
+        
+        safeSocketSend({
+            type: 'updateDesigner',
+            jobNumber,
+            componentNumber,
+            designerCode
+        });
 
-	       // Reapply filters to update coloring
-	    const currentDept = $('#deptFilter').val();
-	    if (currentDept) {
-	        // Use setTimeout to ensure DOM updates complete
-	        setTimeout(() => {
-	            applyRowFilter(currentDept);
-	        }, 50);
-	    }
+           // Reapply filters to update coloring
+        const currentDept = $('#deptFilter').val();
+        if (currentDept) {
+            // Use setTimeout to ensure DOM updates complete
+            setTimeout(() => {
+                applyRowFilter(currentDept);
+            }, 50);
+        }
 
         fetchDesigners();
-	});
+    });
 
     function setupNotesEditing() {
         // Save button handler
@@ -737,13 +754,17 @@ const columnVisibilityRules = {
                     });
 
                     if (isPrePress) {
-                    // PrePress department coloring logic
-                    if (rowData.Designer) {
-                        const designerExists = designers.some(d => d.EmployeeName === rowData.Designer);
-                        if (designerExists) {
-                            // Valid designer - use their specific color
-                            const safeName = rowData.Designer.replace(/\s+/g, '-');
-                            $(rowNode).addClass(`${colorSessionId}-designer-${safeName}`);
+                        // PrePress department coloring logic
+                        if (rowData.Designer) {
+                            const designerExists = designers.some(d => d.EmployeeName === rowData.Designer);
+                            if (designerExists) {
+                                // Valid designer - use their specific color
+                                const safeName = rowData.Designer.replace(/\s+/g, '-');
+                                $(rowNode).addClass(`${colorSessionId}-designer-${safeName}`);
+                            } else {
+                                // Unknown designer - use default color
+                                $(rowNode).addClass(`${colorSessionId}-designer-default`);
+                            }
                         } else {
                                 // No designer assigned - use default color
                                 $(rowNode).addClass(`${colorSessionId}-designer-default`);
@@ -754,8 +775,8 @@ const columnVisibilityRules = {
                         $(rowNode).addClass(processClass);
                     }
                 break;
+                }
             }
-        }
         return matchFound;
         };
 
@@ -948,14 +969,14 @@ const columnVisibilityRules = {
         });
 
         socket.onmessage = function(event) {
-        	console.log("Received WebSocket Message:", event.data); // Debug entire response
-  			var response;
-  			try {
-    			response = JSON.parse(event.data);
-  			} catch (error) {
-    			console.error("Failed to parse WebSocket message:", error);
-    			return;
-  			}
+            //console.log("Received WebSocket Message:", event.data); // Debug entire response
+            var response;
+            try {
+                response = JSON.parse(event.data);
+            } catch (error) {
+                console.error("Failed to parse WebSocket message:", error);
+                return;
+            }
 
             if (!response.type) {
                 console.error("Received message without type:", response);
@@ -1079,51 +1100,17 @@ const columnVisibilityRules = {
                             tbody.appendChild(emptyRow);
                         }
 
-			            // Only add rows if we have data
-			            if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-			                response.data.forEach((detail) => {
-			                    const row = document.createElement('tr');
-			                    [
-			                        detail.JobNumber, 
-			                        detail.ComponentNumber, 
-			                        detail.ProcessCode, 
-			                        detail.Description, 
-			                        detail.CompletionCode, 
-			                        detail.CreateDatim, 
-			                        detail.EmployeeName, 
-			                        detail.Comments
-			                    ].forEach((cellData) => {
-			                        const td = document.createElement('td');
-			                        td.textContent = cellData !== null ? cellData : '';
-			                        row.appendChild(td);
-			                    });
-			                    tbody.appendChild(row);
-			                });
-			            } else {
-			                // Add empty state row if no data
-			                const emptyRow = document.createElement('tr');
-			                const emptyCell = document.createElement('td');
-			                emptyCell.colSpan = 8;
-			                emptyCell.textContent = 'No data available';
-			                emptyCell.style.textAlign = 'center';
-			                emptyCell.style.padding = '20px';
-			                emptyCell.style.fontStyle = 'italic';
-			                emptyCell.style.color = '#999';
-			                emptyRow.appendChild(emptyCell);
-			                tbody.appendChild(emptyRow);
-			            }
-
-			            this.child(tableFragment).show();
-			            $(this.node()).addClass('shown');
-			        }
-			    });
-			} else if (response.type === 'designers') {
-			    designers = response.data;
-			    // Refresh all dropdowns
-			    table.rows().every(function() {
-			        initializeDesignerDropdown(this.node(), this.data());
-			    });
-			} else if (response.type === 'designerUpdated') {
+                        this.child(tableFragment).show();
+                        $(this.node()).addClass('shown');
+                    }
+                });
+            } else if (response.type === 'designers') {
+                designers = response.data;
+                // Refresh all dropdowns
+                table.rows().every(function() {
+                    initializeDesignerDropdown(this.node(), this.data());
+                });
+            } else if (response.type === 'designerUpdated') {
                 const $select = $(`.designer-select[data-job="${response.jobNumber}"][data-component="${response.componentNumber}"]`);
                 if (response.success) {
                     // Update designer list if included
@@ -1158,8 +1145,7 @@ const columnVisibilityRules = {
                 $('.designer-select:disabled').prop('disabled', false);
             }
         };
-		// end socket.onmessage = function(event)
-
+        // end socket.onmessage = function(event)
     }
     // end initializeWebSocket()
 
