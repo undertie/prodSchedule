@@ -18,17 +18,37 @@ $(document).ready(function() {
         ]
     },
     {
-        text: "Cutting",
-        values: ["6006", "6028", "6032", "6007", "6010", "6011", "6012", "6013", "6019", "6019", "6029", "6033", "6034"],
+        text: "CSR", //Eventually Filter by CSR Name instead of Next_Process except for "Review" which would be for the daily review of the schedule
+        values: [],
         subsections: [
             {
-                text: "Pre-Press",
-                values: ["6006", "6028", "6032"]
+                text: "Amber",
+                values: ["6610", "6611", "6612", "6613", "6625", "6615", "6616", "6620", "6621", "6505", "6506", "6510", "6151", "6126", "6305", "6306", "6325", "6540", "5900", "5901", "5906", "6800", "6832", "5951", "5952", "6525", "6425", "6427", "6404", "6405", "6411", "6421", "1000", "1055", "1060", "1062", "1064", "1066", "1160", "1165", "1305", "1310", "1445", "1460", "5301", "5302", "5303", "3000", "3010", "3011", "3012", "3019", "3020", "3022", "5100", "5110", "5120", "5500", "5515", "5525", "5545", "5555", "5565", "5800", "5801", "5803", "5804", "5805", "5806", "5807", "5808", "5809", "5802", "5851", "5852", "6251", "6252", "6705", "6710", "6715", "6719", "6720", "6723", "6729", "6728", "6730", "6731", "6700", "6702", "6725", "6451", "6453", "6452", "6460", "6461", "6385", "6390", "6395", "6415", "6416", "6417", "6450", "6455"]
             },
             {
-                text: "Post-Press",
-                values: ["6007", "6010", "6011", "6012", "6013", "6019", "6019", "6029", "6033", "6034"]
-            }
+                text: "Brent",
+                values: ["6610", "6611", "6612", "6613", "6625", "6615", "6616", "6620", "6621", "6505", "6506", "6510", "6151", "6126", "6305", "6306", "6325", "6540", "5900", "5901", "5906", "6800", "6832", "5951", "5952", "6525", "6425", "6427", "6404", "6405", "6411", "6421", "1000", "1055", "1060", "1062", "1064", "1066", "1160", "1165", "1305", "1310", "1445", "1460", "5301", "5302", "5303", "3000", "3010", "3011", "3012", "3019", "3020", "3022", "5100", "5110", "5120", "5500", "5515", "5525", "5545", "5555", "5565", "5800", "5801", "5803", "5804", "5805", "5806", "5807", "5808", "5809", "5802", "5851", "5852", "6251", "6252", "6705", "6710", "6715", "6719", "6720", "6723", "6729", "6728", "6730", "6731", "6700", "6702", "6725", "6451", "6453", "6452", "6460", "6461", "6385", "6390", "6395", "6415", "6416", "6417", "6450", "6455"]
+            },
+            {
+                text: "Cathy",
+                values: ["6610", "6611", "6612", "6613", "6625", "6615", "6616", "6620", "6621", "6505", "6506", "6510", "6151", "6126", "6305", "6306", "6325", "6540", "5900", "5901", "5906", "6800", "6832", "5951", "5952", "6525", "6425", "6427", "6404", "6405", "6411", "6421", "1000", "1055", "1060", "1062", "1064", "1066", "1160", "1165", "1305", "1310", "1445", "1460", "5301", "5302", "5303", "3000", "3010", "3011", "3012", "3019", "3020", "3022", "5100", "5110", "5120", "5500", "5515", "5525", "5545", "5555", "5565", "5800", "5801", "5803", "5804", "5805", "5806", "5807", "5808", "5809", "5802", "5851", "5852", "6251", "6252", "6705", "6710", "6715", "6719", "6720", "6723", "6729", "6728", "6730", "6731", "6700", "6702", "6725", "6451", "6453", "6452", "6460", "6461", "6385", "6390", "6395", "6415", "6416", "6417", "6450", "6455"]
+            },
+            {
+                text: "Gabby",
+                values: ["6610", "6611", "6612", "6613", "6625", "6615", "6616", "6620", "6621", "6505", "6506", "6510", "6151", "6126", "6305", "6306", "6325", "6540", "5900", "5901", "5906", "6800", "6832", "5951", "5952", "6525", "6425", "6427", "6404", "6405", "6411", "6421", "1000", "1055", "1060", "1062", "1064", "1066", "1160", "1165", "1305", "1310", "1445", "1460", "5301", "5302", "5303", "3000", "3010", "3011", "3012", "3019", "3020", "3022", "5100", "5110", "5120", "5500", "5515", "5525", "5545", "5555", "5565", "5800", "5801", "5803", "5804", "5805", "5806", "5807", "5808", "5809", "5802", "5851", "5852", "6251", "6252", "6705", "6710", "6715", "6719", "6720", "6723", "6729", "6728", "6730", "6731", "6700", "6702", "6725", "6451", "6453", "6452", "6460", "6461", "6385", "6390", "6395", "6415", "6416", "6417", "6450", "6455"]
+            },
+            {
+                text: "Lisa",
+                values: ["6610", "6611", "6612", "6613", "6625", "6615", "6616", "6620", "6621", "6505", "6506", "6510", "6151", "6126", "6305", "6306", "6325", "6540", "5900", "5901", "5906", "6800", "6832", "5951", "5952", "6525", "6425", "6427", "6404", "6405", "6411", "6421", "1000", "1055", "1060", "1062", "1064", "1066", "1160", "1165", "1305", "1310", "1445", "1460", "5301", "5302", "5303", "3000", "3010", "3011", "3012", "3019", "3020", "3022", "5100", "5110", "5120", "5500", "5515", "5525", "5545", "5555", "5565", "5800", "5801", "5803", "5804", "5805", "5806", "5807", "5808", "5809", "5802", "5851", "5852", "6251", "6252", "6705", "6710", "6715", "6719", "6720", "6723", "6729", "6728", "6730", "6731", "6700", "6702", "6725", "6451", "6453", "6452", "6460", "6461", "6385", "6390", "6395", "6415", "6416", "6417", "6450", "6455"]
+            },
+            {
+                text: "Sarah",
+                values: ["6610", "6611", "6612", "6613", "6625", "6615", "6616", "6620", "6621", "6505", "6506", "6510", "6151", "6126", "6305", "6306", "6325", "6540", "5900", "5901", "5906", "6800", "6832", "5951", "5952", "6525", "6425", "6427", "6404", "6405", "6411", "6421", "1000", "1055", "1060", "1062", "1064", "1066", "1160", "1165", "1305", "1310", "1445", "1460", "5301", "5302", "5303", "3000", "3010", "3011", "3012", "3019", "3020", "3022", "5100", "5110", "5120", "5500", "5515", "5525", "5545", "5555", "5565", "5800", "5801", "5803", "5804", "5805", "5806", "5807", "5808", "5809", "5802", "5851", "5852", "6251", "6252", "6705", "6710", "6715", "6719", "6720", "6723", "6729", "6728", "6730", "6731", "6700", "6702", "6725", "6451", "6453", "6452", "6460", "6461", "6385", "6390", "6395", "6415", "6416", "6417", "6450", "6455"]
+            },
+            {
+                text: "Review",
+                values: ["6610", "6611", "6612", "6613", "6625", "6615", "6616", "6620", "6621", "6505", "6506", "6510", "6151", "6126", "6305", "6306", "6325", "6540", "5900", "5901", "5906", "6800", "6832", "5951", "5952", "6525", "6425", "6427", "6404", "6405", "6411", "6421", "1000", "1055", "1060", "1062", "1064", "1066", "1160", "1165", "1305", "1310", "1445", "1460", "5301", "5302", "5303", "3000", "3010", "3011", "3012", "3019", "3020", "3022", "5100", "5110", "5120", "5500", "5515", "5525", "5545", "5555", "5565", "5800", "5801", "5803", "5804", "5805", "5806", "5807", "5808", "5809", "5802", "5851", "5852", "6251", "6252", "6705", "6710", "6715", "6719", "6720", "6723", "6729", "6728", "6730", "6731", "6700", "6702", "6725", "6451", "6453", "6452", "6460", "6461", "6385", "6390", "6395", "6415", "6416", "6417", "6450", "6455"]
+            }           
         ]
     },
     {
@@ -121,10 +141,6 @@ $(document).ready(function() {
         text: "Saddle-Stitch",
         values: ["6251", "6252"]
     },
-
-                        
-                          
-
     {
         text: "Shipping",
         values: ["6705", "6710", "6715", "6719", "6720", "6723", "6729", "6728", "6730", "6731"]
@@ -135,17 +151,7 @@ $(document).ready(function() {
     },
     {
         text: "Spiral",
-        values: ["6451", "6453", "6452", "6460", "6461"],
-//           subsections: [                 // This can go away, compile all spiral processes together.
-//               {
-//                   text: "Punch A/B",
-//                   values: ["6451", "6453", "6452"]
-//               },
-//               {
-//                   text: "Spiral Application",        
-//                   values: ["6460", "6461"]
-//               }
-//           ]
+        values: ["6451", "6453", "6452", "6460", "6461"]
     },
     {
         text: "Smart-Binders",
@@ -168,50 +174,54 @@ $(document).ready(function() {
 ];
 // end departmentMapping
 const columnVisibilityRules = {
-    "Lamination": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Cover_Description', 'NCP_Time'],
-    "UV Coating": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Cover_Description', 'NCP_Time'],
-        //Cutting
-    "Post-Press": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'], //Cutting
+    //added 17June EH
+    "Amber": ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Ship_Date'],
+    "Brent": ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Ship_Date'],
+    "Cathy": ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Ship_Date'],
+    "Gabby": ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Ship_Date'],
+    "Lisa":  ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Ship_Date'],
+    "Sarah": ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Ship_Date'],
+    "Review": ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Ship_Date'],
+    //added 17June -EH
+    "Lamination": ['JobNumber', 'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Cover_Description', 'NCP_Time'],
+    "UV Coating": ['JobNumber', 'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Cover_Description', 'NCP_Time'],
         // "Drill" Defined by "C1MP_M_Proc" OR "C2MP_M_Proc" IN ["6505", "6506", "6510"] Until "NEXT_Comp_Process" > 6510
-    "Drill": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
-    "Folders": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
-    "Hand Bindery": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
-    "Hunkler": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
+    "Drill": ['JobNumber',  'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
+    "Folders": ['JobNumber',  'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
+    "Hand Bindery": ['JobNumber',  'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
+    "Hunkler": ['JobNumber',  'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
         //"Mail" Defined by a "Yes" answer in the "Does it blend" column
     "Mail": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'Does_it_blend', 'Did_it_blend','Is_It_Wednesday', 'Carrier', 'ShipType'],
         // "MBO" Defined by "C1MP_M_Proc" IN ["5951", "5952"]
-    "MBO": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity',  'Last_Completed_Comp_Description', 'Next_Comp_Time'],
-    "Morgana": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'Next_Comp_Description', 'NBP_Time'],
-    // "Perfect Binders"
+    "MBO": ['JobNumber',  'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity',  'Last_Completed_Comp_Description', 'Next_Comp_Time'],
+    "Morgana": ['JobNumber',  'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'Next_Comp_Description', 'NBP_Time'],
+    "Perfect Binders": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'Last_Comp3_Description', 'NBP_Time', 'Mat_Description'],
         // "BQ 470" Defined by "C2MP_M_Proc" IN ["6425", "6427"] Until Next_Comp_Process is > 6500
-    "BQ 470": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
+    "BQ 470": ['JobNumber',  'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
         // "SB-07" Defined by "C2MP_M_Proc" IN ["6404", "6405"] Until Next_Comp_Process is > 6500
-                    
-                                           
-                   
-    "SB-07": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'], 
+    "SB-07": ['JobNumber',  'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'], 
         // "SB-09" Defined by "C2MP_M_Proc" IN ["6411", "6421"] Until Next_Comp_Process is > 6500
-    "SB-09": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
-    // "PrePress": ['JobNumber', 'PrepressNotes', 'Designer', 'JobStatus', 'ComponentNumber', 'CustName', 'JobDescription', 'NCP_Time', 'NBP_Time', 'Proof_Due_Date', 'Customer_CSR', 'Ship_Date'],
-    "Needs Proof": ['JobNumber', 'PrepressNotes', 'Designer', 'JobStatus', 'ComponentNumber', 'CustName', 'JobDescription', 'NCP_Time', 'NBP_Time', 'Proof_Due_Date', 'Customer_CSR', 'Ship_Date'],
-    "Proof Out": ['JobNumber', 'PrepressNotes', 'Designer', 'JobStatus', 'ComponentNumber', 'CustName', 'JobDescription', 'NCP_Time', 'NBP_Time', 'Proof_Due_Date', 'Customer_CSR', 'Ship_Date'],
-    "Imposition": ['JobNumber', 'PrepressNotes', 'Designer', 'JobStatus', 'ComponentNumber', 'CustName', 'JobDescription', 'NCP_Time', 'NBP_Time', 'Proof_Due_Date', 'Customer_CSR', 'Ship_Date'],
+    "SB-09": ['JobNumber',  'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
+    // "PrePress": ['JobNumber',  'JobStatus', 'PrepressNotes', 'Designer', 'JobStatus', 'ComponentNumber', 'CustName', 'JobDescription', 'NCP_Time', 'NBP_Time', 'Proof_Due_Date', 'Customer_CSR', 'Ship_Date'],
+    "Needs Proof": ['JobNumber', 'PrepressNotes', 'Designer', 'JobStatus', 'ComponentNumber', 'CustName', 'JobDescription', 'NCP_Time', 'NBP_Time', 'Proof_Due_Date', 'Customer_CSR', 'JobStatus', 'Ship_Date'],
+    "Proof Out": ['JobNumber', 'PrepressNotes', 'Designer', 'JobStatus', 'ComponentNumber', 'CustName', 'JobDescription', 'NCP_Time', 'NBP_Time', 'Proof_Due_Date', 'Customer_CSR', 'JobStatus', 'Ship_Date'],
+    "Imposition": ['JobNumber', 'PrepressNotes', 'Designer', 'JobStatus', 'ComponentNumber', 'CustName', 'JobDescription', 'NCP_Time', 'NBP_Time', 'Proof_Due_Date', 'Customer_CSR', 'JobStatus', 'Ship_Date'],
     "Priming": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Next_Comp_Time'],
     // "Print"
-    "Print":  ['JobNumber', 'PostpressNotes', 'ComponentNumber', 'Print_Time', 'JobStatus', 'Ship_Date',  'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Completed_Comp_Description', 'Next_Comp_Description', 'Next_Comp_Time', 'Mat_Qty', 'Mat_BWT', 'Mat_Description', 'Mat_Code', 'Press_Size', 'Press_Out', 'Customer_CSR', 'Does_it_blend', 'Did_it_blend', 'Parent_Sheet_Size', 'Parent_Out', 'Print_Type'],
-    "HP100K": ['JobNumber', 'PostpressNotes', 'ComponentNumber', 'Print_Time', 'JobStatus', 'Ship_Date',  'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Completed_Comp_Description', 'Next_Comp_Description', 'Next_Comp_Time', 'Mat_Qty', 'Mat_BWT', 'Mat_Description', 'Mat_Code', 'Press_Size', 'Press_Out', 'Customer_CSR'],
-    "T200 Inkjet": ['JobNumber', 'PostpressNotes', 'ComponentNumber', 'Print_Time', 'JobStatus', 'Ship_Date',  'CustName', 'JobDescription', 'Quantity', 'Last_Completed_Comp_Description', 'Mat_Code', 'Mat_Qty', 'Mat_BWT', 'Mat_Description', 'Press_Size', 'Customer_CSR'],
-    "Toner": ['JobNumber', 'PostpressNotes', 'ComponentNumber', 'Print_Time', 'JobStatus', 'Ship_Date',  'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Completed_Comp_Description', 'Mat_Code', 'Mat_Qty', 'Mat_BWT', 'Mat_Description', 'Parent_Sheet_Size', 'Parent_Out', 'Press_Size', 'Press_Out', 'Print_Type', 'Customer_CSR'],
+    "Print":  ['JobNumber', 'JobStatus', 'PostpressNotes', 'ComponentNumber', 'Print_Time', 'JobStatus', 'Ship_Date',  'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Cover_Description', 'Mat_Qty', 'Mat_BWT', 'Mat_Description', 'Mat_Code', 'Press_Size', 'Press_Out', 'Customer_CSR', 'Does_it_blend', 'Did_it_blend', 'Parent_Sheet_Size', 'Parent_Out', 'Print_Type'],
+    "HP100K": ['JobNumber', 'JobStatus', 'PostpressNotes', 'ComponentNumber', 'Print_Time', 'JobStatus', 'Ship_Date',  'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Cover_Description', 'Mat_Qty', 'Mat_BWT', 'Mat_Description', 'Mat_Code', 'Press_Size', 'Press_Out', 'Customer_CSR'],
+    "T200 Inkjet": ['JobNumber', 'JobStatus', 'PostpressNotes', 'ComponentNumber', 'Print_Time', 'JobStatus', 'Ship_Date',  'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Mat_Code', 'Mat_Qty', 'Mat_BWT', 'Mat_Description', 'Press_Size', 'Customer_CSR'],
+    "Toner": ['JobNumber', 'JobStatus', 'PostpressNotes', 'ComponentNumber', 'Print_Time', 'JobStatus', 'Ship_Date',  'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Cover_Description', 'Mat_Code', 'Mat_Qty', 'Mat_BWT', 'Mat_Description', 'Parent_Sheet_Size', 'Parent_Out', 'Press_Size', 'Press_Out', 'Print_Type', 'Customer_CSR'],
         // "Saddle-Stitch" Defined by "C1MP_M_Proc" OR "C2MP_M_Proc" IN ["6251", "6252"]
-    "Saddle-Stitch": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
-    "Shipping": ['JobNumber', 'PostpressNotes', 'JobStatus', 'Ship_Date', 'Arrival_Date', 'CustName', 'JobDescription', 'Customer_CSR', 'Quantity', 'Carrier', 'ShipType', 'PONumber'],
+    "Saddle-Stitch": ['JobNumber', 'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
+    "Shipping": ['JobNumber', 'JobStatus', 'PostpressNotes', 'JobStatus', 'Ship_Date', 'Arrival_Date', 'CustName', 'JobDescription', 'Customer_CSR', 'Quantity', 'Carrier', 'ShipType', 'PONumber'],
         // "Shrink-Wrap" Defined by a "Yes" in the "Is_It_Wednesday" column 
-    "Shrink-Wrap": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'Last_Cover_Description', 'Last_Body_Description', 'Next_Comp_Time'],
-    "Spiral": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time', 'Next_Comp_Description' ],
+    "Shrink-Wrap": ['JobNumber', 'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'Last_Cover_Description', 'Last_Body_Description', 'Next_Comp_Time'],
+    "Spiral": ['JobNumber', 'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time', 'Next_Comp_Description' ],
     // "Smart-Binders"
-    "BQ-480": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
-    "BQ-500": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
-    "Wire-O": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time']
+    "BQ-480": ['JobNumber', 'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
+    "BQ-500": ['JobNumber', 'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
+    "Wire-O": ['JobNumber', 'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time']
 
     // Add more rules as needed
 };
@@ -389,8 +399,7 @@ const columnVisibilityRules = {
                         return `<select class="designer-select" 
                                 data-job="${row.JobNumber}" 
                                 data-component="${row.ComponentNumber}">
-                                data-current="${data || ''}">
-                            <option value="">Loading designers...</option>
+                            <option value="">Loading...</option>
                         </select>`;
                     }
                 }, // 58
@@ -398,7 +407,13 @@ const columnVisibilityRules = {
                 { data: 'Last_Completed_Comp_Description' , name: 'Last_Completed_Comp_Description' }, // 60
                 { data: 'Next_Comp_Process' , name: 'Next_Comp_Process' }, // 61
                 { data: 'Next_Comp_Description' , name: 'Next_Comp_Description' }, // 62
-                { data: 'Next_Comp_Time' , name: 'Next_Comp_Time' } // 63
+                { data: 'Next_Comp_Time' , name: 'Next_Comp_Time' }, // 63
+                { data: 'Drill_Process' , name: 'Drill_Process' }, // 64
+                { data: 'Drill_Description' , name: 'Drill_Description' }, // 65
+                { data: 'Drill_Time' , name: 'Drill_Time' }, // 66
+                { data: 'Hunkler_Process' , name: 'Hunkler_Process' }, // 67
+                { data: 'Hunkler_Description' , name: 'Hunkler_Description' }, // 68
+                { data: 'Hunkler_Time' , name: 'Hunkler_Time' } // 69
             ],
             "scrollX": false,
             "autoWidth": true,
@@ -428,20 +443,11 @@ const columnVisibilityRules = {
     }
     // end initializeDataTable()
 
-    function safeSocketSend(message) {
-        if (socket && socket.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify(message));
-        } else {
-            console.warn('WebSocket not ready, message not sent:', message);
-            // Optionally queue messages or reconnect
-        }
-    }
-
     let designers = []; // Will store our designer list
 
     // Fetch designers when page loads
     function fetchDesigners() {
-        safeSocketSend({ type: 'getDesigners' });
+        socket.send(JSON.stringify({ type: 'getDesigners' }));
     }
 
     // Initialize dropdown for a specific row
@@ -461,46 +467,27 @@ const columnVisibilityRules = {
         });
     }
 
-    // Function to rebuild a designer dropdown
-    function rebuildDesignerDropdown($select, selectedValue) {
-        $select.empty();
-        $select.append($('<option>').val('').text('Select designer'));
-        
-        designers.forEach(designer => {
-            const option = $('<option>')
-                .val(designer.EmployeeName)
-                .text(designer.EmployeeName)
-                .prop('selected', designer.EmployeeName === selectedValue);
-            $select.append(option);
-        });
-    }
-
     // Handle designer change
     $(document).on('change', '.designer-select', function() {
-        const $select = $(this);
-        const jobNumber = $select.data('job');
-        const componentNumber = $select.data('component');
-        const designerCode = $select.val();
-
-        // Disable the select during update
-        $select.prop('disabled', true);
+        const jobNumber = $(this).data('job');
+        const componentNumber = $(this).data('component');
+        const designerCode = $(this).val();
 
          // Update the data in the table immediately
-        const row = table.row($select.closest('tr'));
+        const row = table.row($(this).closest('tr'));
         const rowData = row.data();
         if (rowData) {
             rowData.Designer = designerCode;
             row.data(rowData).invalidate();
         }
         
-        safeSocketSend({
+        socket.send(JSON.stringify({
             type: 'updateDesigner',
             jobNumber,
             componentNumber,
             designerCode
-        });
-
-           // Reapply filters to update coloring
+        }));
+            // Reapply filters to update coloring
         const currentDept = $('#deptFilter').val();
         if (currentDept) {
             // Use setTimeout to ensure DOM updates complete
@@ -508,8 +495,7 @@ const columnVisibilityRules = {
                 applyRowFilter(currentDept);
             }, 50);
         }
-
-        fetchDesigners();
+        socket.send(JSON.stringify({ type: 'initialData' }));
     });
 
     function setupNotesEditing() {
@@ -536,14 +522,14 @@ const columnVisibilityRules = {
             status.hide();
 
             // Send update via WebSocket
-            safeSocketSend({
+            socket.send(JSON.stringify({
                 type: 'updateNotes',
                 jobNumber: jobNumber.toString(),
                 componentNumber: parseInt(componentNumber),
                 prepressNotes: field === 'PrepressNotes' ? newValue : null,
                 postpressNotes: field === 'PostPressNotes' ? newValue : null,
                 priority: null
-            });
+            }));
         });
     }
 
@@ -605,17 +591,6 @@ const columnVisibilityRules = {
             filterTimeout = setTimeout(() => {
                 localStorage.setItem('deptFilter', $(this).val());
                 applyDepartmentFilter();
-                const currentDept = $('#deptFilter').val();
-                applyRowFilter(currentDept);
-                const selectedText = $('#deptFilter option:selected').text();
-                const isPrePress =
-                    selectedText === 'PrePress' ||
-                    selectedText === 'Needs Proof' ||
-                    selectedText === 'Proof Out' ||
-                    selectedText === 'Imposition';
-                if (isPrePress) {
-                    fetchDesigners();
-                }
             }, 300); // 300ms delay
         });
     }
@@ -646,61 +621,61 @@ const columnVisibilityRules = {
         });
     }
 
-    function applyDepartmentFilter() {
-        if (!table || !$.fn.DataTable.isDataTable('#prodTable')) {
-            console.error('DataTable not properly initialized');
-            return false;
-        }
-
-        try {
-            // Store state
-            const scrollTop = $(window).scrollTop();
-            const deptValue = $('#deptFilter').val();
-            const deptText = $('#deptFilter').find('option:selected').text().trim();
-
-            // Disable rendering during updates
-            table.settings()[0]._bInitComplete = false;
-
-            // Clear existing filters safely
-            if (currentDeptFilter) {
-                $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(
-                    fn => fn !== currentDeptFilter
-                );
-                currentDeptFilter = null;
-            }
-
-            // ALWAYS apply row filtering
-            if (deptValue) {
-                applyRowFilter(deptValue);
-            } else {
-                $.fn.dataTable.ext.search = [];
-            }
-
-            // Apply column visibility rules
-            if (columnVisibilityRules[deptText]) {
-                applyColumnVisibility(deptText);
-            } else {
-                table.columns().visible(true);
-                table.colReorder.reset();
-            }
-
-            // Trigger single draw
-            table.draw();
-
-            // Restore scroll
-            $(window).scrollTop(scrollTop);
-            return true;
-
-        } catch (e) {
-            console.error('Filter error:', e);
-            // Emergency reset
-            table.columns().visible(true);
-            $.fn.dataTable.ext.search = [];
-            table.colReorder.reset();
-            table.draw();
-            return false;
-        }
+function applyDepartmentFilter() {
+    if (!table || !$.fn.DataTable.isDataTable('#prodTable')) {
+        console.error('DataTable not properly initialized');
+        return false;
     }
+
+    try {
+        // Store state
+        const scrollTop = $(window).scrollTop();
+        const deptValue = $('#deptFilter').val();
+        const deptText = $('#deptFilter').find('option:selected').text().trim();
+
+        // Disable rendering during updates
+        table.settings()[0]._bInitComplete = false;
+
+        // Clear existing filters safely
+        if (currentDeptFilter) {
+            $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(
+                fn => fn !== currentDeptFilter
+            );
+            currentDeptFilter = null;
+        }
+
+        // ALWAYS apply row filtering
+        if (deptValue) {
+            applyRowFilter(deptValue);
+        } else {
+            $.fn.dataTable.ext.search = [];
+        }
+
+        // Apply column visibility rules
+        if (columnVisibilityRules[deptText]) {
+            applyColumnVisibility(deptText);
+        } else {
+            table.columns().visible(true);
+            table.colReorder.reset();
+        }
+
+        // Trigger single draw
+        table.draw();
+
+        // Restore scroll
+        $(window).scrollTop(scrollTop);
+        return true;
+
+    } catch (e) {
+        console.error('Filter error:', e);
+        // Emergency reset
+        table.columns().visible(true);
+        $.fn.dataTable.ext.search = [];
+        table.colReorder.reset();
+        table.draw();
+        return false;
+    }
+}
 
     function applyRowFilter(deptValue) {
         const selectedText = $('#deptFilter option:selected').text();
@@ -709,23 +684,6 @@ const columnVisibilityRules = {
             selectedText === 'Needs Proof' ||
             selectedText === 'Proof Out' ||
             selectedText === 'Imposition';
-
-        // Clear highlighting if deptValue is empty
-        if (deptValue === "") {
-            // Clear only this session's highlight classes
-            table.$('tr').removeClass(function(index, className) {
-                return (className.match(new RegExp(`(^|\\s)${colorSessionId}-\\S+`, 'g')) || []).join(' ');
-            });
-            
-            // Clear any existing filters
-            $.fn.dataTable.ext.search.pop();
-            $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(
-                fn => fn !== currentDeptFilter
-            );
-            
-            table.draw();
-            return; // Exit the function early
-        }
 
         const values = deptValue.split(',');
         const columnsToCheck = ['Next_Comp_Process'];
@@ -754,29 +712,29 @@ const columnVisibilityRules = {
                     });
 
                     if (isPrePress) {
-                        // PrePress department coloring logic
-                        if (rowData.Designer) {
-                            const designerExists = designers.some(d => d.EmployeeName === rowData.Designer);
-                            if (designerExists) {
-                                // Valid designer - use their specific color
-                                const safeName = rowData.Designer.replace(/\s+/g, '-');
-                                $(rowNode).addClass(`${colorSessionId}-designer-${safeName}`);
-                            } else {
-                                // Unknown designer - use default color
-                                $(rowNode).addClass(`${colorSessionId}-designer-default`);
-                            }
+                    // PrePress department coloring logic
+                    if (rowData.Designer) {
+                        const designerExists = designers.some(d => d.EmployeeName === rowData.Designer);
+                        if (designerExists) {
+                            // Valid designer - use their specific color
+                            const safeName = rowData.Designer.replace(/\s+/g, '-');
+                            $(rowNode).addClass(`${colorSessionId}-designer-${safeName}`);
                         } else {
-                                // No designer assigned - use default color
-                                $(rowNode).addClass(`${colorSessionId}-designer-default`);
+                            // Unknown designer - use default color
+                            $(rowNode).addClass(`${colorSessionId}-designer-default`);
                         }
                     } else {
-                        // Other departments - process-based coloring
-                        const processClass = `${colorSessionId}-match-col-${colName.replace(/_/g, '-')}`;
-                        $(rowNode).addClass(processClass);
+                        // No designer assigned - use default color
+                        $(rowNode).addClass(`${colorSessionId}-designer-default`);
                     }
-                break;
+                } else {
+                    // Other departments - process-based coloring
+                    const processClass = `${colorSessionId}-match-col-${colName.replace(/_/g, '-')}`;
+                    $(rowNode).addClass(processClass);
                 }
+                break;
             }
+        }
         return matchFound;
         };
 
@@ -792,68 +750,78 @@ const columnVisibilityRules = {
         table.draw();
     }
 
-    function applyColumnVisibility(deptText) {
-        try {
-            // Store current state
-            const currentPage = table.page();
-            const scrollTop = $(window).scrollTop();
-            const visibleColumns = columnVisibilityRules[deptText];
+function applyColumnVisibility(deptText) {
+    try {
+        // Store current state
+        const currentPage = table.page();
+        const scrollTop = $(window).scrollTop();
+        const visibleColumns = columnVisibilityRules[deptText];
 
-            // Disable drawing during updates
-            const settings = table.settings()[0];
-            const oldAutoWidth = settings.oFeatures.bAutoWidth;
-            settings.oFeatures.bAutoWidth = false;
+        // Disable drawing during updates
+        const settings = table.settings()[0];
+        const oldAutoWidth = settings.oFeatures.bAutoWidth;
+        settings.oFeatures.bAutoWidth = false;
 
-            // Case 1: Department has specific column rules
-            if (visibleColumns) {
-                // Hide all columns first
-                table.columns().visible(false);
-                
-                // Show and order specified columns
-                visibleColumns.forEach(colName => {
-                    const col = table.column(`${colName}:name`);
-                    if (col) {
-                        col.visible(true);
-                        // Move to desired position
-                        table.colReorder.move(col.index(), visibleColumns.indexOf(colName));
-                    }
-                });
-            } 
-            // Case 2: No specific rules - show all columns in original order
-            else {
-                // First hide all columns
-                table.columns().visible(false);
-                
-                // Then show all columns in their original order
-                table.columns().every(function(index) {
-                    this.visible(true);
-                    // Move each column back to its original position
-                    table.colReorder.move(this.index(), index);
-                });
-            }
-
-            // Restore settings and redraw
-            settings.oFeatures.bAutoWidth = oldAutoWidth;
-            table.draw(false);
-            table.page(currentPage).draw(false);
-            $(window).scrollTop(scrollTop);
-
-        } catch (e) {
-            console.error('Column visibility error:', e);
-            // Emergency reset - show all columns in original order
-            table.columns().visible(true);
+        // Case 1: Department has specific column rules
+        if (visibleColumns) {
+            // Hide all columns first
+            table.columns().visible(false);
+            
+            // Show and order specified columns
+            visibleColumns.forEach(colName => {
+                const col = table.column(`${colName}:name`);
+                if (col) {
+                    col.visible(true);
+                    // Move to desired position
+                    table.colReorder.move(col.index(), visibleColumns.indexOf(colName));
+                }
+            });
+        } 
+        // Case 2: No specific rules - show all columns in original order
+        else {
+            // First hide all columns
+            table.columns().visible(false);
+            
+            // Then show all columns in their original order
             table.columns().every(function(index) {
+                this.visible(true);
+                // Move each column back to its original position
                 table.colReorder.move(this.index(), index);
             });
-            table.draw();
         }
+
+        // Restore settings and redraw
+        settings.oFeatures.bAutoWidth = oldAutoWidth;
+        table.draw(false);
+        table.page(currentPage).draw(false);
+        $(window).scrollTop(scrollTop);
+
+    } catch (e) {
+        console.error('Column visibility error:', e);
+        // Emergency reset - show all columns in original order
+        table.columns().visible(true);
+        table.columns().every(function(index) {
+            table.colReorder.move(this.index(), index);
+        });
+        table.draw();
     }
+}
+
+
+
+
+
+
+
+
+
+
 
     // variables for automatic reconnect
     let socket;
     let reconnectAttempts = 0;
     const maxReconnectAttempts = 5;
-    const reconnectDelay = 50000; // 50 seconds
+    const reconnectDelay = 5000; // 5 seconds
 
     // variable for checking if rows are opon on data refresh
     var drawHandler = null;
@@ -862,29 +830,35 @@ const columnVisibilityRules = {
     // Initialize WebSocket
     function initializeWebSocket() {
         socket = new WebSocket('wss://ampd.documation.com:8080');
+        let reconnectTimeout;
+        let pingInterval;
         let clickedRow = null;
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 5;
+        const reconnectDelay = 5000;
+
+        // Connection health monitoring
+        function setupHeartbeat() {
+            clearInterval(pingInterval);
+            pingInterval = setInterval(() => {
+                if (socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({ type: 'ping' }));
+                }
+            }, 20000); // Send ping every 20s
+        }
 
         socket.onopen = function(event) {
             console.log("WebSocket is open now.");
             reconnectAttempts = 0;
+            setupHeartbeat();
             updateConnectionStatus('connected');
-
             // Request initial data immediately after connecting
-            if (typeof initializeDataTable === 'function') {
-                safeSocketSend({ type: 'initialData' });
-                // fill out dropdown for designer in prepress
-                const selectedText = $('#deptFilter option:selected').text();
-                const isPrePress =
-                    selectedText === 'PrePress' ||
-                    selectedText === 'Needs Proof' ||
-                    selectedText === 'Proof Out' ||
-                    selectedText === 'Imposition';
-                if (isPrePress) {
-                    fetchDesigners();
-                }
-                const currentDept = $('#deptFilter').val();
-                if (currentDept) applyRowFilter(currentDept);
-            }
+            socket.send(JSON.stringify({ type: 'initialData' }));
+
+            // fill out dropdown for designer in prepress
+            fetchDesigners();
+            const currentDept = $('#deptFilter').val();
+            if (currentDept) applyRowFilter(currentDept);
         };
 
         socket.onerror = function(error) {
@@ -913,58 +887,30 @@ const columnVisibilityRules = {
             
             // Safely check for required data before proceeding
             if (!data || !data.JobNumber || !data.ComponentNumber) {
-                return;
+                return; // Exit if missing required data
             }
 
-            const jobNumber = data.JobNumber.toString(); // Ensure string
-            const componentNumber = data.ComponentNumber.toString(); // Ensure string
+            const jobNumber = data.JobNumber;
+            const componentNumber = data.ComponentNumber;
             let openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
-            
-            // Create consistent key format
-            const rowKey = JSON.stringify({ 
-                jobNumber: jobNumber, 
-                componentNumber: componentNumber 
-            });
 
-            // Check if this exact row is already open
-            const isOpen = openRows.some(row => {
-                const existingKey = JSON.stringify({ 
-                    jobNumber: row.jobNumber, 
-                    componentNumber: row.componentNumber 
-                });
-                return existingKey === rowKey;
-            });
-
-            if (isOpen) {
-                // Remove ALL instances of this row
-                openRows = openRows.filter(row => {
-                    const existingKey = JSON.stringify({ 
-                        jobNumber: row.jobNumber, 
-                        componentNumber: row.componentNumber 
-                    });
-                    return existingKey !== rowKey;
-                });
-                
-                // Only hide if actually shown
-                if (clickedRow.child.isShown()) {
-                    clickedRow.child.hide();
-                    $(this).removeClass('shown');
-                }
+            if (clickedRow.child.isShown()) {
+                // Close the row
+                openRows = openRows.filter(row => 
+                    !(row.jobNumber === jobNumber && row.componentNumber === componentNumber));
+                clickedRow.child.hide();
+                $(this).removeClass('shown');
             } else {
-                // Add the row (only if not already present)
-                openRows.push({ 
-                    jobNumber: jobNumber, 
-                    componentNumber: componentNumber 
-                });
-                safeSocketSend({ 
+                // Open the row
+                openRows.push({ jobNumber, componentNumber });
+                socket.send(JSON.stringify({ 
                     type: 'getDetailedData', 
-                    jobNumber: jobNumber, 
-                    componentNumber: componentNumber 
-                });
+                    jobNumber, 
+                    componentNumber 
+                }));
                 $(this).addClass('shown');
             }
 
-            // Update session storage
             sessionStorage.setItem('openRows', JSON.stringify(openRows));
         });
 
@@ -973,6 +919,11 @@ const columnVisibilityRules = {
             var response;
             try {
                 response = JSON.parse(event.data);
+                console.log("Received message:", response); // Log entire response for debugging
+                if (!response || typeof response !== 'object') {
+                    console.error("Invalid message format:", response);
+                    return;
+                }
             } catch (error) {
                 console.error("Failed to parse WebSocket message:", error);
                 return;
@@ -983,28 +934,34 @@ const columnVisibilityRules = {
                 return;
             }
 
-            if (response.type === 'initialData') {
+            console.log("Received message type:", response.type);
+
+            if (response.type === 'pong') {
+                return; // Ignore pong responses
+            }
+            else if (response.type === 'initialData') {
                 const openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
-                
-                // Remove any existing draw handler first
-                if (drawHandler) {
-                    table.off('draw', drawHandler);
-                }
-                
-                // Create a new handler
-                drawHandler = function() {
-                    // Wait for DataTables to finish rendering
-                    setTimeout(() => {
-                        restoreOpenRows(openRows, response.data);
-                    }, 300); // Increased delay to ensure DOM is ready
-                };
-                
-                table.on('draw', drawHandler);
-                
                 if ($.fn.DataTable.isDataTable('#prodTable')) {
+                    if (drawHandler) table.off('draw', drawHandler);
+                    
+                    drawHandler = function() {
+                        setTimeout(() => {
+                            restoreOpenRows(openRows);
+                        }, 100);
+                    };
+                    
+                    table.on('draw', drawHandler);
                     table.clear().rows.add(response.data).draw();
                 } else {
                     initializeDataTable(response.data);
+                    
+                    drawHandler = function() {
+                        setTimeout(() => {
+                            restoreOpenRows(openRows);
+                        }, 100);
+                    };
+                    
+                    table.on('draw', drawHandler);
                 }
 
                 const currentDept = $('#deptFilter').val();
@@ -1013,29 +970,28 @@ const columnVisibilityRules = {
                     applyRowFilter(currentDept);
                 }
             }
-            else if (response.type === 'updateSuccess') {                
-                // Search through all rows in DataTables
-                table.rows().every(function() {
-                    const rowData = this.data();
-                    if (rowData.JobNumber === response.jobNumber && 
-                        rowData.ComponentNumber == response.componentNumber) {
-                        
-                        const rowNode = this.node();
-                        const container = $(rowNode).find('.notes-container');
-                        
-                        container.find('.btn-save-notes')
-                            .prop('disabled', false)
-                            .html('<i class="fa fa-save"></i> Save');
-                        
-                        container.find('.save-status')
-                            .text('Saved!')
-                            .fadeIn()
-                            .delay(2000)
-                            .fadeOut();
-                            
-                        return false; // Break the loop
-                    }
-                });
+            else if (response.type === 'dataUpdate') {
+                if (response.changes && Array.isArray(response.changes)) {
+                    console.log("Processing dataUpdate with", response.changes.length, "changes");
+                    applyDataUpdates(response.changes);
+                } else {
+                    console.error("Invalid dataUpdate format - changes should be an array");
+                }
+            }
+            else if (response.type === 'updateSuccess') {
+                const row = table.row(`[data-job="${response.jobNumber}"][data-component="${response.componentNumber}"]`).node();
+                if (row) {
+                    const container = $(row).find('.notes-container');
+                    container.find('.btn-save-notes')
+                        .prop('disabled', false)
+                        .html('<i class="fa fa-save"></i> Save');
+                    
+                    const status = container.find('.save-status')
+                        .text('Saved!')
+                        .fadeIn()
+                        .delay(2000)
+                        .fadeOut();
+                }
             }
             else if (response.type === 'updateFailed') {
                 $('.btn-save-notes').each(function() {
@@ -1111,68 +1067,134 @@ const columnVisibilityRules = {
                     initializeDesignerDropdown(this.node(), this.data());
                 });
             } else if (response.type === 'designerUpdated') {
-                const $select = $(`.designer-select[data-job="${response.jobNumber}"][data-component="${response.componentNumber}"]`);
                 if (response.success) {
-                    // Update designer list if included
-                    if (response.designers) {
-                        designers = response.designers;
-                    }
-                    
-                    // Rebuild the dropdown options
-                    //rebuildDesignerDropdown($select, response.designerCode);
-                    
-                    // Update the row data
-                    const row = table.row($select.closest('tr'));
-                    const rowData = row.data();
-                    if (rowData) {
-                        rowData.Designer = response.designerCode;
-                        row.data(rowData).invalidate();
-                    }
-                    
-                    // Re-enable the select
-                    $select.prop('disabled', false);
-                } else {
-                    // Revert to previous value if update failed
-                    const row = table.row($select.closest('tr'));
-                    const rowData = row.data();
-                    $select.val(rowData?.Designer || '');
-                    $select.prop('disabled', false);
-                    alert('Failed to update designer');
+                    // Update the DataTables data
+                    table.rows().every(function() {
+                        const data = this.data();
+                        if (data.JobNumber === response.jobNumber && 
+                            data.ComponentNumber === response.componentNumber) {
+                            data.Designer = response.designerName; // Changed from DesignerCode
+                            this.invalidate();
+                        }
+                    });
                 }
-            } else if (response.type === 'error') {
-                console.error('Server error:', response.message);
-                // Re-enable all disabled selects
-                $('.designer-select:disabled').prop('disabled', false);
             }
         };
         // end socket.onmessage = function(event)
     }
     // end initializeWebSocket()
 
+    //  handle incremental updates
+    function applyDataUpdates(changes) {
+        try {
+            changes.forEach(change => {
+                if (!change || typeof change !== 'object') {
+                    console.error("Invalid change object:", change);
+                    return;
+                }
+
+                // Parse the key (now using hyphen separator)
+                const [jobNumber, componentNumber] = change.key.split('-');
+                
+                // Find the row by matching the first cell (JobNumber)
+                const row = table.rows((idx, data, node) => {
+                    return data.JobNumber == jobNumber && 
+                           data.ComponentNumber == componentNumber;
+                }).nodes().to$();
+                
+                if (row.length) {
+                    // Update the DataTables data model
+                    const rowData = table.row(row).data();
+                    Object.entries(change.fields).forEach(([field, value]) => {
+                        rowData[field] = value;
+                    });
+                    table.row(row).data(rowData).invalidate();
+                    console.log("Updated row:", jobNumber, componentNumber, "with", change.fields);
+                    
+                    // If row is expanded, refresh its details
+                    if (row.hasClass('shown')) {
+                        socket.send(JSON.stringify({
+                            type: 'getDetailedData',
+                            jobNumber,
+                            componentNumber
+                        }));
+                    }
+                } else {
+                    console.log("Row not found:", jobNumber, componentNumber);
+                }
+            });
+        } catch (error) {
+            console.error("Error processing changes:", error);
+        }
+    }
+
+    // function handleUpdateChange(change) {
+    //     if (!change.key || !change.fields) {
+    //         console.error("Invalid update format:", change);
+    //         return;
+    //     }
+
+    //     const parts = change.key.split('_');
+    //     if (parts.length !== 2) {
+    //         console.error("Invalid key format:", change.key);
+    //         return;
+    //     }
+
+    //     const [jobNumber, componentNumber] = parts;
+    //     const row = table.row(`[data-job="${jobNumber}"][data-component="${componentNumber}"]`);
+        
+    //     if (row.any()) {
+    //         const rowData = row.data();
+    //         Object.keys(change.fields).forEach(field => {
+    //             rowData[field] = change.fields[field];
+    //         });
+    //         row.data(rowData).invalidate();
+    //         console.log("Updated:", jobNumber, componentNumber, "with", change.fields);
+            
+    //         if (row.node() && $(row.node()).hasClass('shown')) {
+    //             fetchDetailedData(jobNumber, componentNumber);
+    //         }
+    //     }
+    // }
+
+    // function handleNewChange(change) {
+    //     if (!change.data) {
+    //         console.error("Invalid new item format:", change);
+    //         return;
+    //     }
+    //     table.row.add(change.data).draw(false);
+    //     console.log("Added new item:", change.data.JobNumber, change.data.ComponentNumber);
+    // }
+
+    // function handleRemoveChange(change) {
+    //     if (!change.key) {
+    //         console.error("Invalid remove format:", change);
+    //         return;
+    //     }
+    //     const [jobNum, compNum] = change.key.split('_');
+    //     table.row(`[data-job="${jobNum}"][data-component="${compNum}"]`).remove().draw();
+    //     console.log("Removed item:", jobNum, compNum);
+    // }
+
     // Function to reopen rows after the table refresh
     function restoreOpenRows(openRows) {
-        // Convert all keys to strings for consistent comparison
-        const rowsToOpen = new Set(
-            openRows.map(row => `${String(row.jobNumber)}_${String(row.componentNumber)}`)
-        );
-
+        // First close all existing rows
         table.rows().every(function() {
-            const rowData = this.data();
-            if (rowData) {
-                const rowKey = `${String(rowData.JobNumber)}_${String(rowData.ComponentNumber)}`;
-                if (rowsToOpen.has(rowKey) && !this.child.isShown()) {
-                    // Small delay to allow DataTables to stabilize
-                    setTimeout(() => {
-                        safeSocketSend({
-                            type: 'getDetailedData',
-                            jobNumber: rowData.JobNumber,
-                            componentNumber: rowData.ComponentNumber
-                        });
-                        $(this.node()).addClass('shown');
-                    }, 100);
-                }
+            if (this.child.isShown()) {
+                this.child.hide();
+                $(this.node()).removeClass('shown');
             }
-            return true; // Continue iteration
+        });
+
+        // Reopen saved rows with delay between each
+        openRows.forEach((row, index) => {
+            setTimeout(() => {
+                socket.send(JSON.stringify({
+                    type: 'getDetailedData',
+                    jobNumber: row.jobNumber,
+                    componentNumber: row.componentNumber
+                }));
+            }, index * 150); // Stagger requests
         });
     }
 
@@ -1247,4 +1269,3 @@ const columnVisibilityRules = {
     initializeWebSocket();
 });
 // end $(document).ready(function()
-

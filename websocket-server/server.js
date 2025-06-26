@@ -1,6 +1,3 @@
-// run this in terminal to check who is connected
-// sudo lsof -i :8080
-
 const WebSocket = require('ws');
 const https = require('https');
 const fs = require('fs');
@@ -34,12 +31,15 @@ const server = https.createServer(options);
 const wss = new WebSocket.Server({ server });
 
 // Track active clients
-const clients = new Set();
+const clients = new Map();
 const clientMetadata = new Map();
 
-// Cache for production schedule data
+// Enhanced cache for production schedule data
 let cachedScheduleData = null;
 let lastDataUpdate = 0;
+let lastDataFetchAttempt = 0;
+const CACHE_TTL = 5000; // 5 seconds cache TTL
+const MIN_DB_FETCH_INTERVAL = 1000; // Minimum 1 second between DB fetches
 
 // Helper function to get client IP
 function getClientIp(ws) {
@@ -48,22 +48,68 @@ function getClientIp(ws) {
            (ws.upgradeReq && ws.upgradeReq.connection.remoteAddress);
 }
 
-// Fetch data with connection pooling with caching
 async function fetchInitialData() {
+    const now = Date.now();
+    
+    // Check if we recently attempted a fetch
+    if (now - lastDataFetchAttempt < MIN_DB_FETCH_INTERVAL) {
+        console.log('[fetchInitialData] Too frequent fetch attempts, returning cached data');
+        return cachedScheduleData || [];
+    }
+    
+    lastDataFetchAttempt = now;
+    
+    // Return cached data if it's fresh
+    if (cachedScheduleData && now - lastDataUpdate < CACHE_TTL) {
+        console.log('[fetchInitialData] Returning cached data (still fresh)');
+        return cachedScheduleData;
+    }
+    
+    console.log('[fetchInitialData] Fetching fresh data from DB');
     try {
-        // Return cached data if it's fresh (less than 5 seconds old)
-        if (cachedScheduleData && Date.now() - lastDataUpdate < 5000) {
-            return cachedScheduleData;
-        }
-        
         await poolConnect;
         const result = await pool.request().query('EXEC sp_ProductionScheduleDocu');
-        cachedScheduleData = result.recordset;
-        lastDataUpdate = Date.now();
-        return cachedScheduleData;
+        return result.recordset;
     } catch (err) {
         console.error('Database query failed:', err);
-        return cachedScheduleData || []; // Return cached data if available
+        return cachedScheduleData || [];
+    }
+}
+
+async function sendInitialData(ws, clientId) {
+    try {
+        const data = await fetchInitialData();
+        
+        // Update cache with the fresh data
+        cachedScheduleData = data;
+        lastDataUpdate = Date.now();
+        console.log('[CACHE] Updated cache with initial data');
+        
+        const message = JSON.stringify({
+            type: 'initialData',
+            data: data,
+            fullUpdate: true,
+            timestamp: lastDataUpdate
+        });
+        
+        ws.send(message, (err) => {
+            if (err) {
+                console.error(`Failed to send initial data to ${clientId}:`, err);
+                ws.terminate();
+                clients.delete(clientId);
+            } else {
+                console.log(`Initial data sent to ${clientId}`);
+                // Update last activity after successful send
+                const client = clients.get(clientId);
+                if (client) {
+                    client.metadata.lastActivity = Date.now();
+                }
+            }
+        });
+    } catch (err) {
+        console.error('Initial data preparation failed:', err);
+        // Even if send fails, we might want to keep the cached data
+        // as it represents the most recent successful fetch
     }
 }
 
@@ -119,7 +165,7 @@ async function updateNotes(jobNumber, componentNumber, field, value) {
         
         // Ensure jobNumber is properly formatted as a string
         const cleanJobNumber = jobNumber.toString().trim();
-        request.input('jobNumber', sql.VarChar(50), cleanJobNumber); // Specify length
+        request.input('jobNumber', sql.VarChar(50), cleanJobNumber);
         
         // Ensure componentNumber is a valid integer
         const cleanComponentNumber = parseInt(componentNumber);
@@ -171,13 +217,6 @@ async function updateNotes(jobNumber, componentNumber, field, value) {
             throw new Error('Invalid field specified');
         }
 
-        // console.log('Executing query with:', {
-        //     jobNumber: cleanJobNumber,
-        //     componentNumber: cleanComponentNumber,
-        //     field: field,
-        //     value: value
-        // });
-
         const result = await request.query(query);
         console.log('Update successful, rows affected:', result.rowsAffected);
 
@@ -185,7 +224,7 @@ async function updateNotes(jobNumber, componentNumber, field, value) {
             // Fetch the updated data
             const updatedData = await fetchInitialData();
 
-            // Broadcast the updated data to all clients
+            // Broadcast only the changes
             broadcastData(updatedData, 'initialData');
         }
         return true;
@@ -207,7 +246,6 @@ async function getDesigners() {
     try {
         await poolConnect;
         const result = await pool.request().query('SELECT EmployeeName FROM Employee WHERE DepartmentCode = 1000 AND EmployeeInactive = 0');
-        //console.log('Designers from DB:', result.recordset);
         return result.recordset;
     } catch (err) {
         console.error('Designer query failed:', err);
@@ -246,74 +284,138 @@ async function updateDesigner(jobNumber, componentNumber, designerName) {
     }
 }
 
-// Broadcast function
-function broadcastData(data, type = 'initialData', excludeClient = null) {
-    // For initialData type, we'll do a diff with the cached version
+// In broadcastData, handle the cache comparison and update
+function broadcastData(newData, type = 'initialData') {
+    if (clients.size === 0) {
+        console.log('No clients connected, skipping broadcast');
+        // Still update cache even if no clients
+        if (type === 'initialData' || type === 'dataUpdate') {
+            cachedScheduleData = newData;
+            lastDataUpdate = Date.now();
+        }
+        return;
+    }
+
+    // Prepare the correct message format
+    const message = {
+        type,
+        timestamp: Date.now()
+    };
+
     if (type === 'initialData') {
-        if (!cachedScheduleData) {
-            // First broadcast, send everything
-            cachedScheduleData = data;
-            const message = JSON.stringify({ type, data });
-            sendToAllClients(message, excludeClient);
+        message.data = newData;
+        message.fullUpdate = true;
+    } else if (type === 'dataUpdate') {
+        const changes = findMeaningfulDifferences(cachedScheduleData, newData);
+        if (changes.length === 0) {
+            console.log('[BROADCAST] No meaningful changes, skipping broadcast');
+            cachedScheduleData = newData;
+            lastDataUpdate = Date.now();
             return;
         }
+        // Ensure changes is always an array
+        message.changes = Array.isArray(changes) ? changes : [changes];
+    }
 
-        // Find differences between cached and new data
-        const changes = findDataDifferences(cachedScheduleData, data);
-        
-        if (changes.length > 0) {
-            // Only send the changes if there are any
-            const message = JSON.stringify({ 
-                type: 'dataUpdate', 
-                changes,
-                fullUpdate: false,
-                timestamp: Date.now()
+    // Stringify once
+    const messageString = JSON.stringify(message);
+
+    let sentCount = 0;
+    clients.forEach(({ ws, metadata }) => {
+        console.log("broadcastData test1:");
+        if (ws.readyState === WebSocket.OPEN) {
+        console.log("broadcastData test2:");
+            ws.send(messageString, (err) => {
+        console.log("broadcastData test3:");
+                if (err) {
+                    console.error(`Error sending to ${metadata.id}:`, err);
+                    ws.terminate();
+                    clients.delete(metadata.id);
+                } else {
+        console.log("broadcastData test4:");
+                    sentCount++;
+                    metadata.lastActivity = Date.now();
+                }
             });
-            sendToAllClients(message, excludeClient);
-            cachedScheduleData = data; // Update cache
         }
-    } else {
-        // For other message types, send full data
-        const message = JSON.stringify({ type, data });
-        sendToAllClients(message, excludeClient);
+    });
+
+    console.log(`Broadcast ${type} to ${sentCount}/${clients.size} clients`);
+    
+    // Update cache after successful broadcast
+    if (type === 'initialData' || type === 'dataUpdate') {
+        cachedScheduleData = newData;
+        lastDataUpdate = Date.now();
+        console.log('[CACHE] Updated cache after broadcast');
     }
 }
 
-// Helper to find differences between data sets
-function findDataDifferences(oldData, newData) {
+// Enhanced difference detection that ignores insignificant changes
+function findMeaningfulDifferences(oldData, newData) {
     const changes = [];
     
     // Create a map of old data for quick lookup
     const oldDataMap = new Map();
     oldData.forEach(item => {
-        const key = `${item.JobNumber}_${item.ComponentNumber}`;
+        const key = `${item.JobNumber}-${item.ComponentNumber}`;
         oldDataMap.set(key, item);
     });
 
+    // Improved logging for debugging
+    console.log('[findMeaningfulDifferences] Comparing data sets:');
+    console.log('Old data sample:', JSON.stringify(oldData[0], null, 2));
+    console.log('New data sample:', JSON.stringify(newData[0], null, 2));
+    console.log(`Old data count: ${oldData.length}, New data count: ${newData.length}`);
+
     // Compare each new item with its old version
     newData.forEach(newItem => {
-        const key = `${newItem.JobNumber}_${newItem.ComponentNumber}`;
+        const key = `${newItem.JobNumber}-${newItem.ComponentNumber}`;
         const oldItem = oldDataMap.get(key);
         
         if (!oldItem) {
             // New item
+            console.log(`[findMeaningfulDifferences] New item detected: ${key}`);
             changes.push({
                 type: 'new',
                 data: newItem
             });
         } else {
-            // Check for changed fields
+            // Check for changed fields that we care about
             const changedFields = {};
             let hasChanges = false;
             
-            for (const field in newItem) {
-                if (JSON.stringify(newItem[field]) !== JSON.stringify(oldItem[field])) {
+            // List of fields we consider meaningful for updates
+            const meaningfulFields = [
+                'Status', 'JobStatus', 'Priority', 'PrepressNotes', 'PostPressNotes', 
+                'Designer', 'LastUpdated', 'DueDate', 'CustomerName'
+            ];
+            
+            for (const field of meaningfulFields) {
+                if (newItem[field] !== undefined && oldItem[field] !== undefined) {
+                    const newValue = normalizeFieldValue(newItem[field]);
+                    const oldValue = normalizeFieldValue(oldItem[field]);
+                    
+                    if (newValue !== oldValue) {
+                        console.log(`[findMeaningfulDifferences] Field changed - ${field}:`, {
+                            old: oldItem[field],
+                            new: newItem[field]
+                        });
+                        changedFields[field] = newItem[field];
+                        hasChanges = true;
+                    }
+                } else if (newItem[field] !== oldItem[field]) {
+                    // One is defined and the other isn't
+                    console.log(`[findMeaningfulDifferences] Field presence changed - ${field}:`, {
+                        old: oldItem[field],
+                        new: newItem[field]
+                    });
                     changedFields[field] = newItem[field];
                     hasChanges = true;
                 }
             }
             
             if (hasChanges) {
+                console.log(`[findMeaningfulDifferences] Changes detected for ${key}:`, changedFields);
                 changes.push({
                     type: 'update',
                     key,
@@ -328,6 +430,7 @@ function findDataDifferences(oldData, newData) {
     oldData.forEach(oldItem => {
         const key = `${oldItem.JobNumber}_${oldItem.ComponentNumber}`;
         if (!newKeys.has(key)) {
+            console.log(`[findMeaningfulDifferences] Item removed: ${key}`);
             changes.push({
                 type: 'remove',
                 key
@@ -335,40 +438,97 @@ function findDataDifferences(oldData, newData) {
         }
     });
 
+    console.log(`[findMeaningfulDifferences] Total changes detected: ${changes.length}`);
     return changes;
+}
+
+// Helper to normalize field values for comparison
+function normalizeFieldValue(value) {
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'string') return value.trim().toLowerCase();
+    if (value instanceof Date) return value.toISOString();
+    if (typeof value === 'number') return value.toString();
+    return JSON.stringify(value);
 }
 
 // Helper to send messages to all clients with rate limiting checks
 function sendToAllClients(message, excludeClient = null) {
+    let sentCount = 0;
+    let errorCount = 0;
+    
     clients.forEach(client => {
+        // Skip if client should be excluded
+        if (client === excludeClient) {
+            return;
+        }
+
         const meta = clientMetadata.get(client);
         
-        // Skip if client should be excluded, is blocked, or not open
-        if (client === excludeClient || 
-            !meta || 
-            meta.isBlocked || 
-            client.readyState !== WebSocket.OPEN) {
+        // Skip if no metadata or client is blocked
+        if (!meta || meta.isBlocked) {
             return;
         }
-        
-        // Skip if client is being rate limited
-        if (meta.messageCount > 100 && Date.now() - meta.firstMessageTime < 10000) {
+
+        // Check connection state more thoroughly
+        if (client.readyState !== WebSocket.OPEN) {
+            // Clean up dead connections
+            if (client.readyState === WebSocket.CLOSED || client.readyState === WebSocket.CLOSING) {
+                console.log(`Cleaning up dead connection ${meta.id}`);
+                clients.delete(client);
+                clientMetadata.delete(client);
+            }
             return;
         }
-        
+
+        // Rate limiting check
+        const now = Date.now();
+        if (meta.messageCount > 100 && now - meta.firstMessageTime < 10000) {
+            console.log(`Rate limiting client ${meta.id}`);
+            return;
+        }
+
         try {
-            client.send(message);
+            client.send(message, (err) => {
+                if (err) {
+                    errorCount++;
+                    console.error(`Error sending to client ${meta.id}:`, err);
+                    // Clean up problematic connections
+                    client.terminate();
+                    clients.delete(client);
+                    clientMetadata.delete(client);
+                } else {
+                    sentCount++;
+                    // Update message count for rate limiting
+                    meta.messageCount++;
+                    if (now - meta.firstMessageTime > 10000) {
+                        meta.firstMessageTime = now;
+                        meta.messageCount = 1;
+                    }
+                }
+            });
         } catch (err) {
-            console.error('Error sending to client:', err);
+            errorCount++;
+            console.error(`Unexpected error sending to client ${meta.id}:`, err);
+            client.terminate();
+            clients.delete(client);
+            clientMetadata.delete(client);
         }
     });
+    
+    console.log(`[SEND] Message of type ${JSON.parse(message).type} sent to ${sentCount} clients, ${errorCount} errors`);
+    
+    // If we failed to send to any clients but have active connections, log warning
+    if (sentCount === 0 && clients.size > 0) {
+        console.warn('Message not delivered to any clients despite active connections');
+        console.log('Active connections:', Array.from(clients).map(c => clientMetadata.get(c).id));
+    }
 }
 
-// Periodic updates
+// Periodic updates with improved caching
 setInterval(async () => {
     try {
         const data = await fetchInitialData();
-        broadcastData(data, 'initialData');
+        broadcastData(data, 'dataUpdate');
     } catch (err) {
         console.error('Periodic update failed:', err);
     }
@@ -387,32 +547,39 @@ wss.on('connection', (ws) => {
         lastMessageTime: 0,
         firstMessageTime: 0,
         isBlocked: false,
-        lastPing: Date.now()
+        lastPing: Date.now(),
+        isAlive: true,
+        lastActivity: Date.now()
     };
     
+    // Add to clients Set and metadata Map
     clientMetadata.set(ws, metadata);
-    clients.add(ws);
+    // Add to tracking
+    clients.set(clientId, { ws, metadata });
     
     console.log(`New connection ${clientId} from ${clientIp} (Total: ${clients.size})`);
 
-    // Ping/pong for connection health
-    const pingInterval = setInterval(() => {
-        const meta = clientMetadata.get(ws);
-        if (!meta || ws.readyState !== WebSocket.OPEN) return;
-        
-        // Check if client is responsive
-        if (Date.now() - meta.lastPing > 120000) { // 2 minutes without response
-            console.log(`Closing unresponsive connection ${meta.id}`);
-            ws.terminate();
-            return;
-        }
-        
-        ws.ping();
-    }, 30000); // Every 30 seconds
+    // Immediate initial data send
+    sendInitialData(ws, clientId);
 
+    // Heartbeat check every 30 seconds
+    setInterval(() => {
+        const now = Date.now();
+        clients.forEach(({ ws, metadata }) => {
+            if (now - metadata.lastActivity > 60000) { // 60s timeout
+                ws.terminate();
+                clients.delete(metadata.id);
+            } else if (!metadata.isAlive) {
+                ws.ping();
+            }
+            metadata.isAlive = false;
+        });
+    }, 30000);
+
+    // Heartbeat system
     ws.on('pong', () => {
-        const meta = clientMetadata.get(ws);
-        if (meta) meta.lastPing = Date.now();
+        metadata.isAlive = true;
+        metadata.lastActivity = Date.now();
     });
 
     // Initial data send
@@ -447,6 +614,7 @@ wss.on('connection', (ws) => {
             }
             return;
         }
+        
         try {
             const request = JSON.parse(message);
       
@@ -481,7 +649,7 @@ wss.on('connection', (ws) => {
                     }
 
                     const success = await updateNotes(
-                        request.jobNumber.toString(), // Ensure string
+                        request.jobNumber.toString(),
                         request.componentNumber,
                         field,
                         value
@@ -493,10 +661,6 @@ wss.on('connection', (ws) => {
                             jobNumber: request.jobNumber,
                             componentNumber: request.componentNumber
                         }));
-                        
-                        // Broadcast updated data
-                        const data = await fetchInitialData();
-                        broadcastData(data, 'initialData');
                     } else {
                         ws.send(JSON.stringify({ 
                             type: 'updateFailed',
@@ -513,8 +677,7 @@ wss.on('connection', (ws) => {
             } else if (request.type === 'getDesigners') {
                 const data = await getDesigners();
                 ws.send(JSON.stringify({ type: 'designers', data }));
-            }
-            else if (request.type === 'updateDesigner') {
+            } else if (request.type === 'updateDesigner') {
                 const success = await updateDesigner(
                     request.jobNumber,
                     request.componentNumber,
@@ -525,18 +688,13 @@ wss.on('connection', (ws) => {
                     success,
                     jobNumber: request.jobNumber,
                     componentNumber: request.componentNumber,
-                    designerCode: request.designerCode,
-                    designers // Include the full designer list
+                    designerCode: request.designerCode
                 }));
-                // Broadcast the general update to all other clients
-                const data = await fetchInitialData();
-                broadcastData(data, 'initialData');
-            }
-             else if (request.type === 'initialData') {
+            } else if (request.type === 'initialData') {
                 // Broadcast updated data
                 const data = await fetchInitialData();
                 broadcastData(data, 'initialData');
-             }                
+            }                
         } catch (err) {
             console.error('Message handling failed:', err);
             ws.send(JSON.stringify({ type: 'error', message: err.message }));
@@ -545,11 +703,8 @@ wss.on('connection', (ws) => {
 
     // Cleanup on close
     ws.on('close', () => {
-        clearInterval(pingInterval);
-        clients.delete(ws);
-        clientMetadata.delete(ws);
-        
-        console.log(`Connection ${metadata.id} closed (Remaining: ${clients.size})`);
+        clients.delete(clientId);
+        console.log(`Connection ${clientId} closed (Remaining: ${clients.size})`);
     });
 });
 

@@ -17,6 +17,11 @@
     <!-- Column reordering plugin for datatables -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/colreorder/1.5.2/css/colReorder.dataTables.min.css">
 	<script type="text/javascript" src="https://cdn.datatables.net/colreorder/1.5.2/js/dataTables.colReorder.min.js"></script>
+	<!-- CSS -->
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
+
+	<!-- JS (after jQuery) -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 
    <script type="text/javascript" src="script.js"></script>
 </head>
@@ -116,8 +121,14 @@
 	            <th>Last Completed Process</th> <!-- 59 -->
 	            <th>Last Completed Description</th> <!-- 60 -->
 	            <th>Next Process</th> <!-- 61 -->
-	            <th>Next Description</th> <!-- 62 -->	            
+	            <th>Next Description</th> <!-- 62 -->
 	            <th>Next Time</th> <!-- 63 -->
+	            <th>Drill_Process</th> <!-- 64 -->
+	            <th>Drill_Description</th> <!-- 65 -->
+	            <th>Drill_Time</th> <!-- 66 -->
+	            <th>Hunkler_Process</th> <!-- 67 -->
+	            <th>Hunkler_Description</th> <!-- 68 -->
+	            <th>Hunkler_Time</th> <!-- 69 -->
 	        </thead>
 	        <tbody>
 	            <!-- Data will be populated by DataTables -->
