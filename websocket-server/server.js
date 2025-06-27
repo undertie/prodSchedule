@@ -351,25 +351,118 @@ function broadcastData(newData, type = 'initialData') {
 }
 
 // Enhanced difference detection that ignores insignificant changes
+// function findMeaningfulDifferences(oldData, newData) {
+//     const changes = [];
+    
+//     // Create a map of old data for quick lookup
+//     const oldDataMap = new Map();
+//     oldData.forEach(item => {
+//         const key = `${item.JobNumber}-${item.ComponentNumber}`;
+//         oldDataMap.set(key, item);
+//     });
+
+//     // Improved logging for debugging
+//     console.log('[findMeaningfulDifferences] Comparing data sets:');
+//     console.log('Old data sample:', JSON.stringify(oldData[0], null, 2));
+//     console.log('New data sample:', JSON.stringify(newData[0], null, 2));
+//     console.log(`Old data count: ${oldData.length}, New data count: ${newData.length}`);
+
+//     // Compare each new item with its old version
+//     newData.forEach(newItem => {
+//         const key = `${newItem.JobNumber}-${newItem.ComponentNumber}`;
+//         const oldItem = oldDataMap.get(key);
+        
+//         if (!oldItem) {
+//             // New item
+//             console.log(`[findMeaningfulDifferences] New item detected: ${key}`);
+//             changes.push({
+//                 type: 'new',
+//                 data: newItem
+//             });
+//         } else {
+//             // Check for changed fields that we care about
+//             const changedFields = {};
+//             let hasChanges = false;
+            
+//             // List of fields we consider meaningful for updates
+//             const meaningfulFields = [
+//                 'Status', 'JobStatus', 'Priority', 'PrepressNotes', 'PostPressNotes', 
+//                 'Designer', 'LastUpdated', 'DueDate', 'CustomerName'
+//             ];
+            
+//             for (const field of meaningfulFields) {
+//                 if (newItem[field] !== undefined && oldItem[field] !== undefined) {
+//                     const newValue = normalizeFieldValue(newItem[field]);
+//                     const oldValue = normalizeFieldValue(oldItem[field]);
+                    
+//                     if (newValue !== oldValue) {
+//                         console.log(`[findMeaningfulDifferences] Field changed - ${field}:`, {
+//                             old: oldItem[field],
+//                             new: newItem[field]
+//                         });
+//                         changedFields[field] = newItem[field];
+//                         hasChanges = true;
+//                     }
+//                 } else if (newItem[field] !== oldItem[field]) {
+//                     // One is defined and the other isn't
+//                     console.log(`[findMeaningfulDifferences] Field presence changed - ${field}:`, {
+//                         old: oldItem[field],
+//                         new: newItem[field]
+//                     });
+//                     changedFields[field] = newItem[field];
+//                     hasChanges = true;
+//                 }
+//             }
+            
+//             if (hasChanges) {
+//                 console.log(`[findMeaningfulDifferences] Changes detected for ${key}:`, changedFields);
+//                 changes.push({
+//                     type: 'update',
+//                     key,
+//                     fields: changedFields
+//                 });
+//             }
+//         }
+//     });
+
+//     // Check for removed items
+//     const newKeys = new Set(newData.map(item => `${item.JobNumber}-${item.ComponentNumber}`));
+//     oldData.forEach(oldItem => {
+//         const key = `${oldItem.JobNumber}_${oldItem.ComponentNumber}`;
+//         if (!newKeys.has(key)) {
+//             console.log(`[findMeaningfulDifferences] Item removed: ${key}`);
+//             changes.push({
+//                 type: 'remove',
+//                 key
+//             });
+//         }
+//     });
+
+//     console.log(`[findMeaningfulDifferences] Total changes detected: ${changes.length}`);
+//     return changes;
+// }
+
 function findMeaningfulDifferences(oldData, newData) {
     const changes = [];
     
-    // Create a map of old data for quick lookup
-    const oldDataMap = new Map();
-    oldData.forEach(item => {
-        const key = `${item.JobNumber}-${item.ComponentNumber}`;
-        oldDataMap.set(key, item);
-    });
+    // Helper function to create consistent keys
+    const getItemKey = item => `${item.JobNumber}-${item.ComponentNumber}`;
 
-    // Improved logging for debugging
+    // Create maps for efficient lookup
+    const oldDataMap = new Map(oldData.map(item => [getItemKey(item), item]));
+    const newDataMap = new Map(newData.map(item => [getItemKey(item), item]));
+
+    // Debug logging
     console.log('[findMeaningfulDifferences] Comparing data sets:');
-    console.log('Old data sample:', JSON.stringify(oldData[0], null, 2));
-    console.log('New data sample:', JSON.stringify(newData[0], null, 2));
     console.log(`Old data count: ${oldData.length}, New data count: ${newData.length}`);
+    if (oldData.length > 0 && newData.length > 0) {
+        console.log('Sample old item:', JSON.stringify(oldData[0], null, 2));
+        console.log('Sample new item:', JSON.stringify(newData[0], null, 2));
+    }
 
-    // Compare each new item with its old version
+    // 1. Detect new and updated items
     newData.forEach(newItem => {
-        const key = `${newItem.JobNumber}-${newItem.ComponentNumber}`;
+        const key = getItemKey(newItem);
         const oldItem = oldDataMap.get(key);
         
         if (!oldItem) {
@@ -377,45 +470,32 @@ function findMeaningfulDifferences(oldData, newData) {
             console.log(`[findMeaningfulDifferences] New item detected: ${key}`);
             changes.push({
                 type: 'new',
+                key,
                 data: newItem
             });
         } else {
-            // Check for changed fields that we care about
+            // Check for meaningful changes
             const changedFields = {};
-            let hasChanges = false;
-            
-            // List of fields we consider meaningful for updates
             const meaningfulFields = [
-                'Status', 'JobStatus', 'Priority', 'PrepressNotes', 'PostPressNotes', 
-                'Designer', 'LastUpdated', 'DueDate', 'CustomerName'
+                'Status', 'JobStatus', 'Priority', 'PrepressNotes', 
+                'PostPressNotes', 'Designer', 'LastUpdated', 
+                'DueDate', 'CustomerName'
             ];
-            
-            for (const field of meaningfulFields) {
-                if (newItem[field] !== undefined && oldItem[field] !== undefined) {
-                    const newValue = normalizeFieldValue(newItem[field]);
-                    const oldValue = normalizeFieldValue(oldItem[field]);
-                    
-                    if (newValue !== oldValue) {
-                        console.log(`[findMeaningfulDifferences] Field changed - ${field}:`, {
-                            old: oldItem[field],
-                            new: newItem[field]
-                        });
-                        changedFields[field] = newItem[field];
-                        hasChanges = true;
-                    }
-                } else if (newItem[field] !== oldItem[field]) {
-                    // One is defined and the other isn't
-                    console.log(`[findMeaningfulDifferences] Field presence changed - ${field}:`, {
+
+            meaningfulFields.forEach(field => {
+                const newValue = normalizeFieldValue(newItem[field]);
+                const oldValue = normalizeFieldValue(oldItem[field]);
+                
+                if (newValue !== oldValue) {
+                    changedFields[field] = newItem[field];
+                    console.log(`[findMeaningfulDifferences] Change detected in ${key} - ${field}:`, {
                         old: oldItem[field],
                         new: newItem[field]
                     });
-                    changedFields[field] = newItem[field];
-                    hasChanges = true;
                 }
-            }
-            
-            if (hasChanges) {
-                console.log(`[findMeaningfulDifferences] Changes detected for ${key}:`, changedFields);
+            });
+
+            if (Object.keys(changedFields).length > 0) {
                 changes.push({
                     type: 'update',
                     key,
@@ -425,11 +505,10 @@ function findMeaningfulDifferences(oldData, newData) {
         }
     });
 
-    // Check for removed items
-    const newKeys = new Set(newData.map(item => `${item.JobNumber}_${item.ComponentNumber}`));
+    // 2. Detect removed items
     oldData.forEach(oldItem => {
-        const key = `${oldItem.JobNumber}_${oldItem.ComponentNumber}`;
-        if (!newKeys.has(key)) {
+        const key = getItemKey(oldItem);
+        if (!newDataMap.has(key)) {
             console.log(`[findMeaningfulDifferences] Item removed: ${key}`);
             changes.push({
                 type: 'remove',
@@ -438,9 +517,37 @@ function findMeaningfulDifferences(oldData, newData) {
         }
     });
 
-    console.log(`[findMeaningfulDifferences] Total changes detected: ${changes.length}`);
+    console.log(`[findMeaningfulDifferences] Completed. Total changes: ${changes.length} ` +
+               `(New: ${changes.filter(c => c.type === 'new').length}, ` +
+               `Updates: ${changes.filter(c => c.type === 'update').length}, ` +
+               `Removals: ${changes.filter(c => c.type === 'remove').length})`);
+
     return changes;
 }
+
+// Helper function to normalize values for comparison
+function normalizeFieldValue(value) {
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'string') return value.trim().toLowerCase();
+    return value;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Helper to normalize field values for comparison
 function normalizeFieldValue(value) {
@@ -524,7 +631,7 @@ function sendToAllClients(message, excludeClient = null) {
     }
 }
 
-// Periodic updates with improved caching
+// Periodic updates with improved cachi
 setInterval(async () => {
     try {
         const data = await fetchInitialData();
@@ -532,7 +639,7 @@ setInterval(async () => {
     } catch (err) {
         console.error('Periodic update failed:', err);
     }
-}, 50000);
+}, 25000);
 
 // WebSocket server
 wss.on('connection', (ws) => {
@@ -581,15 +688,6 @@ wss.on('connection', (ws) => {
         metadata.isAlive = true;
         metadata.lastActivity = Date.now();
     });
-
-    // Initial data send
-    fetchInitialData()
-        .then(data => {
-            ws.send(JSON.stringify({ type: 'initialData', data }));
-        })
-        .catch(err => {
-            console.error('Initial data send failed:', err);
-        });
 
     // Message handling
     ws.on('message', async (message) => {

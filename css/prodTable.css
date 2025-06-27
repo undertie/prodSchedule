@@ -358,3 +358,7 @@ label {
         font-weight: bold;
     }
 }
+/* prevent flickering during updates */
+tr.shown td {
+    transition: background-color 0.3s ease;
+}

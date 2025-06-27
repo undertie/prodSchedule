@@ -236,9 +236,9 @@ const columnVisibilityRules = {
     'default': '#E6E6FA'      // Lavender (fallback)
 };
 
-    function initializeAll() {
+    function initializeAll(initialData) {
         // First create the DataTable
-        initializeDataTable();
+        initializeDataTable(initialData);
         
         // Then set up other components
         setupDepartmentDropdown();
@@ -255,7 +255,7 @@ const columnVisibilityRules = {
     }
 
     // Initialize DataTable and all functionality
-    function initializeDataTable() {
+    function initializeDataTable(initialData = []) {
         // Destroy existing table if it exists
         if ($.fn.DataTable.isDataTable('#prodTable')) {
             table.destroy();
@@ -265,6 +265,7 @@ const columnVisibilityRules = {
                     // Performance optimizations:
             // "deferRender": true,
             //"scrollY": "60vh",
+            "data": initialData,
             "scrollCollapse": true,
             "scroller": true,
             "stateSave": true,
@@ -427,6 +428,10 @@ const columnVisibilityRules = {
                 }
             },
             createdRow: function(row, data) {
+                // Add data attributes for DOM selection
+                $(row).attr('data-job', data.JobNumber)
+                  .attr('data-component', data.ComponentNumber);
+
                 // Initialize dropdown after row is created
                 initializeDesignerDropdown(row, data);
             }
@@ -593,6 +598,34 @@ const columnVisibilityRules = {
                 applyDepartmentFilter();
             }, 300); // 300ms delay
         });
+    }
+
+    function findTableRow(jobNumber, componentNumber) {
+        // First try DataTables API (most reliable)
+        const rows = table.rows((idx, data) => 
+            data.JobNumber == jobNumber && 
+            data.ComponentNumber == componentNumber
+        );
+        
+        if (rows.any()) {
+            return {
+                api: rows,
+                node: rows.nodes().to$(),
+                data: rows.data()
+            };
+        }
+        
+        // Fallback to DOM attributes if needed
+        const domRow = $(`#prodTable tr[data-job="${jobNumber}"][data-component="${componentNumber}"]`);
+        if (domRow.length) {
+            return {
+                api: table.row(domRow),
+                node: domRow,
+                data: table.row(domRow).data()
+            };
+        }
+        
+        return null;
     }
 
     // Configure search box behavior
@@ -915,13 +948,19 @@ function applyColumnVisibility(deptText) {
         });
 
         socket.onmessage = function(event) {
-            //console.log("Received WebSocket Message:", event.data); // Debug entire response
-            var response;
+            // Parse and validate the message
+            let response;
             try {
                 response = JSON.parse(event.data);
-                console.log("Received message:", response); // Log entire response for debugging
+                console.log("Received message:", response);
+                
                 if (!response || typeof response !== 'object') {
                     console.error("Invalid message format:", response);
+                    return;
+                }
+                
+                if (!response.type) {
+                    console.error("Received message without type:", response);
                     return;
                 }
             } catch (error) {
@@ -929,204 +968,356 @@ function applyColumnVisibility(deptText) {
                 return;
             }
 
-            if (!response.type) {
-                console.error("Received message without type:", response);
+            console.log("Received message type:", response.type);
+
+            // Process message based on type
+            switch (response.type) {
+                case 'pong':
+                    // Ignore heartbeat responses
+                    break;
+                    
+                case 'initialData':
+                    //handleInitialData(response.data);
+                    // Destroy existing table and reinitialize with new data
+                    initializeAll(response.data);
+                    break;
+                    
+                case 'dataUpdate':
+                    handleDataUpdate(response.changes);
+                    break;
+                    
+                case 'updateSuccess':
+                    handleUpdateSuccess(response.jobNumber, response.componentNumber);
+                    break;
+                    
+                case 'updateFailed':
+                    handleUpdateFailed();
+                    break;
+                    
+                case 'detailedData':
+                    handleDetailedData(response);
+                    break;
+                    
+                case 'designers':
+                    handleDesignersUpdate(response.data);
+                    break;
+                    
+                case 'designerUpdated':
+                    handleDesignerUpdated(response);
+                    break;
+                    
+                default:
+                    console.error("Unknown message type:", response.type);
+            }
+        };
+
+        // Helper functions for each message type
+        function handleInitialData(data) {
+            const openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
+            
+            if ($.fn.DataTable.isDataTable('#prodTable')) {
+                if (drawHandler) table.off('draw', drawHandler);
+                
+                drawHandler = function() {
+                    setTimeout(() => restoreOpenRows(openRows), 100);
+                };
+                
+                table.on('draw', drawHandler);
+                table.clear().rows.add(data).draw();
+            } else {
+                initializeDataTable(data);
+                
+                drawHandler = function() {
+                    setTimeout(() => restoreOpenRows(openRows), 100);
+                };
+                
+                table.on('draw', drawHandler);
+            }
+
+            const currentDept = $('#deptFilter').val();
+            if (currentDept) {
+                applyDepartmentFilter();
+                applyRowFilter(currentDept);
+            }
+        }
+
+        function handleDataUpdate(changes) {
+            if (!Array.isArray(changes)) {
+                console.error("Invalid dataUpdate format - changes should be an array");
+                return;
+            }
+            console.log("Processing dataUpdate with", changes.length, "changes");
+            applyDataUpdates(changes);
+            const openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
+            restoreOpenRows(openRows);
+        }
+
+        function handleUpdateSuccess(jobNumber, componentNumber) {
+            const row = table.row(`[data-job="${jobNumber}"][data-component="${componentNumber}"]`).node();
+            if (row) {
+                const container = $(row).find('.notes-container');
+                container.find('.btn-save-notes')
+                    .prop('disabled', false)
+                    .html('<i class="fa fa-save"></i> Save');
+                
+                container.find('.save-status')
+                    .text('Saved!')
+                    .fadeIn()
+                    .delay(2000)
+                    .fadeOut();
+            }
+        }
+
+        function handleUpdateFailed() {
+            $('.btn-save-notes').each(function() {
+                $(this).prop('disabled', false).html('<i class="fa fa-save"></i> Save');
+                $(this).closest('.notes-container').find('.save-status')
+                    .text('Save failed!')
+                    .css('color', 'red')
+                    .fadeIn()
+                    .delay(2000)
+                    .fadeOut();
+            });
+        }
+
+        function handleDetailedData(response) {
+            const jobNumber = response.jobNumber || (response.data && response.data[0] && response.data[0].JobNumber);
+            const componentNumber = response.componentNumber || (response.data && response.data[0] && response.data[0].ComponentNumber);
+            
+            if (!jobNumber || !componentNumber) {
+                console.error("Missing identifiers in detailedData response");
                 return;
             }
 
-            console.log("Received message type:", response.type);
+            table.rows().every(function() {
+                const rowData = this.data();
+                if (rowData && rowData.JobNumber == jobNumber && rowData.ComponentNumber == componentNumber) {
+                    const template = document.getElementById('detailed-table-template');
+                    const tableFragment = template.content.cloneNode(true);
+                    const tbody = tableFragment.querySelector('tbody');
 
-            if (response.type === 'pong') {
-                return; // Ignore pong responses
-            }
-            else if (response.type === 'initialData') {
-                const openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
-                if ($.fn.DataTable.isDataTable('#prodTable')) {
-                    if (drawHandler) table.off('draw', drawHandler);
-                    
-                    drawHandler = function() {
-                        setTimeout(() => {
-                            restoreOpenRows(openRows);
-                        }, 100);
-                    };
-                    
-                    table.on('draw', drawHandler);
-                    table.clear().rows.add(response.data).draw();
-                } else {
-                    initializeDataTable(response.data);
-                    
-                    drawHandler = function() {
-                        setTimeout(() => {
-                            restoreOpenRows(openRows);
-                        }, 100);
-                    };
-                    
-                    table.on('draw', drawHandler);
-                }
-
-                const currentDept = $('#deptFilter').val();
-                if (currentDept) {
-                    applyDepartmentFilter();
-                    applyRowFilter(currentDept);
-                }
-            }
-            else if (response.type === 'dataUpdate') {
-                if (response.changes && Array.isArray(response.changes)) {
-                    console.log("Processing dataUpdate with", response.changes.length, "changes");
-                    applyDataUpdates(response.changes);
-                } else {
-                    console.error("Invalid dataUpdate format - changes should be an array");
-                }
-            }
-            else if (response.type === 'updateSuccess') {
-                const row = table.row(`[data-job="${response.jobNumber}"][data-component="${response.componentNumber}"]`).node();
-                if (row) {
-                    const container = $(row).find('.notes-container');
-                    container.find('.btn-save-notes')
-                        .prop('disabled', false)
-                        .html('<i class="fa fa-save"></i> Save');
-                    
-                    const status = container.find('.save-status')
-                        .text('Saved!')
-                        .fadeIn()
-                        .delay(2000)
-                        .fadeOut();
-                }
-            }
-            else if (response.type === 'updateFailed') {
-                $('.btn-save-notes').each(function() {
-                    $(this).prop('disabled', false).html('<i class="fa fa-save"></i> Save');
-                    $(this).closest('.notes-container').find('.save-status')
-                        .text('Save failed!')
-                        .css('color', 'red')
-                        .fadeIn()
-                        .delay(2000)
-                        .fadeOut();
-                });
-            } else if (response.type === 'detailedData') {
-                 // Always process even if data is empty
-                const jobNumber = response.jobNumber || (response.data && response.data[0] && response.data[0].JobNumber);
-                const componentNumber = response.componentNumber || (response.data && response.data[0] && response.data[0].ComponentNumber);
-                
-                if (!jobNumber || !componentNumber) {
-                    console.error("Missing identifiers in detailedData response");
-                    return;
-                }
-
-                table.rows().every(function() {
-                    const rowData = this.data();
-                    if (rowData && rowData.JobNumber == jobNumber && 
-                        rowData.ComponentNumber == componentNumber) {
-                        
-                        const template = document.getElementById('detailed-table-template');
-                        const tableFragment = template.content.cloneNode(true);
-                        const tbody = tableFragment.querySelector('tbody');
-
-                        // Only add rows if we have data
-                        if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-                            response.data.forEach((detail) => {
-                                const row = document.createElement('tr');
-                                [
-                                    detail.JobNumber, 
-                                    detail.ComponentNumber, 
-                                    detail.ProcessCode, 
-                                    detail.Description, 
-                                    detail.CompletionCode, 
-                                    detail.CreateDatim, 
-                                    detail.EmployeeName, 
-                                    detail.Comments
-                                ].forEach((cellData) => {
-                                    const td = document.createElement('td');
-                                    td.textContent = cellData !== null ? cellData : '';
-                                    row.appendChild(td);
-                                });
-                                tbody.appendChild(row);
+                    if (response.data && response.data.length > 0) {
+                        response.data.forEach((detail) => {
+                            const row = document.createElement('tr');
+                            [
+                                detail.JobNumber, 
+                                detail.ComponentNumber, 
+                                detail.ProcessCode, 
+                                detail.Description, 
+                                detail.CompletionCode, 
+                                detail.CreateDatim, 
+                                detail.EmployeeName, 
+                                detail.Comments
+                            ].forEach((cellData) => {
+                                const td = document.createElement('td');
+                                td.textContent = cellData !== null ? cellData : '';
+                                row.appendChild(td);
                             });
-                        } else {
-                            // Add empty state row if no data
-                            const emptyRow = document.createElement('tr');
-                            const emptyCell = document.createElement('td');
-                            emptyCell.colSpan = 8;
-                            emptyCell.textContent = 'No data available';
-                            emptyCell.style.textAlign = 'center';
-                            emptyCell.style.padding = '20px';
-                            emptyCell.style.fontStyle = 'italic';
-                            emptyCell.style.color = '#999';
-                            emptyRow.appendChild(emptyCell);
-                            tbody.appendChild(emptyRow);
-                        }
+                            tbody.appendChild(row);
+                        });
+                    } else {
+                        const emptyRow = document.createElement('tr');
+                        const emptyCell = document.createElement('td');
+                        emptyCell.colSpan = 8;
+                        emptyCell.textContent = 'No data available';
+                        emptyCell.style.textAlign = 'center';
+                        emptyCell.style.padding = '20px';
+                        emptyCell.style.fontStyle = 'italic';
+                        emptyCell.style.color = '#999';
+                        emptyRow.appendChild(emptyCell);
+                        tbody.appendChild(emptyRow);
+                    }
 
-                        this.child(tableFragment).show();
-                        $(this.node()).addClass('shown');
+                    this.child(tableFragment).show();
+                    $(this.node()).addClass('shown');
+                }
+            });
+        }
+
+        function handleDesignersUpdate(designersData) {
+            designers = designersData;
+            table.rows().every(function() {
+                initializeDesignerDropdown(this.node(), this.data());
+            });
+        }
+
+        function handleDesignerUpdated(response) {
+            if (response.success) {
+                table.rows().every(function() {
+                    const data = this.data();
+                    if (data.JobNumber === response.jobNumber && 
+                        data.ComponentNumber === response.componentNumber) {
+                        data.Designer = response.designerName;
+                        this.invalidate();
                     }
                 });
-            } else if (response.type === 'designers') {
-                designers = response.data;
-                // Refresh all dropdowns
-                table.rows().every(function() {
-                    initializeDesignerDropdown(this.node(), this.data());
-                });
-            } else if (response.type === 'designerUpdated') {
-                if (response.success) {
-                    // Update the DataTables data
-                    table.rows().every(function() {
-                        const data = this.data();
-                        if (data.JobNumber === response.jobNumber && 
-                            data.ComponentNumber === response.componentNumber) {
-                            data.Designer = response.designerName; // Changed from DesignerCode
-                            this.invalidate();
-                        }
-                    });
-                }
             }
-        };
+        }
         // end socket.onmessage = function(event)
     }
     // end initializeWebSocket()
 
     //  handle incremental updates
-    function applyDataUpdates(changes) {
-        try {
-            changes.forEach(change => {
-                if (!change || typeof change !== 'object') {
-                    console.error("Invalid change object:", change);
-                    return;
-                }
+    // function applyDataUpdates(changes) {
+    //     try {
+    //         changes.forEach(change => {
+    //             if (!change || typeof change !== 'object') {
+    //                 console.error("Invalid change object:", change);
+    //                 return;
+    //             }
 
-                // Parse the key (now using hyphen separator)
-                const [jobNumber, componentNumber] = change.key.split('-');
+    //             // Parse the key (now using hyphen separator)
+    //             const [jobNumber, componentNumber] = change.key.split('-');
                 
-                // Find the row by matching the first cell (JobNumber)
+    //             // Find the row by matching the first cell (JobNumber)
+    //             const row = table.rows((idx, data, node) => {
+    //                 return data.JobNumber == jobNumber && 
+    //                        data.ComponentNumber == componentNumber;
+    //             }).nodes().to$();
+                
+    //             if (row.length) {
+    //                 // Update the DataTables data model
+    //                 const rowData = table.row(row).data();
+    //                 Object.entries(change.fields).forEach(([field, value]) => {
+    //                     rowData[field] = value;
+    //                 });
+    //                 table.row(row).data(rowData).invalidate();
+    //                 console.log("Updated row:", jobNumber, componentNumber, "with", change.fields);
+                    
+    //                 // If row is expanded, refresh its details
+    //                 if (row.hasClass('shown')) {
+    //                     socket.send(JSON.stringify({
+    //                         type: 'getDetailedData',
+    //                         jobNumber,
+    //                         componentNumber
+    //                     }));
+    //                 }
+    //             } else {
+    //                 console.log("Row not found:", jobNumber, componentNumber);
+    //             }
+    //         });
+    //     } catch (error) {
+    //         console.error("Error processing changes:", error);
+    //     }
+    // }
+
+function applyDataUpdates(changes) {
+    try {
+        // Process changes in optimal order: removes first, then updates, then adds
+        const removes = changes.filter(c => c.type === 'remove');
+        const updates = changes.filter(c => c.type === 'update');
+        const adds = changes.filter(c => c.type === 'new');
+
+        // 1. Handle removals first
+        removes.forEach(change => {
+            const [jobNumber, componentNumber] = change.key.split('-');
+            
+            // Find the row using your existing matching logic
+            const row = table.rows((idx, data, node) => {
+                return data.JobNumber == jobNumber && 
+                       data.ComponentNumber == componentNumber;
+            });
+            
+            if (row.count() > 0) {
+                console.log("Removing row:", jobNumber, componentNumber);
+                row.remove().draw(false);
+                
+                // Update openRows in sessionStorage if needed
+                const openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
+                sessionStorage.setItem('openRows', 
+                    openRows.filter(r => !(r.jobNumber == jobNumber && r.componentNumber == componentNumber))
+                );
+            } else {
+                console.log("Row to remove not found:", jobNumber, componentNumber);
+            }
+        });
+
+        // 2. Handle updates (your existing logic)
+        updates.forEach(change => {
+            const [jobNumber, componentNumber] = change.key.split('-');
+            
+            // Find the row
+            const row = table.rows((idx, data, node) => {
+                return data.JobNumber == jobNumber && 
+                       data.ComponentNumber == componentNumber;
+            }).nodes().to$();
+            
+            if (row.length) {
+                // Update the DataTables data model
+                const rowData = table.row(row).data();
+                Object.entries(change.fields).forEach(([field, value]) => {
+                    rowData[field] = value;
+                });
+                table.row(row).data(rowData).invalidate();
+                console.log("Updated row:", jobNumber, componentNumber, "with", change.fields);
+                
+                // If row is expanded, refresh its details
+                if (row.hasClass('shown')) {
+                    socket.send(JSON.stringify({
+                        type: 'getDetailedData',
+                        jobNumber,
+                        componentNumber
+                    }));
+                }
+            } else {
+                console.log("Row to update not found:", jobNumber, componentNumber);
+            }
+        });
+
+        // 3. Handle additions
+        adds.forEach(change => {
+            const [jobNumber, componentNumber] = change.key.split('-');
+            
+            // Check if row already exists (shouldn't happen, but just in case)
+            const exists = table.rows((idx, data, node) => {
+                return data.JobNumber == jobNumber && 
+                       data.ComponentNumber == componentNumber;
+            }).count() > 0;
+            
+            if (!exists) {
+                console.log("Adding new row:", jobNumber, componentNumber);
+                
+                // Create new row data combining key and fields
+                const newRowData = {
+                    JobNumber: jobNumber,
+                    ComponentNumber: componentNumber,
+                    ...change.fields  // Spread any additional fields
+                };
+                
+                table.row.add(newRowData).draw(false);
+            } else {
+                console.log("Row already exists, treating as update:", jobNumber, componentNumber);
+                // Fall back to update behavior if row exists
                 const row = table.rows((idx, data, node) => {
                     return data.JobNumber == jobNumber && 
                            data.ComponentNumber == componentNumber;
                 }).nodes().to$();
                 
                 if (row.length) {
-                    // Update the DataTables data model
                     const rowData = table.row(row).data();
                     Object.entries(change.fields).forEach(([field, value]) => {
                         rowData[field] = value;
                     });
                     table.row(row).data(rowData).invalidate();
-                    console.log("Updated row:", jobNumber, componentNumber, "with", change.fields);
-                    
-                    // If row is expanded, refresh its details
-                    if (row.hasClass('shown')) {
-                        socket.send(JSON.stringify({
-                            type: 'getDetailedData',
-                            jobNumber,
-                            componentNumber
-                        }));
-                    }
-                } else {
-                    console.log("Row not found:", jobNumber, componentNumber);
                 }
-            });
-        } catch (error) {
-            console.error("Error processing changes:", error);
-        }
+            }
+        });
+
+    } catch (error) {
+        console.error("Error processing changes:", error);
     }
+}
+
+
+
+
+
+
+
+
+
+
+
 
     // function handleUpdateChange(change) {
     //     if (!change.key || !change.fields) {
@@ -1166,15 +1357,15 @@ function applyColumnVisibility(deptText) {
     //     console.log("Added new item:", change.data.JobNumber, change.data.ComponentNumber);
     // }
 
-    // function handleRemoveChange(change) {
+    // function
+    //     const [jobNum, compNum] = change.key.split('_');
+    //     table.row(`[data-job="${jobNum}"][data-component="${compNum}"]`).remove().draw();
+    //     console.log("Removed item:", jobNum, compNum);
+    // } handleRemoveChange(change) {
     //     if (!change.key) {
     //         console.error("Invalid remove format:", change);
     //         return;
     //     }
-    //     const [jobNum, compNum] = change.key.split('_');
-    //     table.row(`[data-job="${jobNum}"][data-component="${compNum}"]`).remove().draw();
-    //     console.log("Removed item:", jobNum, compNum);
-    // }
 
     // Function to reopen rows after the table refresh
     function restoreOpenRows(openRows) {
