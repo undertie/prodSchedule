@@ -346,6 +346,9 @@ function broadcastData(newData, type = 'initialData') {
 
         cachedScheduleData = sortedData;
         lastDataUpdate = Date.now();
+
+        // Add search preservation flag
+        message.preserveSearch = true;
     }
 
     // Stringify once
