@@ -34,7 +34,7 @@ $(document).ready(function() {
                 values: ["6610", "6611", "6612", "6613", "6625", "6615", "6616", "6620", "6621", "6505", "6506", "6510", "6151", "6126", "6305", "6306", "6325", "6540", "5900", "5901", "5906", "6800", "6832", "5951", "5952", "6525", "6425", "6427", "6404", "6405", "6411", "6421", "1000", "1055", "1060", "1062", "1064", "1066", "1160", "1165", "1305", "1310", "1445", "1460", "5301", "5302", "5303", "3000", "3010", "3011", "3012", "3019", "3020", "3022", "5100", "5110", "5120", "5500", "5515", "5525", "5545", "5555", "5565", "5800", "5801", "5803", "5804", "5805", "5806", "5807", "5808", "5809", "5802", "5851", "5852", "6251", "6252", "6705", "6710", "6715", "6719", "6720", "6723", "6729", "6728", "6730", "6731", "6700", "6702", "6725", "6451", "6453", "6452", "6460", "6461", "6385", "6390", "6395", "6415", "6416", "6417", "6450", "6455"]
             },
             {
-                text: "Gabby",
+                text: "Gabbi",
                 values: ["6610", "6611", "6612", "6613", "6625", "6615", "6616", "6620", "6621", "6505", "6506", "6510", "6151", "6126", "6305", "6306", "6325", "6540", "5900", "5901", "5906", "6800", "6832", "5951", "5952", "6525", "6425", "6427", "6404", "6405", "6411", "6421", "1000", "1055", "1060", "1062", "1064", "1066", "1160", "1165", "1305", "1310", "1445", "1460", "5301", "5302", "5303", "3000", "3010", "3011", "3012", "3019", "3020", "3022", "5100", "5110", "5120", "5500", "5515", "5525", "5545", "5555", "5565", "5800", "5801", "5803", "5804", "5805", "5806", "5807", "5808", "5809", "5802", "5851", "5852", "6251", "6252", "6705", "6710", "6715", "6719", "6720", "6723", "6729", "6728", "6730", "6731", "6700", "6702", "6725", "6451", "6453", "6452", "6460", "6461", "6385", "6390", "6395", "6415", "6416", "6417", "6450", "6455"]
             },
             {
@@ -176,11 +176,11 @@ $(document).ready(function() {
 const columnVisibilityRules = {
     //added 17June EH
     "Amber": ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Ship_Date'],
-    "Brent": ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Ship_Date'],
+    "Brent": ['JobNumber', 'PrepressNotes', 'PostpressNotes', 'Job_In_Date', 'Proof_Due_Date', 'Ship_Date', 'JobDescription', 'CustName', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description', 'MP_Description', 'Designer'],
     "Cathy": ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Ship_Date'],
-    "Gabby": ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Ship_Date'],
+    "Gabbi": ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Ship_Date'],
     "Lisa":  ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Ship_Date'],
-    "Sarah": ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Ship_Date'],
+    "Sarah": ['JobNumber', 'PrepressNotes', 'PostpressNotes', 'Job_In_Date', 'Proof_Due_Date', 'Ship_Date', 'JobDescription', 'CustName', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description', 'MP_Description', 'Designer'],
     "Review": ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Ship_Date'],
     //added 17June -EH
     "Lamination": ['JobNumber', 'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Cover_Description', 'NCP_Time'],
@@ -242,7 +242,7 @@ const columnVisibilityRules = {
         
         // Then set up other components
         setupDepartmentDropdown();
-        setupSearchBehavior();
+        //setupSearchBehavior();
         applyDepartmentFilter();               
     }
 
@@ -260,6 +260,15 @@ const columnVisibilityRules = {
         if ($.fn.DataTable.isDataTable('#prodTable')) {
             table.destroy();
         }
+
+        // Create styled search box that matches DataTables style
+        $('.search-container').html(`
+            <div id="prodTable_filter" class="dataTables_filter">
+                <label>Search:
+                    <input type="search" id="customSearch" class="" placeholder="" aria-controls="prodTable">
+                </label>
+            </div>
+        `);
 
         table = $('#prodTable').DataTable({
                     // Performance optimizations:
@@ -280,7 +289,7 @@ const columnVisibilityRules = {
             "pageLength": 100,
             "bSort": false,
             "colReorder": true,
-            dom: 'Bfrtip',
+            dom: 'Brtip',
             buttons: [
                 { extend: 'copy', className: "columnsButton" },
                 { extend: 'excel', className: "columnsButton" }
@@ -426,11 +435,16 @@ const columnVisibilityRules = {
                 if ($('#deptFilter').val()) {
                     applyDepartmentFilter();
                 }
+                
+                // Set up search handler INSIDE initComplete
+                $('#customSearch').on('keyup', function() {
+                    table.search(this.value).draw();
+                });
             },
             createdRow: function(row, data) {
                 // Add data attributes for DOM selection
                 $(row).attr('data-job', data.JobNumber)
-                  .attr('data-component', data.ComponentNumber);
+                      .attr('data-component', data.ComponentNumber);
 
                 // Initialize dropdown after row is created
                 initializeDesignerDropdown(row, data);
@@ -1048,7 +1062,17 @@ function applyColumnVisibility(deptText) {
             }
             console.log("Processing dataUpdate with", changes.length, "changes");
             applyDataUpdates(changes);
-            const openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
+            // Safely handle sessionStorage data
+            let openRows = [];
+            try {
+                const storedRows = sessionStorage.getItem('openRows');
+                openRows = storedRows ? JSON.parse(storedRows) : [];
+            } catch (storageError) {
+                console.error("Error reading openRows from sessionStorage:", storageError);
+                // Reset to empty array if corrupted
+                sessionStorage.setItem('openRows', JSON.stringify([]));
+            }
+            
             restoreOpenRows(openRows);
         }
 
@@ -1203,102 +1227,73 @@ function applyColumnVisibility(deptText) {
 
 function applyDataUpdates(changes) {
     try {
-        // Process changes in optimal order: removes first, then updates, then adds
+        // Process changes in optimal order: removes, updates, adds
         const removes = changes.filter(c => c.type === 'remove');
         const updates = changes.filter(c => c.type === 'update');
         const adds = changes.filter(c => c.type === 'new');
 
-        // 1. Handle removals first
+        // 1. Handle removals
         removes.forEach(change => {
             const [jobNumber, componentNumber] = change.key.split('-');
+            const rows = table.rows((idx, data) => 
+                data.JobNumber == jobNumber && 
+                data.ComponentNumber == componentNumber
+            );
             
-            // Find the row using your existing matching logic
-            const row = table.rows((idx, data, node) => {
-                return data.JobNumber == jobNumber && 
-                       data.ComponentNumber == componentNumber;
-            });
-            
-            if (row.count() > 0) {
+            if (rows.count() > 0) {
                 console.log("Removing row:", jobNumber, componentNumber);
-                row.remove().draw(false);
+                rows.remove().draw(false);
                 
-                // Update openRows in sessionStorage if needed
+                // Update openRows in sessionStorage
                 const openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
                 sessionStorage.setItem('openRows', 
                     openRows.filter(r => !(r.jobNumber == jobNumber && r.componentNumber == componentNumber))
                 );
-            } else {
-                console.log("Row to remove not found:", jobNumber, componentNumber);
             }
         });
 
-        // 2. Handle updates (your existing logic)
+        // 2. Handle updates
         updates.forEach(change => {
             const [jobNumber, componentNumber] = change.key.split('-');
+            const rows = table.rows((idx, data) => 
+                data.JobNumber == jobNumber && 
+                data.ComponentNumber == componentNumber
+            );
             
-            // Find the row
-            const row = table.rows((idx, data, node) => {
-                return data.JobNumber == jobNumber && 
-                       data.ComponentNumber == componentNumber;
-            }).nodes().to$();
-            
-            if (row.length) {
-                // Update the DataTables data model
+            if (rows.count() > 0) {
+                const row = rows.nodes()[0];
                 const rowData = table.row(row).data();
-                Object.entries(change.fields).forEach(([field, value]) => {
-                    rowData[field] = value;
-                });
-                table.row(row).data(rowData).invalidate();
-                console.log("Updated row:", jobNumber, componentNumber, "with", change.fields);
+                Object.assign(rowData, change.fields);
+                table.row(row).data(rowData).invalidate().draw(false);
                 
-                // If row is expanded, refresh its details
-                if (row.hasClass('shown')) {
+                if ($(row).hasClass('shown')) {
                     socket.send(JSON.stringify({
                         type: 'getDetailedData',
                         jobNumber,
                         componentNumber
                     }));
                 }
-            } else {
-                console.log("Row to update not found:", jobNumber, componentNumber);
             }
         });
 
-        // 3. Handle additions
+        // 3. Handle additions - MODIFIED TO PROPERLY HANDLE NEW ROWS
         adds.forEach(change => {
+            const newRowData = transformDataForTable(change.data);
             const [jobNumber, componentNumber] = change.key.split('-');
             
-            // Check if row already exists (shouldn't happen, but just in case)
-            const exists = table.rows((idx, data, node) => {
-                return data.JobNumber == jobNumber && 
-                       data.ComponentNumber == componentNumber;
-            }).count() > 0;
+            // Check if row exists already
+            const exists = table.rows((idx, data) => 
+                data.JobNumber == jobNumber && 
+                data.ComponentNumber == componentNumber
+            ).count() > 0;
             
             if (!exists) {
                 console.log("Adding new row:", jobNumber, componentNumber);
-                
-                // Create new row data combining key and fields
-                const newRowData = {
-                    JobNumber: jobNumber,
-                    ComponentNumber: componentNumber,
-                    ...change.fields  // Spread any additional fields
-                };
-                
                 table.row.add(newRowData).draw(false);
-            } else {
-                console.log("Row already exists, treating as update:", jobNumber, componentNumber);
-                // Fall back to update behavior if row exists
-                const row = table.rows((idx, data, node) => {
-                    return data.JobNumber == jobNumber && 
-                           data.ComponentNumber == componentNumber;
-                }).nodes().to$();
                 
-                if (row.length) {
-                    const rowData = table.row(row).data();
-                    Object.entries(change.fields).forEach(([field, value]) => {
-                        rowData[field] = value;
-                    });
-                    table.row(row).data(rowData).invalidate();
+                // If your table has sorting, reapply it
+                if (table.order().length > 0) {
+                    table.order(table.order()).draw(false);
                 }
             }
         });
@@ -1306,6 +1301,83 @@ function applyDataUpdates(changes) {
     } catch (error) {
         console.error("Error processing changes:", error);
     }
+}
+
+// Helper function to transform incoming data to match table structure
+function transformDataForTable(sourceData) {
+    return {
+            JobNumber: sourceData.JobNumber,
+            JobStatus: sourceData.JobStatus,
+            Job_In_Date: sourceData.Job_In_Date,
+            Proof_Due_Date: sourceData.Proof_Due_Date,
+            Ship_Date: sourceData.Ship_Date,
+            Arrival_Date: sourceData.Arrival_Date,
+            Carrier: sourceData.Carrier,
+            ShipType: sourceData.ShipType,
+            Job_Creator: sourceData.Job_Creator,
+            Customer_CSR: sourceData.Customer_CSR,
+            Customer: sourceData.Customer,
+            CustName: sourceData.CustName,
+            JobDescription: sourceData.JobDescription,
+            Comp1_Pages: sourceData.Comp1_Pages,
+            Comp2_Pages: sourceData.Comp2_Pages,
+            Quantity: sourceData.Quantity,
+            Size: sourceData.Size,
+            CoverCoating: sourceData.CoverCoating,
+            Last_Cover_Process: sourceData.Last_Cover_Process,
+            Last_Cover_Description: sourceData.Last_Cover_Description,
+            Last_Body_Process: sourceData.Last_Body_Process,
+            Last_Body_Description: sourceData.Last_Body_Description,
+            CoverPrintedAt: sourceData.CoverPrintedAt,
+            Material_WIP_Cost: sourceData.Material_WIP_Cost,
+            Production_WIP_Cost: sourceData.Production_WIP_Cost,
+            PONumber: sourceData.PONumber,
+            OrderSellPrice: sourceData.OrderSellPrice,
+            Next_Cover_Process: sourceData.Next_Cover_Process,
+            Next_Cover_Description: sourceData.Next_Cover_Description,
+            NCP_Time: sourceData.NCP_Time,
+            Next_Body_Process: sourceData.Next_Body_Process,
+            Next_Body_Description: sourceData.Next_Body_Description,
+            NBP_Time: sourceData.NBP_Time,
+            Main_Process: sourceData.Main_Process,
+            MP_Description: sourceData.MP_Description,
+            MP_Time: sourceData.MP_Time,
+            JobPriority: sourceData.JobPriority,
+            Does_it_blend: sourceData.Does_it_blend,
+            Did_it_blend: sourceData.Did_it_blend,
+            Is_It_Wednesday: sourceData.Is_It_Wednesday,
+            ComponentNumber: sourceData.ComponentNumber,
+            Mat_Code: sourceData.Mat_Code,
+            Mat_Qty: sourceData.Mat_Qty,
+            Mat_BWT: sourceData.Mat_BWT,
+            Mat_Description: sourceData.Mat_Description,
+            Parent_Sheet_Size: sourceData.Parent_Sheet_Size,
+            Parent_Out: sourceData.Parent_Out,
+            Press_Size: sourceData.Press_Size,
+            Press_Out: sourceData.Press_Out,
+            Print_Type: sourceData.Print_Type,
+            Print_Time: sourceData.Print_Time,
+            Last_Comp3_Description: sourceData.Last_Comp3_Description,
+            Last_Comp3_Process: sourceData.Print_Type,
+            Next_Comp3_Description: sourceData.Next_Comp3_Description,
+            Next_Comp3_Process: sourceData.Next_Comp3_Process,
+            Next_Comp3_Time: sourceData.Next_Comp3_Time,
+            PrepressNotes: sourceData.PrepressNotes,
+            PostpressNotes: sourceData.PostpressNotes,
+            Designer: sourceData.Designer,
+            Last_Completed_Comp_Process: sourceData.Last_Completed_Comp_Process,
+            Last_Completed_Comp_Description: sourceData.Last_Completed_Comp_Description,
+            Next_Comp_Process: sourceData.Next_Comp_Process,
+            Next_Comp_Description: sourceData.Next_Comp_Description,
+            Next_Comp_Time: sourceData.Next_Comp_Time,
+            Drill_Process: sourceData.Drill_Process,
+            Drill_Description: sourceData.Drill_Description,
+            Drill_Time: sourceData.Drill_Time,
+            Hunkler_Process: sourceData.Hunkler_Process,
+            Hunkler_Description: sourceData.Hunkler_Description,
+            Hunkler_Time: sourceData.Hunkler_Time,
+        _rawData: sourceData // Store original data for details view
+    };
 }
 
 
