@@ -286,35 +286,66 @@ async function updateDesigner(jobNumber, componentNumber, designerName) {
 
 // In broadcastData, handle the cache comparison and update
 function broadcastData(newData, type = 'initialData') {
+
+    // Apply the same sorting as your stored procedure
+    const sortedData = [...newData].sort((a, b) => {
+        // 1. Compare Ship_Date (handle null/undefined dates)
+        const dateA = a.Ship_Date ? new Date(a.Ship_Date) : new Date(0);
+        const dateB = b.Ship_Date ? new Date(b.Ship_Date) : new Date(0);
+        const dateDiff = dateA - dateB;
+        if (dateDiff !== 0) return dateDiff;
+
+        // 2. Compare JobNumber (always string)
+        const jobDiff = a.JobNumber.localeCompare(b.JobNumber);
+        if (jobDiff !== 0) return jobDiff;
+
+        // 3. Compare ComponentNumber (handle both string and number)
+        if (typeof a.ComponentNumber === 'number' && typeof b.ComponentNumber === 'number') {
+            return a.ComponentNumber - b.ComponentNumber;
+        }
+        return String(a.ComponentNumber).localeCompare(String(b.ComponentNumber));
+    });
+
     if (clients.size === 0) {
         console.log('No clients connected, skipping broadcast');
         // Still update cache even if no clients
-        if (type === 'initialData' || type === 'dataUpdate') {
-            cachedScheduleData = newData;
-            lastDataUpdate = Date.now();
-        }
+        cachedScheduleData = sortedData;
+        lastDataUpdate = Date.now();
         return;
     }
 
     // Prepare the correct message format
     const message = {
         type,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        sortOrder: ['Ship_date', 'JobNumber', 'ComponentNumber'] // Include sort criteria
     };
 
     if (type === 'initialData') {
         message.data = newData;
         message.fullUpdate = true;
     } else if (type === 'dataUpdate') {
-        const changes = findMeaningfulDifferences(cachedScheduleData, newData);
+        const changes = findMeaningfulDifferences(cachedScheduleData, sortedData);
         if (changes.length === 0) {
             console.log('[BROADCAST] No meaningful changes, skipping broadcast');
-            cachedScheduleData = newData;
+            cachedScheduleData = sortedData;
             lastDataUpdate = Date.now();
             return;
         }
-        // Ensure changes is always an array
-        message.changes = Array.isArray(changes) ? changes : [changes];
+        message.changes = changes;
+        
+        // Include position hints for new items
+        message.changes.forEach(change => {
+            if (change.type === 'new') {
+                change.position = sortedData.findIndex(item => 
+                    item.JobNumber === change.data.JobNumber && 
+                    item.ComponentNumber === change.data.ComponentNumber
+                );
+            }
+        });
+
+        cachedScheduleData = sortedData;
+        lastDataUpdate = Date.now();
     }
 
     // Stringify once
@@ -343,11 +374,9 @@ function broadcastData(newData, type = 'initialData') {
     console.log(`Broadcast ${type} to ${sentCount}/${clients.size} clients`);
     
     // Update cache after successful broadcast
-    if (type === 'initialData' || type === 'dataUpdate') {
-        cachedScheduleData = newData;
-        lastDataUpdate = Date.now();
-        console.log('[CACHE] Updated cache after broadcast');
-    }
+    cachedScheduleData = sortedData;
+    lastDataUpdate = Date.now();
+    console.log('[CACHE] Updated cache after broadcast');
 }
 
 // Enhanced difference detection that ignores insignificant changes

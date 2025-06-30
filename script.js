@@ -1227,79 +1227,62 @@ function applyColumnVisibility(deptText) {
 
 function applyDataUpdates(changes) {
     try {
-        // Process changes in optimal order: removes, updates, adds
-        const removes = changes.filter(c => c.type === 'remove');
-        const updates = changes.filter(c => c.type === 'update');
-        const adds = changes.filter(c => c.type === 'new');
-
-        // 1. Handle removals
-        removes.forEach(change => {
+        // Process removes first
+        changes.filter(c => c.type === 'remove').forEach(change => {
             const [jobNumber, componentNumber] = change.key.split('-');
             const rows = table.rows((idx, data) => 
                 data.JobNumber == jobNumber && 
                 data.ComponentNumber == componentNumber
             );
-            
-            if (rows.count() > 0) {
-                console.log("Removing row:", jobNumber, componentNumber);
-                rows.remove().draw(false);
-                
-                // Update openRows in sessionStorage
-                const openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
-                sessionStorage.setItem('openRows', 
-                    openRows.filter(r => !(r.jobNumber == jobNumber && r.componentNumber == componentNumber))
-                );
-            }
+            rows.remove().draw(false);
         });
 
-        // 2. Handle updates
-        updates.forEach(change => {
+        // Process updates
+        changes.filter(c => c.type === 'update').forEach(change => {
             const [jobNumber, componentNumber] = change.key.split('-');
-            const rows = table.rows((idx, data) => 
+            const row = table.row((idx, data) => 
                 data.JobNumber == jobNumber && 
                 data.ComponentNumber == componentNumber
             );
             
-            if (rows.count() > 0) {
-                const row = rows.nodes()[0];
-                const rowData = table.row(row).data();
+            if (row.length) {
+                const rowData = row.data();
                 Object.assign(rowData, change.fields);
-                table.row(row).data(rowData).invalidate().draw(false);
-                
-                if ($(row).hasClass('shown')) {
-                    socket.send(JSON.stringify({
-                        type: 'getDetailedData',
-                        jobNumber,
-                        componentNumber
-                    }));
-                }
+                row.data(rowData).invalidate().draw(false);
             }
         });
 
-        // 3. Handle additions - MODIFIED TO PROPERLY HANDLE NEW ROWS
-        adds.forEach(change => {
-            const newRowData = transformDataForTable(change.data);
-            const [jobNumber, componentNumber] = change.key.split('-');
-            
-            // Check if row exists already
+        // Process adds with proper positioning
+        changes.filter(c => c.type === 'new').forEach(change => {
+            // Skip if already exists
             const exists = table.rows((idx, data) => 
-                data.JobNumber == jobNumber && 
-                data.ComponentNumber == componentNumber
+                data.JobNumber == change.data.JobNumber && 
+                data.ComponentNumber == change.data.ComponentNumber
             ).count() > 0;
             
             if (!exists) {
-                console.log("Adding new row:", jobNumber, componentNumber);
-                table.row.add(newRowData).draw(false);
+                const newRow = transformDataForTable(change.data);
                 
-                // If your table has sorting, reapply it
-                if (table.order().length > 0) {
-                    table.order(table.order()).draw(false);
+                // If we have position info from server, use it
+                if (typeof change.position !== 'undefined') {
+                    const allData = table.rows().data().toArray();
+                    allData.splice(change.position, 0, newRow);
+                    table.clear();
+                    table.rows.add(allData).draw();
+                } else {
+                    // Fallback: add to end and let sort handle it
+                    table.row.add(newRow).draw();
                 }
             }
         });
 
+        // Reapply sorting if needed
+        if (table.order().length > 0) {
+            table.order(table.order()).draw();
+        }
+
     } catch (error) {
-        console.error("Error processing changes:", error);
+        console.error("Error applying updates:", error);
     }
 }
 
