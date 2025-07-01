@@ -39,7 +39,7 @@ let cachedScheduleData = null;
 let lastDataUpdate = 0;
 let lastDataFetchAttempt = 0;
 const CACHE_TTL = 5000; // 5 seconds cache TTL
-const MIN_DB_FETCH_INTERVAL = 1000; // Minimum 1 second between DB fetches
+const MIN_DB_FETCH_INTERVAL = 10000; // Minimum 10 seconds between DB fetches
 
 // Helper function to get client IP
 function getClientIp(ws) {
@@ -382,115 +382,30 @@ function broadcastData(newData, type = 'initialData') {
     console.log('[CACHE] Updated cache after broadcast');
 }
 
-// Enhanced difference detection that ignores insignificant changes
-// function findMeaningfulDifferences(oldData, newData) {
-//     const changes = [];
-    
-//     // Create a map of old data for quick lookup
-//     const oldDataMap = new Map();
-//     oldData.forEach(item => {
-//         const key = `${item.JobNumber}-${item.ComponentNumber}`;
-//         oldDataMap.set(key, item);
-//     });
 
-//     // Improved logging for debugging
-//     console.log('[findMeaningfulDifferences] Comparing data sets:');
-//     console.log('Old data sample:', JSON.stringify(oldData[0], null, 2));
-//     console.log('New data sample:', JSON.stringify(newData[0], null, 2));
-//     console.log(`Old data count: ${oldData.length}, New data count: ${newData.length}`);
 
-//     // Compare each new item with its old version
-//     newData.forEach(newItem => {
-//         const key = `${newItem.JobNumber}-${newItem.ComponentNumber}`;
-//         const oldItem = oldDataMap.get(key);
-        
-//         if (!oldItem) {
-//             // New item
-//             console.log(`[findMeaningfulDifferences] New item detected: ${key}`);
-//             changes.push({
-//                 type: 'new',
-//                 data: newItem
-//             });
-//         } else {
-//             // Check for changed fields that we care about
-//             const changedFields = {};
-//             let hasChanges = false;
-            
-//             // List of fields we consider meaningful for updates
-//             const meaningfulFields = [
-//                 'Status', 'JobStatus', 'Priority', 'PrepressNotes', 'PostPressNotes', 
-//                 'Designer', 'LastUpdated', 'DueDate', 'CustomerName'
-//             ];
-            
-//             for (const field of meaningfulFields) {
-//                 if (newItem[field] !== undefined && oldItem[field] !== undefined) {
-//                     const newValue = normalizeFieldValue(newItem[field]);
-//                     const oldValue = normalizeFieldValue(oldItem[field]);
-                    
-//                     if (newValue !== oldValue) {
-//                         console.log(`[findMeaningfulDifferences] Field changed - ${field}:`, {
-//                             old: oldItem[field],
-//                             new: newItem[field]
-//                         });
-//                         changedFields[field] = newItem[field];
-//                         hasChanges = true;
-//                     }
-//                 } else if (newItem[field] !== oldItem[field]) {
-//                     // One is defined and the other isn't
-//                     console.log(`[findMeaningfulDifferences] Field presence changed - ${field}:`, {
-//                         old: oldItem[field],
-//                         new: newItem[field]
-//                     });
-//                     changedFields[field] = newItem[field];
-//                     hasChanges = true;
-//                 }
-//             }
-            
-//             if (hasChanges) {
-//                 console.log(`[findMeaningfulDifferences] Changes detected for ${key}:`, changedFields);
-//                 changes.push({
-//                     type: 'update',
-//                     key,
-//                     fields: changedFields
-//                 });
-//             }
-//         }
-//     });
 
-//     // Check for removed items
-//     const newKeys = new Set(newData.map(item => `${item.JobNumber}-${item.ComponentNumber}`));
-//     oldData.forEach(oldItem => {
-//         const key = `${oldItem.JobNumber}_${oldItem.ComponentNumber}`;
-//         if (!newKeys.has(key)) {
-//             console.log(`[findMeaningfulDifferences] Item removed: ${key}`);
-//             changes.push({
-//                 type: 'remove',
-//                 key
-//             });
-//         }
-//     });
 
-//     console.log(`[findMeaningfulDifferences] Total changes detected: ${changes.length}`);
-//     return changes;
-// }
+
+
+
+
+
+
+
+
+
+
+
+
 
 function findMeaningfulDifferences(oldData, newData) {
     const changes = [];
-    
-    // Helper function to create consistent keys
     const getItemKey = item => `${item.JobNumber}-${item.ComponentNumber}`;
 
     // Create maps for efficient lookup
     const oldDataMap = new Map(oldData.map(item => [getItemKey(item), item]));
     const newDataMap = new Map(newData.map(item => [getItemKey(item), item]));
-
-    // Debug logging
-    console.log('[findMeaningfulDifferences] Comparing data sets:');
-    console.log(`Old data count: ${oldData.length}, New data count: ${newData.length}`);
-    if (oldData.length > 0 && newData.length > 0) {
-        console.log('Sample old item:', JSON.stringify(oldData[0], null, 2));
-        console.log('Sample new item:', JSON.stringify(newData[0], null, 2));
-    }
 
     // 1. Detect new and updated items
     newData.forEach(newItem => {
@@ -498,41 +413,43 @@ function findMeaningfulDifferences(oldData, newData) {
         const oldItem = oldDataMap.get(key);
         
         if (!oldItem) {
-            // New item
-            console.log(`[findMeaningfulDifferences] New item detected: ${key}`);
-            changes.push({
-                type: 'new',
-                key,
-                data: newItem
-            });
+            changes.push({ type: 'new', key, data: newItem });
         } else {
-            // Check for meaningful changes
             const changedFields = {};
-            const meaningfulFields = [
-                'Status', 'JobStatus', 'Priority', 'PrepressNotes', 
-                'PostPressNotes', 'Designer', 'LastUpdated', 
-                'DueDate', 'CustomerName'
-            ];
-
-            meaningfulFields.forEach(field => {
-                const newValue = normalizeFieldValue(newItem[field]);
-                const oldValue = normalizeFieldValue(oldItem[field]);
+            
+            // Compare ALL fields dynamically
+            for (const field in newItem) {
+                // Skip internal fields
+                if (field.startsWith('_')) continue;
                 
-                if (newValue !== oldValue) {
-                    changedFields[field] = newItem[field];
-                    console.log(`[findMeaningfulDifferences] Change detected in ${key} - ${field}:`, {
-                        old: oldItem[field],
-                        new: newItem[field]
-                    });
+                const oldValue = oldItem[field];
+                const newValue = newItem[field];
+                
+                // Special handling for date fields
+                if (field.toLowerCase().includes('date') || field === 'Proof_Due_Date') {
+                    if (!areDatesEqual(oldValue, newValue)) {
+                        changedFields[field] = newValue;
+                    }
+                } 
+                // Normal field comparison
+                else if (!areValuesEqual(oldValue, newValue)) {
+                    changedFields[field] = newValue;
                 }
-            });
+
+                // debugging log
+                // console.log('Comparing:', {
+                //     key,
+                //     field,
+                //     oldValue,
+                //     newValue,
+                //     oldDate: field.toLowerCase().includes('date') ? new Date(oldValue) : null,
+                //     newDate: field.toLowerCase().includes('date') ? new Date(newValue) : null,
+                //     equal: areDatesEqual(oldValue, newValue)
+                // });
+            }
 
             if (Object.keys(changedFields).length > 0) {
-                changes.push({
-                    type: 'update',
-                    key,
-                    fields: changedFields
-                });
+                changes.push({ type: 'update', key, fields: changedFields });
             }
         }
     });
@@ -541,27 +458,47 @@ function findMeaningfulDifferences(oldData, newData) {
     oldData.forEach(oldItem => {
         const key = getItemKey(oldItem);
         if (!newDataMap.has(key)) {
-            console.log(`[findMeaningfulDifferences] Item removed: ${key}`);
-            changes.push({
-                type: 'remove',
-                key
-            });
+            changes.push({ type: 'remove', key });
         }
     });
-
-    console.log(`[findMeaningfulDifferences] Completed. Total changes: ${changes.length} ` +
-               `(New: ${changes.filter(c => c.type === 'new').length}, ` +
-               `Updates: ${changes.filter(c => c.type === 'update').length}, ` +
-               `Removals: ${changes.filter(c => c.type === 'remove').length})`);
 
     return changes;
 }
 
-// Helper function to normalize values for comparison
-function normalizeFieldValue(value) {
-    if (value === null || value === undefined) return '';
-    if (typeof value === 'string') return value.trim().toLowerCase();
-    return value;
+// Special date comparison
+function areDatesEqual(oldDate, newDate) {
+    // Handle empty/whitespace dates
+    const oldStr = String(oldDate || '').trim();
+    const newStr = String(newDate || '').trim();
+    
+    // Consider empty string and whitespace as equal
+    if ((!oldStr || oldStr === ' ') && (!newStr || newStr === ' ')) {
+        return true;
+    }
+    
+    // Compare as dates if both have values
+    try {
+        const oldTime = oldStr ? new Date(oldStr).getTime() : null;
+        const newTime = newStr ? new Date(newStr).getTime() : null;
+        return oldTime === newTime;
+    } catch {
+        return oldStr === newStr; // Fallback to string comparison
+    }
+}
+
+// General value comparison
+function areValuesEqual(a, b) {
+    // Handle null/undefined
+    if (a == null && b == null) return true;
+    if (a == null || b == null) return false;
+    
+    // Special case for empty strings/whitespace
+    if (typeof a === 'string' && typeof b === 'string') {
+        return a.trim() === b.trim();
+    }
+    
+    // Default comparison
+    return a === b;
 }
 
 
@@ -570,25 +507,6 @@ function normalizeFieldValue(value) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-// Helper to normalize field values for comparison
-function normalizeFieldValue(value) {
-    if (value === null || value === undefined) return '';
-    if (typeof value === 'string') return value.trim().toLowerCase();
-    if (value instanceof Date) return value.toISOString();
-    if (typeof value === 'number') return value.toString();
-    return JSON.stringify(value);
-}
 
 // Helper to send messages to all clients with rate limiting checks
 function sendToAllClients(message, excludeClient = null) {

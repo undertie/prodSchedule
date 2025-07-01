@@ -531,7 +531,7 @@ const columnVisibilityRules = {
                 applyRowFilter(currentDept);
             }, 50);
         }
-        socket.send(JSON.stringify({ type: 'initialData' }));
+       // socket.send(JSON.stringify({ type: 'initialData' }));
     });
 
     function setupNotesEditing() {
@@ -720,20 +720,76 @@ const columnVisibilityRules = {
         table.search(term).draw();
     }
 
-    // Modified applyDataUpdates to preserve search
     function applyDataUpdates(changes) {
-        // Store current search state
-        const currentSearch = $('#customSearch').val();
-        
-        try {
-            // Process your changes
-            // ... existing change processing code ...
-        } finally {
-            // Restore search state
-            $('#customSearch').val(currentSearch);
-            executeSearch(currentSearch);
+    try {
+        const table = $('#prodTable').DataTable();
+        const currentSearch = table.search();
+        const currentOrder = table.order();
+        let needsResort = false;
+
+        // Process removes first
+        changes.filter(c => c.type === 'remove').forEach(change => {
+            const [jobNumber, componentNumber] = change.key.split('-');
+            table.rows((idx, data) => 
+                data.JobNumber == jobNumber && 
+                data.ComponentNumber == componentNumber
+            ).remove();
+        });
+
+        // Process updates
+        changes.filter(c => c.type === 'update').forEach(change => {
+            const [jobNumber, componentNumber] = change.key.split('-');
+            const rows = table.rows((idx, data) => 
+                data.JobNumber == jobNumber && 
+                data.ComponentNumber == componentNumber
+            );
+            
+            if (rows.count() > 0) {
+                const row = rows.nodes()[0];
+                const rowData = table.row(row).data();
+                const oldShipDate = rowData.Ship_Date;
+                
+                // Update the data
+                Object.assign(rowData, change.fields);
+                table.row(row).data(rowData);
+                
+                // Check if sort field changed
+                if ('Ship_Date' in change.fields && 
+                    !areDatesEqual(oldShipDate, change.fields.Ship_Date)) {
+                    needsResort = true;
+                }
+            }
+        });
+
+        // Process additions
+        changes.filter(c => c.type === 'new').forEach(change => {
+            const newRow = transformDataForTable(change.data);
+            table.row.add(newRow);
+            needsResort = true; // New rows always need resorting
+        });
+
+        // Reapply sorting if needed
+        if (needsResort) {
+            table.order(currentOrder).draw();
+        } else {
+            table.draw(false); // Just redraw without resorting
         }
+
+        // Restore search
+        if (currentSearch) {
+            table.search(currentSearch).draw();
+        }
+
+    } catch (error) {
+        console.error("Error applying updates:", error);
     }
+}
+
+function areDatesEqual(date1, date2) {
+    const d1 = date1 ? new Date(date1).getTime() : null;
+    const d2 = date2 ? new Date(date2).getTime() : null;
+    return d1 === d2;
+}
 
 function applyDepartmentFilter() {
     if (!table || !$.fn.DataTable.isDataTable('#prodTable')) {
@@ -966,8 +1022,6 @@ function applyColumnVisibility(deptText) {
             reconnectAttempts = 0;
             setupHeartbeat();
             updateConnectionStatus('connected');
-            // Request initial data immediately after connecting
-            socket.send(JSON.stringify({ type: 'initialData' }));
 
             // fill out dropdown for designer in prepress
             fetchDesigners();
@@ -1250,79 +1304,79 @@ function applyColumnVisibility(deptText) {
     // end initializeWebSocket()
 
     //  handle incremental updates
-    function applyDataUpdates(changes) {
-        try {
+    // function applyDataUpdates(changes) {
+    //     try {
 
-            // Store current search state
-            const currentSearch = $('#customSearch').val();
-            const currentFilter = table.search();
+    //         // Store current search state
+    //         const currentSearch = $('#customSearch').val();
+    //         const currentFilter = table.search();
 
-            // Process removes first
-            changes.filter(c => c.type === 'remove').forEach(change => {
-                const [jobNumber, componentNumber] = change.key.split('-');
-                const rows = table.rows((idx, data) => 
-                    data.JobNumber == jobNumber && 
-                    data.ComponentNumber == componentNumber
-                );
-                rows.remove().draw(false);
-            });
+    //         // Process removes first
+    //         changes.filter(c => c.type === 'remove').forEach(change => {
+    //             const [jobNumber, componentNumber] = change.key.split('-');
+    //             const rows = table.rows((idx, data) => 
+    //                 data.JobNumber == jobNumber && 
+    //                 data.ComponentNumber == componentNumber
+    //             );
+    //             rows.remove().draw(false);
+    //         });
 
-            // Process updates
-            changes.filter(c => c.type === 'update').forEach(change => {
-                const [jobNumber, componentNumber] = change.key.split('-');
-                const row = table.row((idx, data) => 
-                    data.JobNumber == jobNumber && 
-                    data.ComponentNumber == componentNumber
-                );
+    //         // Process updates
+    //         changes.filter(c => c.type === 'update').forEach(change => {
+    //             const [jobNumber, componentNumber] = change.key.split('-');
+    //             const row = table.row((idx, data) => 
+    //                 data.JobNumber == jobNumber && 
+    //                 data.ComponentNumber == componentNumber
+    //             );
                 
-                if (row.length) {
-                    const rowData = row.data();
-                    Object.assign(rowData, change.fields);
-                    row.data(rowData).invalidate().draw(false);
-                }
-            });
+    //             if (row.length) {
+    //                 const rowData = row.data();
+    //                 Object.assign(rowData, change.fields);
+    //                 row.data(rowData).invalidate().draw(false);
+    //             }
+    //         });
 
-            // Process adds with proper positioning
-            changes.filter(c => c.type === 'new').forEach(change => {
-                // Skip if already exists
-                const exists = table.rows((idx, data) => 
-                    data.JobNumber == change.data.JobNumber && 
-                    data.ComponentNumber == change.data.ComponentNumber
-                ).count() > 0;
+    //         // Process adds with proper positioning
+    //         changes.filter(c => c.type === 'new').forEach(change => {
+    //             // Skip if already exists
+    //             const exists = table.rows((idx, data) => 
+    //                 data.JobNumber == change.data.JobNumber && 
+    //                 data.ComponentNumber == change.data.ComponentNumber
+    //             ).count() > 0;
                 
-                if (!exists) {
-                    const newRow = transformDataForTable(change.data);
+    //             if (!exists) {
+    //                 const newRow = transformDataForTable(change.data);
                     
-                    // If we have position info from server, use it
-                    if (typeof change.position !== 'undefined') {
-                        const allData = table.rows().data().toArray();
-                        allData.splice(change.position, 0, newRow);
-                        table.clear();
-                        table.rows.add(allData).draw();
-                    } else {
-                        // Fallback: add to end and let sort handle it
-                        table.row.add(newRow).draw();
-                    }
-                }
-            });
+    //                 // If we have position info from server, use it
+    //                 if (typeof change.position !== 'undefined') {
+    //                     const allData = table.rows().data().toArray();
+    //                     allData.splice(change.position, 0, newRow);
+    //                     table.clear();
+    //                     table.rows.add(allData).draw();
+    //                 } else {
+    //                     // Fallback: add to end and let sort handle it
+    //                     table.row.add(newRow).draw();
+    //                 }
+    //             }
+    //         });
 
-            // Reapply sorting if needed
-            if (table.order().length > 0) {
-                table.order(table.order()).draw();
-            }
+    //         // Reapply sorting if needed
+    //         if (table.order().length > 0) {
+    //             table.order(table.order()).draw();
+    //         }
 
-            // Restore search state
-            if (currentSearch !== '') {
-                table.search(currentSearch).draw();
-            } else if (currentFilter !== '') {
-                // If search was cleared but filter exists
-                table.search(currentFilter).draw();
-            }
+    //         // Restore search state
+    //         if (currentSearch !== '') {
+    //             table.search(currentSearch).draw();
+    //         } else if (currentFilter !== '') {
+    //             // If search was cleared but filter exists
+    //             table.search(currentFilter).draw();
+    //         }
 
-        } catch (error) {
-            console.error("Error applying updates:", error);
-        }
-    }
+    //     } catch (error) {
+    //         console.error("Error applying updates:", error);
+    //     }
+    // }
 
     // Helper function to transform incoming data to match table structure
     function transformDataForTable(sourceData) {
