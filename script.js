@@ -236,15 +236,68 @@ const columnVisibilityRules = {
     'default': '#E6E6FA'      // Lavender (fallback)
 };
 
-    function initializeAll(initialData) {
-        // First create the DataTable
-        initializeDataTable(initialData);
+    // function initializeAll(initialData) {
+    //     // First create the DataTable
+    //     initializeDataTable(initialData);
         
-        // Then set up other components
-        setupDepartmentDropdown();
-        //setupSearchBehavior();
-        applyDepartmentFilter();
-        setupSearchHandler();
+    //     // Then set up other components
+    //     setupDepartmentDropdown();
+    //     //setupSearchBehavior();
+    //     applyDepartmentFilter();
+    //     setupSearchHandler();
+
+    //     // fill out dropdown for designer in prepress
+    //     fetchDesigners();
+    //     const currentDept = $('#deptFilter').val();
+    //     if (currentDept) applyRowFilter(currentDept);
+
+    // }
+
+        // Global variable to track initialization state
+    let isTableInitialized = false;
+
+    function initializeAll(initialData) {
+        console.log("Starting initialization");
+        
+        // Destroy existing table if needed
+        if ($.fn.DataTable.isDataTable('#prodTable')) {
+            console.log("Destroying existing table from function initializeAll");
+            table.destroy(true);
+            $('#prodTable').empty();
+        }
+        // If we have real data, initialize the table
+        if (initialData.length > 0 && initialData[0].JobNumber) {
+            // Initialize DataTable with proper callback
+            initializeDataTable(initialData, function() {
+                console.log("DataTable fully initialized - running post-init tasks");
+                
+                // Now run your post-initialization tasks
+                setupDepartmentDropdown();
+                setupSearchHandler();
+                fetchDesigners();
+                
+                // Apply saved filter after small delay
+                setTimeout(() => {
+                    const savedFilter = localStorage.getItem('deptFilter');
+                    if (savedFilter) {
+                        console.log("Applying saved filter:", savedFilter);
+                        $('#deptFilter').val(savedFilter);
+                        applyDepartmentFilter();
+                    }
+                }, 100);
+                
+                // Restore open rows if needed
+                const openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
+                if (openRows.length) {
+                    console.log("Restoring open rows");
+                    restoreOpenRows(openRows);
+                }
+                isTableInitialized = true;
+            });
+        } else {
+            console.log("Waiting for WebSocket data...");
+        }
+
     }
 
     let colorSessionId = 'session-' + Math.random().toString(36).substr(2, 9);
@@ -259,7 +312,7 @@ const columnVisibilityRules = {
     let searchHandler = null;
 
     // Initialize DataTable and all functionality
-    function initializeDataTable(initialData = []) {
+    function initializeDataTable(initialData = [], callback) {
         // Destroy existing table if it exists
         if ($.fn.DataTable.isDataTable('#prodTable')) {
             // Remove previous search handler
@@ -411,14 +464,29 @@ const columnVisibilityRules = {
                     }
                 }, // 57
                 { 
-                    data: 'Designer', // Make sure this matches your data field name
+                    data: 'Designer',
                     name: 'Designer',
                     render: function(data, type, row) {
-                        return `<select class="designer-select" 
-                                data-job="${row.JobNumber}" 
-                                data-component="${row.ComponentNumber}">
-                            <option value="">Loading...</option>
-                        </select>`;
+                        // Return just the value for non-display purposes
+                        if (type !== 'display') {
+                            return data;
+                        }
+                        
+                        // For display, return the select element with the current value
+                        let options = '<option value="">Select designer</option>';
+                        
+                        if (designers && designers.length > 0) {
+                            designers.forEach(designer => {
+                                const selected = designer.EmployeeName === row.Designer ? 'selected' : '';
+                                options += `<option value="${designer.EmployeeName}" ${selected}>${designer.EmployeeName}</option>`;
+                            });
+                        }
+                        
+                        return `<select class="designer-select form-control" 
+                                  data-job="${row.JobNumber}" 
+                                  data-component="${row.ComponentNumber}">
+                                ${options}
+                              </select>`;
                     }
                 }, // 58
                 { data: 'Last_Completed_Comp_Process' , name: 'Last_Completed_Comp_Process' }, // 59
@@ -440,9 +508,9 @@ const columnVisibilityRules = {
                 console.log('DataTable fully initialized');
 
                 // Force initial highlight if needed
-                if ($('#deptFilter').val()) {
-                    applyDepartmentFilter();
-                }
+                // if ($('#deptFilter').val()) {
+                //     applyDepartmentFilter();
+                // }
                 
                 // Set up search handler INSIDE initComplete
                 $('#customSearch').on('keyup', function() {
@@ -476,6 +544,11 @@ const columnVisibilityRules = {
         setupSearchHandler();
         
         $('#customSearch').on('keyup', searchHandler);
+
+        if (typeof callback === 'function') {
+            callback();
+        }
+
     }
     // end initializeDataTable()
 
@@ -531,7 +604,7 @@ const columnVisibilityRules = {
                 applyRowFilter(currentDept);
             }, 50);
         }
-       // socket.send(JSON.stringify({ type: 'initialData' }));
+        socket.send(JSON.stringify({ type: 'dataUpdate' }));
     });
 
     function setupNotesEditing() {
@@ -1022,11 +1095,6 @@ function applyColumnVisibility(deptText) {
             reconnectAttempts = 0;
             setupHeartbeat();
             updateConnectionStatus('connected');
-
-            // fill out dropdown for designer in prepress
-            fetchDesigners();
-            const currentDept = $('#deptFilter').val();
-            if (currentDept) applyRowFilter(currentDept);
         };
 
         socket.onerror = function(error) {
@@ -1147,35 +1215,35 @@ function applyColumnVisibility(deptText) {
         };
 
         // Helper functions for each message type
-        function handleInitialData(data) {
-            const openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
+        // function handleInitialData(data) {
+        //     const openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
             
-            if ($.fn.DataTable.isDataTable('#prodTable')) {
-                if (drawHandler) table.off('draw', drawHandler);
+        //     if ($.fn.DataTable.isDataTable('#prodTable')) {
+        //         if (drawHandler) table.off('draw', drawHandler);
                 
-                drawHandler = function() {
-                    setTimeout(() => restoreOpenRows(openRows), 100);
-                };
+        //         drawHandler = function() {
+        //             setTimeout(() => restoreOpenRows(openRows), 100);
+        //         };
                 
-                table.on('draw', drawHandler);
-                table.clear().rows.add(data).draw();
-            } else {
-                initializeDataTable(data);
-                setupSearchHandler();
+        //         table.on('draw', drawHandler);
+        //         table.clear().rows.add(data).draw();
+        //     } else {
+        //         initializeDataTable(data);
+        //         setupSearchHandler();
                 
-                drawHandler = function() {
-                    setTimeout(() => restoreOpenRows(openRows), 100);
-                };
+        //         drawHandler = function() {
+        //             setTimeout(() => restoreOpenRows(openRows), 100);
+        //         };
                 
-                table.on('draw', drawHandler);
-            }
+        //         table.on('draw', drawHandler);
+        //     }
 
-            const currentDept = $('#deptFilter').val();
-            if (currentDept) {
-                applyDepartmentFilter();
-                applyRowFilter(currentDept);
-            }
-        }
+        //     const currentDept = $('#deptFilter').val();
+        //     if (currentDept) {
+        //         applyDepartmentFilter();
+        //         applyRowFilter(currentDept);
+        //     }
+        // }
 
         function handleDataUpdate(changes) {
             if (!Array.isArray(changes)) {
@@ -1544,7 +1612,7 @@ function applyColumnVisibility(deptText) {
     // end connection indicator functions
 
     // Initialize everything
-    initializeAll();
     initializeWebSocket();
+    //initializeAll();
 });
 // end $(document).ready(function()

@@ -274,8 +274,8 @@ async function updateDesigner(jobNumber, componentNumber, designerName) {
             `);
 
         // Fetch updated data and broadcast
-        const data = await fetchInitialData();
-        broadcastData(data, 'initialData');
+        // const data = await fetchInitialData();
+        // broadcastData(data, 'initialData');
         
         return true;
     } catch (err) {
