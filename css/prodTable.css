@@ -275,6 +275,30 @@ label {
         white-space: nowrap;   /* Prevent text wrapping */
     }
 
+/* show rows that have been inserted or updated */
+.pulse {
+  animation: pulseAnimation 1s ease-in-out 2;
+}
+
+@keyframes pulseAnimation {
+  0%, 100% { background-color: inherit; }
+  50% { background-color: #ffeaa7; } /* light yellow pulse */
+}
+
+.fade-out {
+  animation: fadeOutRow 0.5s forwards;
+}
+
+@keyframes fadeOutRow {
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+    height: 0;
+    padding: 0;
+    margin: 0;
+  }
+}
+
 /* details table */
 
 /* Add some padding to the hidden row */

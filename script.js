@@ -321,7 +321,6 @@ $(document).ready(function() {
             "data": initialData,
             "scrollCollapse": true,
             "scroller": true,
-            "stateSave": true,
             "processing": true,
             // Alternative performance optimizations
             "renderer": "bootstrap", // More efficient rendering
@@ -332,7 +331,10 @@ $(document).ready(function() {
             "paging": true,
             "pageLength": 100,
             "bSort": false,
-            "colReorder": true,
+            "colReorder": {
+                fixedColumnsLeft: 1,
+                stateSave: false // Disable state saving
+            },
             dom: 'Brtip',
             buttons: [
                 { extend: 'copy', className: "columnsButton" },
@@ -343,7 +345,16 @@ $(document).ready(function() {
                 { data: 'JobStatus' , name: 'JobStatus' }, // 1
                 { data: 'Job_In_Date' , name: 'Job_In_Date' }, // 2
                 { data: 'Proof_Due_Date' , name: 'Proof_Due_Date' }, // 3
-                { data: 'Ship_Date' , name: 'Ship_Date' }, // 4
+                {
+                  data: 'Ship_Date',
+                  name: 'Ship_Date',
+                  render: function(data, type, row) {
+                    if (type === 'sort' || type === 'type') {
+                      return new Date(data).getTime();
+                    }
+                    return data;
+                  }
+                }, // 4
                 { data: 'Arrival_Date' , name: 'Arrival_Date' }, // 5
                 { data: 'Carrier' , name: 'Carrier' }, // 6
                 { data: 'ShipType' , name: 'ShipType' }, // 7
@@ -669,7 +680,12 @@ $(document).ready(function() {
             clearTimeout(filterTimeout);
             filterTimeout = setTimeout(() => {
                 localStorage.setItem('deptFilter', $(this).val());
+
                 applyDepartmentFilter();
+
+                // Scroll to top of the page
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
             }, 300); // 300ms delay
         });
     }
@@ -765,63 +781,146 @@ $(document).ready(function() {
 
     function applyDataUpdates(changes) {
         try {
-            const table = $('#prodTable').DataTable();
-            const currentSearch = table.search();
-            const currentOrder = table.order();
-            let needsResort = false;
-
-            // Process removes first
-            changes.filter(c => c.type === 'remove').forEach(change => {
-                const [jobNumber, componentNumber] = change.key.split('-');
-                table.rows((idx, data) => 
-                    data.JobNumber == jobNumber && 
-                    data.ComponentNumber == componentNumber
-                ).remove();
-            });
+            // Process removals - optimized for multiple rows
+            const removals = changes.filter(c => c.type === 'remove');
+            
+            if (removals.length > 0) {
+                // 1. First collect all rows to be removed
+                const rowsToRemove = [];
+                const keysToRemove = new Set();
+                
+                removals.forEach(change => {
+                    const [jobNumber, componentNumber] = change.key.split('-');
+                    keysToRemove.add(change.key);
+                    
+                    table.rows((idx, data) => 
+                        data.JobNumber == jobNumber && 
+                        data.ComponentNumber == componentNumber
+                    ).every(function() {
+                        rowsToRemove.push(this);
+                        return true;
+                    });
+                });
+                
+                // 2. Clean up all child rows and state first
+                rowsToRemove.forEach(row => {
+                    const rowNode = $(row.node());
+                    
+                    // Handle child rows
+                    if (row.child) {
+                        // Hide if shown
+                        if (row.child.isShown && row.child.isShown()) {
+                            row.child.hide();
+                        }
+                        
+                        // Remove any lingering DOM elements
+                        const childRow = rowNode.next('tr.child');
+                        if (childRow.length) {
+                            childRow.remove();
+                        }
+                        
+                        // Clear DataTables' internal tracking
+                        if (row.child.remove) {
+                            row.child.remove();
+                        }
+                    }
+                    
+                    // Clean up classes
+                    rowNode.removeClass('shown dt-hasChild');
+                });
+                
+                // 3. Remove from sessionStorage in bulk
+                let openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
+                openRows = openRows.filter(row => 
+                    !keysToRemove.has(`${row.jobNumber}-${row.componentNumber}`)
+                );
+                sessionStorage.setItem('openRows', JSON.stringify(openRows));
+                
+                // 4. Animate and remove rows
+                rowsToRemove.forEach(row => {
+                    $(row.node()).addClass('fade-out');
+                });
+                
+                // 5. Remove all rows after animation completes
+                setTimeout(() => {
+                    table.rows(rowsToRemove.map(r => r.index()))
+                        .remove()
+                        .draw(false);
+                    
+                    // Force cleanup of any remaining artifacts
+                    $('tr.child').each(function() {
+                        if (!$(this).prev('tr').hasClass('parent')) {
+                            $(this).remove();
+                        }
+                    });
+                }, 500);
+            }
 
             // Process updates
             changes.filter(c => c.type === 'update').forEach(change => {
                 const [jobNumber, componentNumber] = change.key.split('-');
-                const rows = table.rows((idx, data) => 
-                    data.JobNumber == jobNumber && 
-                    data.ComponentNumber == componentNumber
+                const row = table.row((idx, data) =>
+                    data.JobNumber == jobNumber && data.ComponentNumber == componentNumber
                 );
-                
-                if (rows.count() > 0) {
-                    const row = rows.nodes()[0];
-                    const rowData = table.row(row).data();
-                    const oldShipDate = rowData.Ship_Date;
-                    
-                    // Update the data
+
+                if (row.length) {
+                    const rowData = row.data();
+                    const oldValues = {
+                        Ship_Date: rowData.Ship_Date,
+                        JobNumber: rowData.JobNumber,
+                        ComponentNumber: rowData.ComponentNumber
+                    };
+
                     Object.assign(rowData, change.fields);
-                    table.row(row).data(rowData);
-                    
-                    // Check if sort field changed
-                    if ('Ship_Date' in change.fields && 
-                        !areDatesEqual(oldShipDate, change.fields.Ship_Date)) {
-                        needsResort = true;
+                    row.data(rowData).invalidate();
+
+                    const rowNode = $(row.node());
+                    rowNode.addClass('pulse');
+                    setTimeout(() => rowNode.removeClass('pulse'), 2000);
+
+                    const sortRelevantChanged =
+                        ('Ship_Date' in change.fields && !areDatesEqual(oldValues.Ship_Date, change.fields.Ship_Date)) ||
+                        ('JobNumber' in change.fields && oldValues.JobNumber !== change.fields.JobNumber) ||
+                        ('ComponentNumber' in change.fields && oldValues.ComponentNumber !== change.fields.ComponentNumber);
+
+                    if (sortRelevantChanged) {
+                        table.rows().invalidate();
+                        table.order(table.order()).draw();
+                    } else {
+                        row.draw(false);
                     }
                 }
             });
 
-            // Process additions
+            // Process inserts
             changes.filter(c => c.type === 'new').forEach(change => {
-                const newRow = transformDataForTable(change.data);
-                table.row.add(newRow);
-                needsResort = true; // New rows always need resorting
+                const exists = table.rows((idx, data) =>
+                    data.JobNumber == change.data.JobNumber && data.ComponentNumber == change.data.ComponentNumber
+                ).count() > 0;
+
+                if (!exists) {
+                    const newRow = transformDataForTable(change.data);
+
+                    if (typeof change.position !== 'undefined') {
+                        // Rebuild table with new row inserted at position
+                        const allData = table.rows().data().toArray();
+                        allData.splice(change.position, 0, newRow);
+                        table.clear();
+                        table.rows.add(allData).draw();
+                    } else {
+                        // Add to end and re-sort
+                        const addedRow = table.row.add(newRow).draw(false).node();
+                        const $addedRow = $(addedRow);
+                        $addedRow.addClass('pulse');
+                        setTimeout(() => $addedRow.removeClass('pulse'), 2000);
+                    }
+
+                    // Reapply sort to place correctly
+                    if (table.order().length > 0) {
+                        table.order(table.order()).draw();
+                    }
+                }
             });
-
-            // Reapply sorting if needed
-            if (needsResort) {
-                table.order(currentOrder).draw();
-            } else {
-                table.draw(false); // Just redraw without resorting
-            }
-
-            // Restore search
-            if (currentSearch) {
-                table.search(currentSearch).draw();
-            }
 
         } catch (error) {
             console.error("Error applying updates:", error);
@@ -829,9 +928,8 @@ $(document).ready(function() {
     }
 
     function areDatesEqual(date1, date2) {
-        const d1 = date1 ? new Date(date1).getTime() : null;
-        const d2 = date2 ? new Date(date2).getTime() : null;
-        return d1 === d2;
+        if (!date1 || !date2) return false;
+        return new Date(date1).getTime() === new Date(date2).getTime();
     }
 
     function applyDepartmentFilter() {
