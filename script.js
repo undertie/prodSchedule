@@ -2,6 +2,7 @@ $(document).ready(function() {
     // Global variables
     let table;
     let currentDeptFilter = null;
+    let isInitialized = false;
     const departmentMapping = [
         {
             text: "Coating",
@@ -236,18 +237,115 @@ $(document).ready(function() {
         'default': '#E6E6FA'      // Lavender (fallback)
     };
 
-    // Global variable to track initialization state
-    let isTableInitialized = false;
-
     function initializeAll(initialData) {
         console.log("Starting initialization");
-        
-        // Destroy existing table if needed
-        if ($.fn.DataTable.isDataTable('#prodTable')) {
-            console.log("Destroying existing table from function initializeAll");
-            table.destroy(true);
-            $('#prodTable').empty();
+
+        // Ensure the container exists
+        const container = $('#contain');
+        if (!container.length) {
+            console.error("Container div not found!");
+            return;
         }
+
+        // Show the container (in case it was hidden)
+        container.show();
+        
+        // Properly destroy existing table
+        if ($.fn.DataTable.isDataTable('#prodTable')) {
+            console.log("Destroying existing table");
+            // Save scroll position if needed
+            const scrollPos = $(window).scrollTop();
+            
+            table.clear().destroy();
+            $('#prodTable').remove(); // Completely remove the table
+
+            isInitialized = false;
+            
+            // Recreate the table structure
+            container.append(`
+                <table id="prodTable" class="display" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th>JobNumber</th> <!-- 0 -->
+                            <th>Job Status</th> <!-- 1 -->
+                            <th>Job In Date</th> <!-- 2 -->
+                            <th>Proof Due Date</th> <!-- 3 -->
+                            <th>Ship Date</th> <!-- 4 -->
+                            <th>Arrival Date</th> <!-- 5 -->
+                            <th>Carrier</th> <!-- 6 -->
+                            <th>ShipType</th> <!-- 7 -->
+                            <th>Job Creator</th> <!-- 8 -->
+                            <th>Customer CSR</th> <!-- 9 -->
+                            <th>Customer</th> <!-- 10 -->
+                            <th>Cust Name</th> <!-- 11 -->
+                            <th>JobDescription</th> <!-- 12 -->
+                            <th>Comp1 Pages</th> <!-- 13 -->
+                            <th>Comp2 Pages</th> <!-- 14 -->
+                            <th>Quantity</th> <!-- 15 -->
+                            <th>Size</th> <!-- 16 -->
+                            <th>CoverCoating</th> <!-- 17 -->
+                            <th>Last Cover Process</th> <!-- 18 -->
+                            <th>Last Cover Description</th> <!-- 19 -->
+                            <th>Last Body Process</th> <!-- 20 -->
+                            <th>Last Body Description</th> <!-- 21 -->
+                            <th>CoverPrintedAt</th> <!-- 22 -->
+                            <th>Material WIP Cost</th> <!-- 23 -->
+                            <th>Production WIP Cost</th> <!-- 24 -->
+                            <th>PONumber</th> <!-- 25 -->
+                            <th>OrderSellPrice</th> <!-- 26 -->
+                            <th>Next Cover Process</th> <!-- 27 -->
+                            <th>Next Cover Description</th> <!-- 28 -->
+                            <th>NCP Time</th> <!-- 29 -->
+                            <th>Next Body Process</th> <!-- 30 -->
+                            <th>Next Body Description</th> <!-- 31 -->
+                            <th>NBP Time</th> <!-- 32 -->
+                            <th>Main Process</th> <!-- 33 -->
+                            <th>MP_Description</th> <!-- 34 -->
+                            <th>MP_Time</th> <!-- 35 -->
+                            <th>Job Priority</th> <!-- 36 -->
+                            <th>Does It Blend</th> <!-- 37 -->
+                            <th>Did It Blend</th> <!-- 38 -->
+                            <th>Is It Wednesday</th> <!-- 39 -->
+                            <th>Job Comp</th> <!-- 40 -->
+                            <th>Mat Code</th> <!-- 41 -->
+                            <th>Mat Qty</th> <!-- 42 -->
+                            <th>Mat BWT</th> <!-- 43 -->
+                            <th>Mat Description</th> <!-- 44 -->
+                            <th>Parent Sheet Size</th> <!-- 45 -->
+                            <th>Parent Out</th> <!-- 46 -->
+                            <th>Press Size</th> <!-- 47 -->
+                            <th>Press Out</th> <!-- 48 -->
+                            <th>Print Type</th> <!-- 49 -->
+                            <th>Print Time</th> <!-- 50 -->
+                            <th>Last_Comp3_Description</th> <!-- 51 -->
+                            <th>Last_Comp3_Process</th> <!-- 52 -->
+                            <th>Next_Comp3_Description</th> <!-- 53 -->
+                            <th>Next_Comp3_Process</th> <!-- 54 -->
+                            <th>Next_Comp3_Time</th> <!-- 55 -->
+                            <th>Prepress Notes</th> <!-- 56 -->
+                            <th>Postpress Notes</th> <!-- 57 -->
+                            <th>Designer</th> <!-- 58 -->
+                            <th>Last Completed Process</th> <!-- 59 -->
+                            <th>Last Completed Description</th> <!-- 60 -->
+                            <th>Next Process</th> <!-- 61 -->
+                            <th>Next Description</th> <!-- 62 -->
+                            <th>Next Time</th> <!-- 63 -->
+                            <th>Drill_Process</th> <!-- 64 -->
+                            <th>Drill_Description</th> <!-- 65 -->
+                            <th>Drill_Time</th> <!-- 66 -->
+                            <th>Hunkler_Process</th> <!-- 67 -->
+                            <th>Hunkler_Description</th> <!-- 68 -->
+                            <th>Hunkler_Time</th> <!-- 69 -->
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            `);
+            
+            // Restore scroll position
+            $(window).scrollTop(scrollPos);
+        }
+
         // If we have real data, initialize the table
         if (initialData.length > 0 && initialData[0].JobNumber) {
             // Initialize DataTable with proper callback
@@ -275,7 +373,7 @@ $(document).ready(function() {
                     console.log("Restoring open rows");
                     restoreOpenRows(openRows);
                 }
-                isTableInitialized = true;
+                isInitialized = true;
             });
         } else {
             console.log("Waiting for WebSocket data...");
@@ -296,13 +394,21 @@ $(document).ready(function() {
 
     // Initialize DataTable and all functionality
     function initializeDataTable(initialData = [], callback) {
-        // Destroy existing table if it exists
-        if ($.fn.DataTable.isDataTable('#prodTable')) {
-            // Remove previous search handler
-            if (searchHandler) {
-                $('#customSearch').off('keyup', searchHandler);
-            }
-            table.destroy();
+        console.log("Checking table element exists:", $('#prodTable').length);
+        console.log("Table parent visibility:", $('#prodTable').parent().is(':visible'));
+        console.log("test1");
+
+        // Verify table element exists
+        const tableElement = $('#prodTable');
+        if (!tableElement.length) {
+            console.error("CRITICAL: prodTable element doesn't exist!");
+            return;
+        }
+        
+        // Verify table header structure
+        if (tableElement.find('thead th').length === 0) {
+            console.error("Table headers missing!");
+            return;
         }
 
         // Create styled search box that matches DataTables style
@@ -314,6 +420,7 @@ $(document).ready(function() {
             </div>
         `);
 
+        console.log("test3");
         table = $('#prodTable').DataTable({
             // Performance optimizations:
             // "deferRender": true,
@@ -499,6 +606,7 @@ $(document).ready(function() {
             "autoWidth": true,
             "fixedColumns": false,
             initComplete: function() {
+        console.log("test4");
                 // Set up search handler INSIDE initComplete
                 $('#customSearch').on('keyup', function() {
                     table.search(this.value).draw();
@@ -515,6 +623,7 @@ $(document).ready(function() {
         });
         // end Initialize DataTable
 
+        console.log("test5");
         // Add event handlers for notes editing
         setupNotesEditing();
 
@@ -533,6 +642,7 @@ $(document).ready(function() {
         $('#customSearch').on('keyup', searchHandler);
 
         if (typeof callback === 'function') {
+        console.log("test6");
             callback();
         }
 
@@ -1142,9 +1252,6 @@ $(document).ready(function() {
         let reconnectTimeout;
         let pingInterval;
         let clickedRow = null;
-        let reconnectAttempts = 0;
-        const maxReconnectAttempts = 5;
-        const reconnectDelay = 5000;
 
         // Connection health monitoring
         function setupHeartbeat() {
@@ -1153,12 +1260,13 @@ $(document).ready(function() {
                 if (socket.readyState === WebSocket.OPEN) {
                     socket.send(JSON.stringify({ type: 'ping' }));
                 }
-            }, 20000); // Send ping every 20s
+            }, 30000); // Send ping every 30s
         }
 
         socket.onopen = function(event) {
             console.log("WebSocket is open now.");
             reconnectAttempts = 0;
+            console.log("reconnectAttempts should be 0: " + reconnectAttempts);
             setupHeartbeat();
             updateConnectionStatus('connected');
         };
@@ -1246,10 +1354,27 @@ $(document).ready(function() {
                     break;
                     
                 case 'initialData':
-                    //handleInitialData(response.data);
-                    // Destroy existing table and reinitialize with new data
-                    initializeAll(response.data);
+                    if (!isInitialized || response.fullUpdate) {
+                        // Always reinitialize if fullUpdate is true
+                        initializeAll(response.data);
+                        isInitialized = true;
+                    } else if (response.changes) {
+                        // Handle partial updates
+                        handleDataUpdate(response.changes);
+                    } else {
+                        console.error("Invalid initialData format - missing data or changes");
+                    }
                     break;
+
+                    //                 case 'initialData':
+                    // if (!isInitialized) {
+                    //     initializeAll(response.data);
+                    //     isInitialized = true;
+                    // } else {
+                    //     // Just update data instead of re-initializing
+                    //     handleDataUpdate(response.changes);
+                    // } 
+                    // break;
                     
                 case 'dataUpdate':
                     handleDataUpdate(response.changes);
@@ -1281,8 +1406,13 @@ $(document).ready(function() {
         };
 
         function handleDataUpdate(changes) {
+            if (!changes) {
+                console.error("No changes provided");
+                return;
+            }
+            
             if (!Array.isArray(changes)) {
-                console.error("Invalid dataUpdate format - changes should be an array");
+                console.error("Changes should be an array, received:", typeof changes);
                 return;
             }
             console.log("Processing dataUpdate with", changes.length, "changes");
@@ -1521,6 +1651,7 @@ $(document).ready(function() {
             toastr.error('Connection lost. Please refresh the page.', 'Disconnected', {
                 timeOut: 0,
                 extendedTimeOut: 0,
+                preventDuplicates: true,
                 closeButton: true
             });
         }
@@ -1556,6 +1687,7 @@ $(document).ready(function() {
         switch(status) {
             case 'connected':
                 dot.classList.add('connected');
+                toastr.clear(); // clear existing error messages
                 break;
             case 'disconnected':
                 dot.classList.add('disconnected');
