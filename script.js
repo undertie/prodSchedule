@@ -340,6 +340,25 @@ $(document).ready(function() {
                     </thead>
                     <tbody></tbody>
                 </table>
+                <template id="detailed-table-template">
+                    <table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">
+                        <thead>
+                            <tr>
+                                <th>Job Number</th>
+                                <th>Component Number</th>
+                                <th>Process Code</th>
+                                <th>Description</th>
+                                <th>Completion Code</th>
+                                <th>Create Date</th>
+                                <th>Name</th>
+                                <th>Comments</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Rows will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </template>
             `);
             
             // Restore scroll position
@@ -353,6 +372,7 @@ $(document).ready(function() {
                 console.log("DataTable fully initialized - running post-init tasks");
                 
                 // Now run your post-initialization tasks
+                setupTableEventHandlers();
                 setupDepartmentDropdown();
                 setupSearchHandler();
                 fetchDesigners();
@@ -736,6 +756,51 @@ $(document).ready(function() {
                 postpressNotes: field === 'PostPressNotes' ? newValue : null,
                 priority: null
             }));
+        });
+    }
+
+    // open hidden row to show detailed data for accumulated production
+    // save the clicked row information so, it opens back up on periodic refresh
+    function setupTableEventHandlers() {
+        // Remove any existing handlers to prevent duplicates
+        $('#prodTable tbody').off('click', 'tr');
+        
+        // Add new handler
+        $('#prodTable tbody').on('click', 'tr', function(event) {
+            // Ignore clicks on form elements and buttons
+            if ($(event.target).is('input, textarea, button, a, select')) {
+                return;
+            }
+
+            const clickedRow = table.row(this);
+            const data = clickedRow.data();
+            
+            if (!data || !data.JobNumber || !data.ComponentNumber) {
+                return;
+            }
+
+            const jobNumber = data.JobNumber;
+            const componentNumber = data.ComponentNumber;
+            let openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
+
+            if (clickedRow.child.isShown()) {
+                // Close the row
+                openRows = openRows.filter(row => 
+                    !(row.jobNumber === jobNumber && row.componentNumber === componentNumber));
+                clickedRow.child.hide();
+                $(this).removeClass('shown');
+            } else {
+                // Open the row
+                openRows.push({ jobNumber, componentNumber });
+                socket.send(JSON.stringify({ 
+                    type: 'getDetailedData', 
+                    jobNumber, 
+                    componentNumber 
+                }));
+                $(this).addClass('shown');
+            }
+
+            sessionStorage.setItem('openRows', JSON.stringify(openRows));
         });
     }
 
@@ -1283,46 +1348,6 @@ $(document).ready(function() {
               attemptReconnect();
             }
         };
-
-        // open hidden row to show detailed data for accumulated production
-        // save the clicked row information so, it opens back up on periodic refresh
-        $('#prodTable tbody').on('click', 'tr', function(event) {
-            // Ignore clicks on form elements and buttons
-            if ($(event.target).is('input, textarea, button, a, select')) {
-                return;
-            }
-
-            const clickedRow = table.row(this);
-            const data = clickedRow.data();
-            
-            // Safely check for required data before proceeding
-            if (!data || !data.JobNumber || !data.ComponentNumber) {
-                return; // Exit if missing required data
-            }
-
-            const jobNumber = data.JobNumber;
-            const componentNumber = data.ComponentNumber;
-            let openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
-
-            if (clickedRow.child.isShown()) {
-                // Close the row
-                openRows = openRows.filter(row => 
-                    !(row.jobNumber === jobNumber && row.componentNumber === componentNumber));
-                clickedRow.child.hide();
-                $(this).removeClass('shown');
-            } else {
-                // Open the row
-                openRows.push({ jobNumber, componentNumber });
-                socket.send(JSON.stringify({ 
-                    type: 'getDetailedData', 
-                    jobNumber, 
-                    componentNumber 
-                }));
-                $(this).addClass('shown');
-            }
-
-            sessionStorage.setItem('openRows', JSON.stringify(openRows));
-        });
 
         socket.onmessage = function(event) {
             // Parse and validate the message

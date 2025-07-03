@@ -44,13 +44,14 @@
 	                    <select id="deptFilter">
 	                    </select>
 	                </div>
+	                <!--
                     <div class="process-status-container">
                         <div class="process-box match-col-Last-Cover-Process-Header">Last-Cover-Process</div>
                         <div class="process-box match-col-Last-Body-Process-Header">Last-Body-Process</div>
                         <div class="process-box match-col-Next-Cover-Process-Header">Next-Cover-Process</div>
                         <div class="process-box match-col-Next-Body-Process-Header">Next-Body-Process</div>
                     </div>
-	                
+	                -->
 	                <!-- Search on the right -->
 	                <div class="search-container">
 	                </div>
