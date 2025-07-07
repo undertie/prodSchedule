@@ -24,6 +24,9 @@
 
 	<!-- JS (after jQuery) -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+	
+	<!-- Add this before your DataTables script -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 
    <script type="text/javascript" src="script.js"></script>
 </head>

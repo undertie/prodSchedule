@@ -342,6 +342,27 @@ function broadcastData(newData, type = 'initialData') {
                     item.ComponentNumber === change.data.ComponentNumber
                 );
             }
+            // Add this for updates that affect sorting
+            if (change.type === 'update' && 'Ship_Date' in change.fields) {
+                const [jobNumber, componentNumber] = change.key.split('-');
+                change.position = sortedData.findIndex(item => 
+                    item.JobNumber === jobNumber && 
+                    item.ComponentNumber.toString() === componentNumber &&
+                    item.Ship_Date === change.fields.Ship_Date // Verify exact match
+                );
+                
+                // Include full row data for client verification
+                change.newData = sortedData[change.position];
+                
+                console.log(`Update ${change.key} confirmed position: ${change.position}`, {
+                    expectedShipDate: change.fields.Ship_Date,
+                    actualShipDate: sortedData[change.position]?.Ship_Date
+                });
+            }
+            console.log('Update positions:');
+            if (change.type === 'update' && 'Ship_Date' in change.fields) {
+                console.log(`- ${change.key}: position ${change.position}`);
+            }
         });
 
         cachedScheduleData = sortedData;
@@ -349,6 +370,12 @@ function broadcastData(newData, type = 'initialData') {
 
         // Add search preservation flag
         message.preserveSearch = true;
+
+        console.log('Sorted data order (first 10 rows):');
+        sortedData.slice(0, 10).forEach((item, index) => {
+            console.log(`#${index}: ${item.JobNumber}-${item.ComponentNumber}`, 
+                       `Ship_Date: ${item.Ship_Date}`);
+        });
     }
 
     // Stringify once

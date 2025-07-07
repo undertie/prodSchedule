@@ -453,7 +453,12 @@ $(document).ready(function() {
             "renderer": "bootstrap", // More efficient rendering
             "deferLoading": true,     // Only loads data when needed
             "stateDuration": -1,      // Session storage instead of local storage
-
+            "ordering": true,
+            "autoWidth": false,
+            "retrieve": true,
+            "deferRender": true,
+            "orderMulti": false, // Important - prevents multi-column sort interference
+            "orderClasses": false, // Improves performance
             "aaSorting": [],
             "paging": true,
             "pageLength": 100,
@@ -955,12 +960,27 @@ $(document).ready(function() {
     }
 
     function applyDataUpdates(changes) {
+
+        console.log("Received changes with positions:");
+        changes.forEach(change => {
+            if (change.type === 'update') {
+                console.log(`- ${change.key}:`, {
+                    position: change.position,
+                    newShipDate: change.fields.Ship_Date,
+                    newData: change.newData
+                });
+            }
+        });
+
         try {
             // Process removals - optimized for multiple rows
             const removals = changes.filter(c => c.type === 'remove');
-            
+
             if (removals.length > 0) {
-                // 1. First collect all rows to be removed
+                console.group('─── REMOVAL PROCESSING ───');
+                console.log('Total removals:', removals.length);
+                
+                // 1. Collect all rows to be removed
                 const rowsToRemove = [];
                 const keysToRemove = new Set();
                 
@@ -977,25 +997,31 @@ $(document).ready(function() {
                     });
                 });
                 
-                // 2. Clean up all child rows and state first
+                // 2. Clean up child rows and state
+                console.group('Cleaning up child rows');
                 rowsToRemove.forEach(row => {
                     const rowNode = $(row.node());
                     
                     // Handle child rows
                     if (row.child) {
+                        console.log(`Processing child rows for ${row.data().JobNumber}-${row.data().ComponentNumber}`);
+                        
                         // Hide if shown
                         if (row.child.isShown && row.child.isShown()) {
+                            console.log('- Hiding child row');
                             row.child.hide();
                         }
                         
                         // Remove any lingering DOM elements
                         const childRow = rowNode.next('tr.child');
                         if (childRow.length) {
+                            console.log('- Removing child row DOM element');
                             childRow.remove();
                         }
                         
                         // Clear DataTables' internal tracking
                         if (row.child.remove) {
+                            console.log('- Clearing internal child reference');
                             row.child.remove();
                         }
                     }
@@ -1003,69 +1029,228 @@ $(document).ready(function() {
                     // Clean up classes
                     rowNode.removeClass('shown dt-hasChild');
                 });
+                console.groupEnd();
                 
-                // 3. Remove from sessionStorage in bulk
+                // 3. Update sessionStorage
+                console.group('Updating sessionStorage');
                 let openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
+                const beforeCount = openRows.length;
                 openRows = openRows.filter(row => 
                     !keysToRemove.has(`${row.jobNumber}-${row.componentNumber}`)
                 );
                 sessionStorage.setItem('openRows', JSON.stringify(openRows));
+                console.log(`Removed ${beforeCount - openRows.length} entries from sessionStorage`);
+                console.groupEnd();
                 
                 // 4. Animate and remove rows
+                console.group('Animating and removing rows');
                 rowsToRemove.forEach(row => {
-                    $(row.node()).addClass('fade-out');
+                    const rowNode = $(row.node());
+                    const rowData = row.data();
+                    
+                    console.log(`Animating removal for ${rowData.JobNumber}-${rowData.ComponentNumber}`);
+                    rowNode.addClass('fade-out');
+                    
+                    // Optional: Add event listener for animation end
+                    rowNode.on('animationend', function() {
+                        console.log(`Animation complete for ${rowData.JobNumber}-${rowData.ComponentNumber}`);
+                        $(this).off('animationend'); // Clean up event listener
+                    });
                 });
                 
-                // 5. Remove all rows after animation completes
+                // 5. Remove rows after animation completes
                 setTimeout(() => {
-                    table.rows(rowsToRemove.map(r => r.index()))
-                        .remove()
-                        .draw(false);
+                    console.group('Performing final removal');
+                    const indexes = rowsToRemove.map(r => r.index());
+                    console.log('Removing rows at indexes:', indexes);
                     
-                    // Force cleanup of any remaining artifacts
+                    table.rows(indexes).remove().draw(false);
+                    
+                    // Clean up any orphaned child rows
                     $('tr.child').each(function() {
                         if (!$(this).prev('tr').hasClass('parent')) {
+                            console.log('Removing orphaned child row:', this);
                             $(this).remove();
                         }
                     });
-                }, 500);
+                    
+                    console.log(`Removed ${indexes.length} rows successfully`);
+                    console.groupEnd();
+                }, 500); // Match this to your CSS animation duration
+                
+                console.groupEnd(); // Animating and removing rows
+                console.groupEnd(); // REMOVAL PROCESSING
             }
 
             // Process updates
-            changes.filter(c => c.type === 'update').forEach(change => {
-                const [jobNumber, componentNumber] = change.key.split('-');
-                const row = table.row((idx, data) =>
-                    data.JobNumber == jobNumber && data.ComponentNumber == componentNumber
-                );
+            const updateChanges = changes.filter(c => c.type === 'update');
+            if (updateChanges.length > 0) {
+                console.group('─── UPDATE PROCESSING ───');
+                console.log(' Total updates:', updateChanges.length);
 
-                if (row.length) {
-                    const rowData = row.data();
-                    const oldValues = {
-                        Ship_Date: rowData.Ship_Date,
-                        JobNumber: rowData.JobNumber,
-                        ComponentNumber: rowData.ComponentNumber
-                    };
+                // Phase 1: Update all row data first
+                console.group('PHASE 1: DATA UPDATES');
+                updateChanges.forEach(change => {
+                    const [jobNumber, componentNumber] = change.key.split('-');
+                    table.rows((idx, data) => 
+                        data.JobNumber == jobNumber && 
+                        data.ComponentNumber == componentNumber
+                    ).every(function() {
+                        const row = this; // Get the row API object
+                        const rowNode = $(row.node()); // Get the DOM node as jQuery object
+                        const oldData = row.data();
+                        
+                        console.log(` Updating ${change.key}`, {
+                            'Old Ship_Date': oldData.Ship_Date,
+                            'New Ship_Date': change.fields.Ship_Date,
+                            'Target Position': change.position
+                        });
 
-                    Object.assign(rowData, change.fields);
-                    row.data(rowData).invalidate();
+                        // Apply pulse animation to the row node
+                        rowNode.addClass('pulse');
+                        setTimeout(() => rowNode.removeClass('pulse'), 2000);
 
-                    const rowNode = $(row.node());
-                    rowNode.addClass('pulse');
-                    setTimeout(() => rowNode.removeClass('pulse'), 2000);
+                        // Update data
+                        Object.assign(oldData, change.fields);
+                        row.data(oldData).invalidate();
+                        return true;
+                    });
+                });
+                console.groupEnd();
 
-                    const sortRelevantChanged =
-                        ('Ship_Date' in change.fields && !areDatesEqual(oldValues.Ship_Date, change.fields.Ship_Date)) ||
-                        ('JobNumber' in change.fields && oldValues.JobNumber !== change.fields.JobNumber) ||
-                        ('ComponentNumber' in change.fields && oldValues.ComponentNumber !== change.fields.ComponentNumber);
+                // Phase 2: Process position changes
+                const positionChanges = updateChanges
+                    .filter(c => typeof c.position !== 'undefined' && c.position >= 0)
+                    .sort((a, b) => b.position - a.position); // Process highest positions first
+                    //.sort((a, b) => a.position - b.position); // Process from lowest to highest position
 
-                    if (sortRelevantChanged) {
-                        table.rows().invalidate();
+
+                if (positionChanges.length > 0) {
+                    console.group('PHASE 2: POSITION CHANGES');
+                    console.log(' Changes to process:', positionChanges.map(c => ({
+                        key: c.key,
+                        position: c.position,
+                        shipDate: c.fields.Ship_Date
+                    })));
+
+                    // Disable sorting temporarily
+                    table.settings()[0].oFeatures.bSort = false;
+                    
+                    // Get current data
+                    let allData = table.rows({ order: 'index' }).data().toArray();
+                    console.log('📊 Initial data order:', allData.map((r, i) => 
+                        `${i}: ${r.JobNumber}-${r.ComponentNumber} (${r.Ship_Date})`));
+
+                    // Track moved rows
+                    const movedRows = [];
+                    
+                    positionChanges.forEach((change, idx) => {
+                        console.group(` Move ${idx + 1}: ${change.key} to ${change.position}`);
+                        const [jobNumber, componentNumber] = change.key.split('-');
+                        
+                        // Find current index
+                        const currentIndex = allData.findIndex(row => 
+                            row.JobNumber == jobNumber && 
+                            row.ComponentNumber == componentNumber
+                        );
+                        console.log(' Found at index:', currentIndex);
+                        
+                        if (currentIndex !== -1 && currentIndex !== change.position) {
+                            // Calculate position adjustment
+                            const adjustment = movedRows.filter(m => 
+                                m.newPos < change.position && m.oldPos >= change.position
+                            ).length;
+                            
+                            const adjustedPosition = change.position + adjustment;
+                            console.log('🧮 Position adjustment:', {
+                                'Base position': change.position,
+                                'Adjustment': adjustment,
+                                'Final position': adjustedPosition
+                            });
+
+                            // Perform the move
+                            const [movedRow] = allData.splice(currentIndex, 1);
+                            allData.splice(adjustedPosition, 0, movedRow);
+                            movedRows.push({
+                                key: change.key,
+                                oldPos: currentIndex,
+                                newPos: adjustedPosition
+                            });
+                            
+                            console.log(' Removed from:', currentIndex);
+                            console.log(' Inserted at:', adjustedPosition);
+                            console.log(' Current order:', allData.map((r, i) => 
+                                `${i}: ${r.JobNumber}-${r.ComponentNumber}`));
+                        } else {
+                            console.log(' No move needed - already in position');
+                        }
+                        console.groupEnd();
+                    });
+
+                    // Phase 3: Apply changes
+                    console.group('PHASE 3: APPLY CHANGES');
+                    console.log('💾 Final data order:', allData.map((r, i) => 
+                        `${i}: ${r.JobNumber}-${r.ComponentNumber} (${r.Ship_Date})`));
+                    
+                    table.clear();
+                    table.rows.add(allData).draw();
+                    
+                    // Re-enable sorting
+                    table.settings()[0].oFeatures.bSort = true;
+                    if (table.order().length > 0) {
                         table.order(table.order()).draw();
-                    } else {
-                        row.draw(false);
                     }
+                    console.groupEnd();
+
+                    // Apply pulse to moved rows
+                    positionChanges.forEach(change => {
+                        const [jobNumber, componentNumber] = change.key.split('-');
+                        table.rows((idx, data) => 
+                            data.JobNumber == jobNumber && 
+                            data.ComponentNumber == componentNumber
+                        ).every(function() {
+                            const rowNode = $(this.node());
+                            rowNode.addClass('pulse');
+                            setTimeout(() => rowNode.removeClass('pulse'), 2000);
+                            return true;
+                        });
+                    });
+
+                    // Phase 4: Verification
+                    console.group('PHASE 4: VERIFICATION');
+                    positionChanges.forEach(change => {
+                        const [jobNumber, componentNumber] = change.key.split('-');
+                        const newIndex = table.rows({ order: 'index' }).indexes()
+                            .toArray()
+                            .findIndex(idx => {
+                                const row = table.row(idx).data();
+                                return row.JobNumber == jobNumber && 
+                                       row.ComponentNumber == componentNumber;
+                            });
+                        
+                        console.log(` ${change.key}:`, {
+                            'Expected': change.position,
+                            'Actual': newIndex,
+                            'Status': newIndex === change.position ? ' Correct' : ' Mismatch'
+                        });
+                        
+                        if (newIndex !== change.position) {
+                            console.error('💥 POSITION ERROR:', {
+                                'Expected Data': change.newData,
+                                'Actual Data': table.row(newIndex).data(),
+                                'Surrounding Data': [
+                                    table.row(newIndex-1)?.data(),
+                                    table.row(newIndex)?.data(),
+                                    table.row(newIndex+1)?.data()
+                                ]
+                            });
+                        }
+                    });
+                    console.groupEnd();
+                    console.groupEnd();
                 }
-            });
+                console.groupEnd();
+            }
 
             // Process inserts
             changes.filter(c => c.type === 'new').forEach(change => {
@@ -1082,6 +1267,18 @@ $(document).ready(function() {
                         allData.splice(change.position, 0, newRow);
                         table.clear();
                         table.rows.add(allData).draw();
+
+                        // Apply pulse to the new row
+                        table.rows((idx, data) => 
+                            data.JobNumber == change.data.JobNumber && 
+                            data.ComponentNumber == change.data.ComponentNumber
+                        ).every(function() {
+                            const rowNode = $(this.node());
+                            rowNode.addClass('pulse');
+                            setTimeout(() => rowNode.removeClass('pulse'), 2000);
+                            return true;
+                        });
+
                     } else {
                         // Add to end and re-sort
                         const addedRow = table.row.add(newRow).draw(false).node();

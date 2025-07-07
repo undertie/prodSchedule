@@ -281,10 +281,17 @@ label {
 }
 
 @keyframes pulseAnimation {
-  0%, 100% { background-color: inherit; }
-  50% { background-color: #ffeaa7; } /* light yellow pulse */
+  0%, 100% { 
+    background-color: inherit; 
+    box-shadow: none;
+  }
+  50% { 
+    background-color: #ffeaa7; /* light yellow */
+    box-shadow: 0 0 8px rgba(255, 234, 167, 0.8);
+  }
 }
 
+/* Fade out for removals */
 .fade-out {
   animation: fadeOutRow 0.5s forwards;
 }
@@ -296,7 +303,13 @@ label {
     height: 0;
     padding: 0;
     margin: 0;
+    border: none;
   }
+}
+
+/* Optional: Add transition for smooth sorting */
+table.dataTable tbody tr {
+  transition: background-color 0.3s ease;
 }
 
 /* details table */
