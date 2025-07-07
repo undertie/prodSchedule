@@ -28,6 +28,12 @@
 	<!-- Add this before your DataTables script -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 
+	<!-- RowReorder CSS -->
+	<link rel="stylesheet" href="https://cdn.datatables.net/rowreorder/1.5.0/css/rowReorder.dataTables.min.css">
+
+	<!-- RowReorder JS -->
+	<script src="https://cdn.datatables.net/rowreorder/1.5.0/js/dataTables.rowReorder.min.js"></script>
+
    <script type="text/javascript" src="script.js"></script>
 </head>
 	<script>
