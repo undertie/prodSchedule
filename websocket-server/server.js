@@ -77,6 +77,7 @@ async function fetchInitialData() {
 }
 
 async function sendInitialData(ws, clientId) {
+    console.log("I am in sendInitialData!");
     try {
         const data = await fetchInitialData();
         
@@ -766,10 +767,8 @@ wss.on('connection', (ws) => {
                     designerCode: request.designerCode
                 }));
             } else if (request.type === 'initialData') {
-                // Broadcast updated data
-                const data = await fetchInitialData();
-                broadcastData(data, 'initialData');
-            }                
+                sendInitialData(ws, clientId);
+            }               
         } catch (err) {
             console.error('Message handling failed:', err);
             ws.send(JSON.stringify({ type: 'error', message: err.message }));

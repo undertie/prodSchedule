@@ -2,7 +2,8 @@ $(document).ready(function() {
     // Global variables
     let table;
     let currentDeptFilter = null;
-    let isInitialized = false;
+    let isTableInitialized = false;
+    let initialDataRequested = false;
     const departmentMapping = [
         {
             text: "Coating",
@@ -238,6 +239,11 @@ $(document).ready(function() {
     };
 
     function initializeAll(initialData) {
+        // Skip if table is already initialized
+        if (isTableInitialized) {
+            console.log("Skipping reinitialization");
+            return;
+        }
         console.log("Starting initialization");
 
         // Ensure the container exists
@@ -259,7 +265,7 @@ $(document).ready(function() {
             table.clear().destroy();
             $('#prodTable').remove(); // Completely remove the table
 
-            isInitialized = false;
+            isTableInitialized = false;
             
             // Recreate the table structure
             container.append(`
@@ -393,7 +399,7 @@ $(document).ready(function() {
                     console.log("Restoring open rows");
                     restoreOpenRows(openRows);
                 }
-                isInitialized = true;
+                isTableInitialized = true;
             });
         } else {
             console.log("Waiting for WebSocket data...");
@@ -1419,10 +1425,9 @@ $(document).ready(function() {
             updateConnectionStatus('connected');
             
             // Request initial data immediately after connection opens
-            if (socket.readyState === WebSocket.OPEN) {
-                socket.send(JSON.stringify({ 
-                    type: 'initialData'
-                }));
+            if (!initialDataRequested) {
+                initialDataRequested = true;
+                socket.send(JSON.stringify({ type: 'initialData' }));
             }
         };
 
@@ -1469,19 +1474,17 @@ $(document).ready(function() {
                     break;
                     
                 case 'initialData':
-                    if (!isInitialized || response.fullUpdate) {
-                        // Always reinitialize if fullUpdate is true
+                   // Always update data but only initialize once
+                    if (!isTableInitialized) {
                         initializeAll(response.data);
-                        isInitialized = true;
-                    } else if (response.changes) {
-                        // Handle partial updates
-                        handleDataUpdate(response.changes);
                     } else {
-                        console.error("Invalid initialData format - missing data or changes");
+                        // Just update existing table
+                        handleDataUpdate(response.data);
                     }
                     break;
                     
                 case 'dataUpdate':
+                    console.log("dataUpdate?!");
                     handleDataUpdate(response.changes);
                     break;
                     
@@ -1764,6 +1767,9 @@ $(document).ready(function() {
 
     // Optional: Add visibility change detection to reconnect when tab becomes visible
     document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') {
+            isTableInitialized = false;
+        }
         if (document.visibilityState === 'visible' && 
             (!socket || socket.readyState === WebSocket.CLOSED)) {
 
