@@ -72,6 +72,7 @@
 	    <table border=0 id="prodTable" class="display" cellspacing="0" width="100%">
 	        <thead>
 	            <th>JobNumber</th> <!-- 0 -->
+	            <th>Job Comp</th> <!-- 40 -->
 	            <th>Job Status</th> <!-- 1 -->
 	            <th>Job In Date</th> <!-- 2 -->
 	            <th>Proof Due Date</th> <!-- 3 -->
@@ -111,7 +112,6 @@
 	            <th>Does It Blend</th> <!-- 37 -->
 	            <th>Did It Blend</th> <!-- 38 -->
 	            <th>Is It Wednesday</th> <!-- 39 -->
-	            <th>Job Comp</th> <!-- 40 -->
 	            <th>Mat Code</th> <!-- 41 -->
 	            <th>Mat Qty</th> <!-- 42 -->
 	            <th>Mat BWT</th> <!-- 43 -->

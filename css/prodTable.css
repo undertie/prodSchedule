@@ -203,7 +203,6 @@ label {
     font-family: Proxima Nova ExtraBold,Arial, sans-serif;
 }
 
-
 /* Make the first column header sticky for both horizontal and vertical scrolling */
 #prodTable thead th:first-child {
     position: sticky;
@@ -330,8 +329,6 @@ tr.fade-out td {
   opacity: 0;
   transition: opacity 0.5s ease;
 }
-
-
 
 /* details table */
 

@@ -267,6 +267,7 @@ $(document).ready(function() {
                     <thead>
                         <tr>
                             <th>JobNumber</th> <!-- 0 -->
+                            <th>Job Comp</th> <!-- 40 -->
                             <th>Job Status</th> <!-- 1 -->
                             <th>Job In Date</th> <!-- 2 -->
                             <th>Proof Due Date</th> <!-- 3 -->
@@ -306,7 +307,6 @@ $(document).ready(function() {
                             <th>Does It Blend</th> <!-- 37 -->
                             <th>Did It Blend</th> <!-- 38 -->
                             <th>Is It Wednesday</th> <!-- 39 -->
-                            <th>Job Comp</th> <!-- 40 -->
                             <th>Mat Code</th> <!-- 41 -->
                             <th>Mat Qty</th> <!-- 42 -->
                             <th>Mat BWT</th> <!-- 43 -->
@@ -462,7 +462,10 @@ $(document).ready(function() {
             "aaSorting": [],
             "paging": true,
             "pageLength": 100,
-            "bSort": false,
+            "bSort": false,            
+            "scrollX": false,
+            "autoWidth": true,
+            "fixedColumns": false,
             "rowReorder": true,  // Enable row reordering
             "colReorder": {
                 fixedColumnsLeft: 1,
@@ -628,9 +631,6 @@ $(document).ready(function() {
                 { data: 'Hunkler_Description' , name: 'Hunkler_Description' }, // 68
                 { data: 'Hunkler_Time' , name: 'Hunkler_Time' } // 69
             ],
-            "scrollX": false,
-            "autoWidth": true,
-            "fixedColumns": false,
             initComplete: function() {
         console.log("test4");
                 // Set up search handler INSIDE initComplete
@@ -808,6 +808,25 @@ $(document).ready(function() {
 
             sessionStorage.setItem('openRows', JSON.stringify(openRows));
         });
+
+        // scroll to top on page selection.
+        $('#prodTable').on('page.dt', function () {
+            setTimeout(() => {
+                const $table = $(this);
+                const scrollPos = $table.closest('.dataTables_wrapper').offset()?.top || 
+                                  $table.offset()?.top || 
+                                  0;
+
+                // Adjust upward a bit for margin/padding/header
+                const offsetAdjustment = 121;
+
+                window.scrollTo({
+                    top: scrollPos - offsetAdjustment,
+                    behavior: 'smooth'
+                });
+            }, 50);
+        });
+
     }
 
     $('#prodTable').on('keydown', '.notes-input', function(e) {
@@ -960,552 +979,211 @@ $(document).ready(function() {
         table.search(term).draw();
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-function applyDataUpdates(changes) {
-    console.log("Received changes with positions:");
-    changes.forEach(change => {
-        if (change.type === 'update') {
-            console.log(`- ${change.key}:`, {
-                position: change.position,
-                newShipDate: change.fields.Ship_Date,
-                newData: change.newData
-            });
-        }
-    });
-
-    try {
-        // === REMOVALS ===
-            const removals = changes.filter(c => c.type === 'remove');
-
-            if (removals.length > 0) {
-                console.group('─── REMOVAL PROCESSING ───');
-                console.log('Total removals:', removals.length);
-                
-                // 1. Collect all rows to be removed
-                const rowsToRemove = [];
-                const keysToRemove = new Set();
-                
-                removals.forEach(change => {
-                    const [jobNumber, componentNumber] = change.key.split('-');
-                    keysToRemove.add(change.key);
-                    
-                    table.rows((idx, data) => 
-                        data.JobNumber == jobNumber && 
-                        data.ComponentNumber == componentNumber
-                    ).every(function() {
-                        rowsToRemove.push(this);
-                        return true;
-                    });
+    function applyDataUpdates(changes) {
+        console.log("Received changes with positions:");
+        changes.forEach(change => {
+            if (change.type === 'update') {
+                console.log(`- ${change.key}:`, {
+                    position: change.position,
+                    newShipDate: change.fields.Ship_Date,
+                    newData: change.newData
                 });
-                
-                // 2. Clean up child rows and state
-                console.group('Cleaning up child rows');
-                rowsToRemove.forEach(row => {
-                    const rowNode = $(row.node());
+            }
+        });
+
+        try {
+            // === REMOVALS ===
+                const removals = changes.filter(c => c.type === 'remove');
+
+                if (removals.length > 0) {
+                    console.group('─── REMOVAL PROCESSING ───');
+                    console.log('Total removals:', removals.length);
                     
-                    // Handle child rows
-                    if (row.child) {
-                        console.log(`Processing child rows for ${row.data().JobNumber}-${row.data().ComponentNumber}`);
+                    // 1. Collect all rows to be removed
+                    const rowsToRemove = [];
+                    const keysToRemove = new Set();
+                    
+                    removals.forEach(change => {
+                        const [jobNumber, componentNumber] = change.key.split('-');
+                        keysToRemove.add(change.key);
                         
-                        // Hide if shown
-                        if (row.child.isShown && row.child.isShown()) {
-                            console.log('- Hiding child row');
-                            row.child.hide();
-                        }
-                        
-                        // Remove any lingering DOM elements
-                        const childRow = rowNode.next('tr.child');
-                        if (childRow.length) {
-                            console.log('- Removing child row DOM element');
-                            childRow.remove();
-                        }
-                        
-                        // Clear DataTables' internal tracking
-                        if (row.child.remove) {
-                            console.log('- Clearing internal child reference');
-                            row.child.remove();
-                        }
-                    }
-                    
-                    // Clean up classes
-                    rowNode.removeClass('shown dt-hasChild');
-                });
-                console.groupEnd();
-                
-                // 3. Update sessionStorage
-                console.group('Updating sessionStorage');
-                let openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
-                const beforeCount = openRows.length;
-                openRows = openRows.filter(row => 
-                    !keysToRemove.has(`${row.jobNumber}-${row.componentNumber}`)
-                );
-                sessionStorage.setItem('openRows', JSON.stringify(openRows));
-                console.log(`Removed ${beforeCount - openRows.length} entries from sessionStorage`);
-                console.groupEnd();
-                
-                // 4. Animate and remove rows
-                console.group('Animating and removing rows');
-                rowsToRemove.forEach(row => {
-                    const rowNode = $(row.node());
-                    const rowData = row.data();
-                    
-                    console.log(`Animating removal for ${rowData.JobNumber}-${rowData.ComponentNumber}`);
-                    rowNode.addClass('fade-out');
-                    
-                    // Optional: Add event listener for animation end
-                    rowNode.on('animationend', function() {
-                        console.log(`Animation complete for ${rowData.JobNumber}-${rowData.ComponentNumber}`);
-                        $(this).off('animationend'); // Clean up event listener
-                    });
-                });
-                
-                // 5. Remove rows after animation completes
-                setTimeout(() => {
-                    console.group('Performing final removal');
-                    const indexes = rowsToRemove.map(r => r.index());
-                    console.log('Removing rows at indexes:', indexes);
-                    
-                    table.rows(indexes).remove().draw(false);
-                    
-                    // Clean up any orphaned child rows
-                    $('tr.child').each(function() {
-                        if (!$(this).prev('tr').hasClass('parent')) {
-                            console.log('Removing orphaned child row:', this);
-                            $(this).remove();
-                        }
+                        table.rows((idx, data) => 
+                            data.JobNumber == jobNumber && 
+                            data.ComponentNumber == componentNumber
+                        ).every(function() {
+                            rowsToRemove.push(this);
+                            return true;
+                        });
                     });
                     
-                    console.log(`Removed ${indexes.length} rows successfully`);
+                    // 2. Clean up child rows and state
+                    console.group('Cleaning up child rows');
+                    rowsToRemove.forEach(row => {
+                        const rowNode = $(row.node());
+                        
+                        // Handle child rows
+                        if (row.child) {
+                            console.log(`Processing child rows for ${row.data().JobNumber}-${row.data().ComponentNumber}`);
+                            
+                            // Hide if shown
+                            if (row.child.isShown && row.child.isShown()) {
+                                console.log('- Hiding child row');
+                                row.child.hide();
+                            }
+                            
+                            // Remove any lingering DOM elements
+                            const childRow = rowNode.next('tr.child');
+                            if (childRow.length) {
+                                console.log('- Removing child row DOM element');
+                                childRow.remove();
+                            }
+                            
+                            // Clear DataTables' internal tracking
+                            if (row.child.remove) {
+                                console.log('- Clearing internal child reference');
+                                row.child.remove();
+                            }
+                        }
+                        
+                        // Clean up classes
+                        rowNode.removeClass('shown dt-hasChild');
+                    });
                     console.groupEnd();
-                }, 500); // Match this to your CSS animation duration
-                
-                console.groupEnd(); // Animating and removing rows
-                console.groupEnd(); // REMOVAL PROCESSING
+                    
+                    // 3. Update sessionStorage
+                    console.group('Updating sessionStorage');
+                    let openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
+                    const beforeCount = openRows.length;
+                    openRows = openRows.filter(row => 
+                        !keysToRemove.has(`${row.jobNumber}-${row.componentNumber}`)
+                    );
+                    sessionStorage.setItem('openRows', JSON.stringify(openRows));
+                    console.log(`Removed ${beforeCount - openRows.length} entries from sessionStorage`);
+                    console.groupEnd();
+                    
+                    // 4. Animate and remove rows
+                    console.group('Animating and removing rows');
+                    rowsToRemove.forEach(row => {
+                        const rowNode = $(row.node());
+                        const rowData = row.data();
+                        
+                        console.log(`Animating removal for ${rowData.JobNumber}-${rowData.ComponentNumber}`);
+                        rowNode.addClass('fade-out');
+                        
+                        // Optional: Add event listener for animation end
+                        rowNode.on('animationend', function() {
+                            console.log(`Animation complete for ${rowData.JobNumber}-${rowData.ComponentNumber}`);
+                            $(this).off('animationend'); // Clean up event listener
+                        });
+                    });
+                    
+                    // 5. Remove rows after animation completes
+                    setTimeout(() => {
+                        console.group('Performing final removal');
+                        const indexes = rowsToRemove.map(r => r.index());
+                        console.log('Removing rows at indexes:', indexes);
+                        
+                        table.rows(indexes).remove().draw(false);
+                        
+                        // Clean up any orphaned child rows
+                        $('tr.child').each(function() {
+                            if (!$(this).prev('tr').hasClass('parent')) {
+                                console.log('Removing orphaned child row:', this);
+                                $(this).remove();
+                            }
+                        });
+                        
+                        console.log(`Removed ${indexes.length} rows successfully`);
+                        console.groupEnd();
+                    }, 500); // Match this to your CSS animation duration
+                    
+                    console.groupEnd(); // Animating and removing rows
+                    console.groupEnd(); // REMOVAL PROCESSING
+                }
+
+            // === COMBINED INSERT + UPDATE REORDERING ===
+            const inserts = changes.filter(c => c.type === 'new');
+            const updates = changes.filter(c => c.type === 'update');
+
+            if (inserts.length > 0 || updates.length > 0) {
+                console.group('─── INSERT/UPDATE WITH SORTING ───');
+
+                const currentRows = table.rows().data().toArray();
+                const rowMap = new Map(currentRows.map(r => [`${r.JobNumber}-${r.ComponentNumber}`, r]));
+
+                // Apply updates in-place
+                updates.forEach(change => {
+                    const key = change.key;
+                    if (rowMap.has(key)) {
+                        const updated = { ...rowMap.get(key), ...change.fields };
+                        rowMap.set(key, updated);
+                    }
+                });
+
+                // Add inserts to map
+                inserts.forEach(change => {
+                    const key = `${change.data.JobNumber}-${change.data.ComponentNumber}`;
+                    const rowData = transformDataForTable(change.data);
+                    rowMap.set(key, rowData);
+                });
+
+                // Re-sort all rows by Ship_Date, JobNumber, then ComponentNumber
+                const sortedRows = Array.from(rowMap.values()).sort((a, b) => {
+                    const d1 = new Date(a.Ship_Date || '9999-12-31');
+                    const d2 = new Date(b.Ship_Date || '9999-12-31');
+                    if (d1 - d2 !== 0) return d1 - d2;
+
+                    const j1 = a.JobNumber?.toString().padStart(10, '0') || '';
+                    const j2 = b.JobNumber?.toString().padStart(10, '0') || '';
+                    if (j1 !== j2) return j1.localeCompare(j2);
+
+                    const c1 = a.ComponentNumber?.toString().padStart(10, '0') || '';
+                    const c2 = b.ComponentNumber?.toString().padStart(10, '0') || '';
+                    return c1.localeCompare(c2);
+                });
+
+                // Replace table contents (minimal redraw)
+                table.clear();
+                table.rows.add(sortedRows).draw(false);
+
+                // Animate affected rows
+                const keysToAnimate = new Set([
+                    ...updates.map(u => u.key),
+                    ...inserts.map(i => `${i.data.JobNumber}-${i.data.ComponentNumber}`)
+                ]);
+                setTimeout(() => {
+                    table.rows().every(function () {
+                        const data = this.data();
+                        const key = `${data.JobNumber}-${data.ComponentNumber}`;
+                        if (keysToAnimate.has(key)) {
+                            const node = $(this.node());
+                            node.addClass('pulse');
+                            setTimeout(() => node.removeClass('pulse'), 2000);
+                        }
+                    });
+                }, 10);
+
+                console.groupEnd();
             }
 
-        // === COMBINED INSERT + UPDATE REORDERING ===
-        const inserts = changes.filter(c => c.type === 'new');
-        const updates = changes.filter(c => c.type === 'update');
 
-        if (inserts.length > 0 || updates.length > 0) {
-            console.group('─── INSERT/UPDATE WITH SORTING ───');
-
-            const currentRows = table.rows().data().toArray();
-            const rowMap = new Map(currentRows.map(r => [`${r.JobNumber}-${r.ComponentNumber}`, r]));
-
-            // Apply updates in-place
-            updates.forEach(change => {
-                const key = change.key;
-                if (rowMap.has(key)) {
-                    const updated = { ...rowMap.get(key), ...change.fields };
-                    rowMap.set(key, updated);
-                }
-            });
-
-            // Add inserts to map
-            inserts.forEach(change => {
-                const key = `${change.data.JobNumber}-${change.data.ComponentNumber}`;
-                const rowData = transformDataForTable(change.data);
-                rowMap.set(key, rowData);
-            });
-
-            // Re-sort all rows by Ship_Date, JobNumber, then ComponentNumber
-            const sortedRows = Array.from(rowMap.values()).sort((a, b) => {
-                const d1 = new Date(a.Ship_Date || '9999-12-31');
-                const d2 = new Date(b.Ship_Date || '9999-12-31');
-                if (d1 - d2 !== 0) return d1 - d2;
-
-                const j1 = a.JobNumber?.toString().padStart(10, '0') || '';
-                const j2 = b.JobNumber?.toString().padStart(10, '0') || '';
-                if (j1 !== j2) return j1.localeCompare(j2);
-
-                const c1 = a.ComponentNumber?.toString().padStart(10, '0') || '';
-                const c2 = b.ComponentNumber?.toString().padStart(10, '0') || '';
-                return c1.localeCompare(c2);
-            });
-
-            // Replace table contents (minimal redraw)
-            table.clear();
-            table.rows.add(sortedRows).draw(false);
-
-            // Animate affected rows
-            const keysToAnimate = new Set([
-                ...updates.map(u => u.key),
-                ...inserts.map(i => `${i.data.JobNumber}-${i.data.ComponentNumber}`)
-            ]);
-            setTimeout(() => {
-                table.rows().every(function () {
-                    const data = this.data();
-                    const key = `${data.JobNumber}-${data.ComponentNumber}`;
-                    if (keysToAnimate.has(key)) {
-                        const node = $(this.node());
-                        node.addClass('pulse');
-                        setTimeout(() => node.removeClass('pulse'), 2000);
-                    }
-                });
-            }, 10);
-
-            console.groupEnd();
-        }
-
-
-    } catch (error) {
-        console.error("Error applying updates:", error);
-    }
-}
-
-function insertSortedByShipDate(rowData, allRows) {
-    const newDate = new Date(rowData.Ship_Date || '9999-12-31');
-    for (let i = 0; i < allRows.length; i++) {
-        const compDate = new Date(allRows[i].Ship_Date || '9999-12-31');
-        if (newDate < compDate) {
-            allRows.splice(i, 0, rowData);
-            return i;
+        } catch (error) {
+            console.error("Error applying updates:", error);
         }
     }
-    allRows.push(rowData);
-    return allRows.length - 1;
-}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // function applyDataUpdates(changes) {
-    //     console.log("Received changes with positions:");
-    //     changes.forEach(change => {
-    //         if (change.type === 'update') {
-    //             console.log(`- ${change.key}:`, {
-    //                 position: change.position,
-    //                 newShipDate: change.fields.Ship_Date,
-    //                 newData: change.newData
-    //             });
-    //         }
-    //     });
-
-    //     try {
-    //         // Process removals - optimized for multiple rows
-    //         const removals = changes.filter(c => c.type === 'remove');
-
-    //         if (removals.length > 0) {
-    //             console.group('─── REMOVAL PROCESSING ───');
-    //             console.log('Total removals:', removals.length);
-                
-    //             // 1. Collect all rows to be removed
-    //             const rowsToRemove = [];
-    //             const keysToRemove = new Set();
-                
-    //             removals.forEach(change => {
-    //                 const [jobNumber, componentNumber] = change.key.split('-');
-    //                 keysToRemove.add(change.key);
-                    
-    //                 table.rows((idx, data) => 
-    //                     data.JobNumber == jobNumber && 
-    //                     data.ComponentNumber == componentNumber
-    //                 ).every(function() {
-    //                     rowsToRemove.push(this);
-    //                     return true;
-    //                 });
-    //             });
-                
-    //             // 2. Clean up child rows and state
-    //             console.group('Cleaning up child rows');
-    //             rowsToRemove.forEach(row => {
-    //                 const rowNode = $(row.node());
-                    
-    //                 // Handle child rows
-    //                 if (row.child) {
-    //                     console.log(`Processing child rows for ${row.data().JobNumber}-${row.data().ComponentNumber}`);
-                        
-    //                     // Hide if shown
-    //                     if (row.child.isShown && row.child.isShown()) {
-    //                         console.log('- Hiding child row');
-    //                         row.child.hide();
-    //                     }
-                        
-    //                     // Remove any lingering DOM elements
-    //                     const childRow = rowNode.next('tr.child');
-    //                     if (childRow.length) {
-    //                         console.log('- Removing child row DOM element');
-    //                         childRow.remove();
-    //                     }
-                        
-    //                     // Clear DataTables' internal tracking
-    //                     if (row.child.remove) {
-    //                         console.log('- Clearing internal child reference');
-    //                         row.child.remove();
-    //                     }
-    //                 }
-                    
-    //                 // Clean up classes
-    //                 rowNode.removeClass('shown dt-hasChild');
-    //             });
-    //             console.groupEnd();
-                
-    //             // 3. Update sessionStorage
-    //             console.group('Updating sessionStorage');
-    //             let openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
-    //             const beforeCount = openRows.length;
-    //             openRows = openRows.filter(row => 
-    //                 !keysToRemove.has(`${row.jobNumber}-${row.componentNumber}`)
-    //             );
-    //             sessionStorage.setItem('openRows', JSON.stringify(openRows));
-    //             console.log(`Removed ${beforeCount - openRows.length} entries from sessionStorage`);
-    //             console.groupEnd();
-                
-    //             // 4. Animate and remove rows
-    //             console.group('Animating and removing rows');
-    //             rowsToRemove.forEach(row => {
-    //                 const rowNode = $(row.node());
-    //                 const rowData = row.data();
-                    
-    //                 console.log(`Animating removal for ${rowData.JobNumber}-${rowData.ComponentNumber}`);
-    //                 rowNode.addClass('fade-out');
-                    
-    //                 // Optional: Add event listener for animation end
-    //                 rowNode.on('animationend', function() {
-    //                     console.log(`Animation complete for ${rowData.JobNumber}-${rowData.ComponentNumber}`);
-    //                     $(this).off('animationend'); // Clean up event listener
-    //                 });
-    //             });
-                
-    //             // 5. Remove rows after animation completes
-    //             setTimeout(() => {
-    //                 console.group('Performing final removal');
-    //                 const indexes = rowsToRemove.map(r => r.index());
-    //                 console.log('Removing rows at indexes:', indexes);
-                    
-    //                 table.rows(indexes).remove().draw(false);
-                    
-    //                 // Clean up any orphaned child rows
-    //                 $('tr.child').each(function() {
-    //                     if (!$(this).prev('tr').hasClass('parent')) {
-    //                         console.log('Removing orphaned child row:', this);
-    //                         $(this).remove();
-    //                     }
-    //                 });
-                    
-    //                 console.log(`Removed ${indexes.length} rows successfully`);
-    //                 console.groupEnd();
-    //             }, 500); // Match this to your CSS animation duration
-                
-    //             console.groupEnd(); // Animating and removing rows
-    //             console.groupEnd(); // REMOVAL PROCESSING
-    //         }
-
-    //         // Process updates
-    //         const updateChanges = changes.filter(c => c.type === 'update');
-    //         if (updateChanges.length > 0) {
-    //             console.group('─── UPDATE PROCESSING ───');
-    //             console.log(' Total updates:', updateChanges.length);
-
-    //             // Phase 1: Update all row data first
-    //             console.group('PHASE 1: DATA UPDATES');
-    //             updateChanges.forEach(change => {
-    //                 const [jobNumber, componentNumber] = change.key.split('-');
-    //                 table.rows((idx, data) => 
-    //                     data.JobNumber == jobNumber && 
-    //                     data.ComponentNumber == componentNumber
-    //                 ).every(function() {
-    //                     const row = this;
-    //                     const rowNode = $(row.node());
-    //                     const oldData = row.data();
-                        
-    //                     console.log(` Updating ${change.key}`, {
-    //                         'Old Ship_Date': oldData.Ship_Date,
-    //                         'New Ship_Date': change.fields.Ship_Date,
-    //                         'Target Position': change.position
-    //                     });
-
-    //                     // Apply pulse animation
-    //                     rowNode.addClass('pulse');
-    //                     setTimeout(() => rowNode.removeClass('pulse'), 2000);
-
-    //                     // Update data
-    //                     Object.assign(oldData, change.fields);
-    //                     row.data(oldData).invalidate();
-    //                     return true;
-    //                 });
-    //             });
-    //             console.groupEnd();
-
-    //             // Phase 2: Process position changes
-    //             const positionChanges = updateChanges
-    //                 .filter(c => typeof c.position !== 'undefined' && c.position >= 0)
-    //                 .sort((a, b) => a.position - b.position);
-
-    //             if (positionChanges.length > 0) {
-    //                 console.group('─── POSITION CHANGES (WITH ANIMATIONS) ───');
-                    
-    //                 // 1. Create working copy of data
-    //                 let allData = table.rows().data().toArray();
-                    
-    //                 // 2. Prepare moves list and pulse rows immediately
-    //                 const moves = positionChanges.map(change => {
-    //                     const currentIdx = allData.findIndex(r => 
-    //                         `${r.JobNumber}-${r.ComponentNumber}` === change.key);
-                        
-    //                     // Apply pulse animation to source row immediately
-    //                     if (currentIdx >= 0) {
-    //                         const rowNode = $(table.row(currentIdx).node());
-    //                         rowNode.addClass('pulse');
-    //                         setTimeout(() => rowNode.removeClass('pulse'), 2000);
-    //                     }
-                        
-    //                     return {
-    //                         key: change.key,
-    //                         from: currentIdx,
-    //                         to: change.position,
-    //                         row: currentIdx >= 0 ? allData[currentIdx] : null
-    //                     };
-    //                 }).filter(m => m.from !== m.to && m.row);
-
-    //                 // 3. Process moves in phases
-    //                 const movedRows = [];
-                    
-    //                 // Phase 1: Remove rows (highest first)
-    //                 moves.sort((a, b) => b.from - a.from).forEach(move => {
-    //                     movedRows.unshift(allData.splice(move.from, 1)[0]);
-    //                 });
-                    
-    //                 // Phase 2: Insert rows (lowest first)
-    //                 moves.sort((a, b) => a.to - b.to).forEach(move => {
-    //                     allData.splice(move.to, 0, move.row);
-    //                 });
-                    
-    //                 // 4. Apply to DataTable
-    //                 table.clear();
-    //                 table.rows.add(allData).draw(false);
-                    
-    //                 // 5. Apply pulse to moved rows in new positions
-    //                 setTimeout(() => {
-    //                     moves.forEach(move => {
-    //                         const newIndex = allData.findIndex(r => 
-    //                             `${r.JobNumber}-${r.ComponentNumber}` === move.key);
-    //                         if (newIndex >= 0) {
-    //                             const rowNode = $(table.row(newIndex).node());
-    //                             rowNode.addClass('pulse');
-    //                             setTimeout(() => rowNode.removeClass('pulse'), 2000);
-    //                         }
-    //                     });
-    //                 }, 50); // Small delay to ensure DOM update
-                    
-    //                 // 6. Verification
-    //                 const finalData = table.rows().data().toArray();
-    //                 moves.forEach(move => {
-    //                     const actualPos = finalData.findIndex(r => 
-    //                         `${r.JobNumber}-${r.ComponentNumber}` === move.key);
-    //                     console.log(`Verify ${move.key}:`, {
-    //                         expected: move.to,
-    //                         actual: actualPos,
-    //                         status: actualPos === move.to ? 'CORRECT' : 'ERROR'
-    //                     });
-    //                 });
-                    
-    //                 console.groupEnd();
-    //             }
-    //         }
-
-
-    //         // Process inserts - optimized batch processing
-    //         const insertChanges = changes.filter(c => c.type === 'new');
-    //         if (insertChanges.length > 0) {
-    //             console.group('─── INSERT PROCESSING ───');
-    //             console.log('Total inserts:', insertChanges.length);
-                
-    //             // Get all current data
-    //             let allData = table.rows().data().toArray();
-    //             const insertedKeys = new Set();
-                
-    //             // Collect all new rows to insert
-    //             const rowsToInsert = [];
-    //             insertChanges.forEach(change => {
-    //                 const key = `${change.data.JobNumber}-${change.data.ComponentNumber}`;
-    //                 if (!insertedKeys.has(key)) {
-    //                     insertedKeys.add(key);
-    //                     rowsToInsert.push({
-    //                         data: transformDataForTable(change.data),
-    //                         position: change.position
-    //                     });
-    //                 }
-    //             });
-                
-    //             // Apply all inserts
-    //             rowsToInsert.forEach(row => {
-    //                 if (typeof row.position !== 'undefined') {
-    //                     allData.splice(row.position, 0, row.data);
-    //                 } else {
-    //                     allData.push(row.data);
-    //                 }
-    //             });
-                
-    //             // Clear and redraw with all new data
-    //             table.clear();
-    //             table.rows.add(allData).draw();
-                
-    //             // Apply pulse to all inserted rows
-    //             rowsToInsert.forEach(row => {
-    //                 const jobNumber = row.data.JobNumber;
-    //                 const componentNumber = row.data.ComponentNumber;
-                    
-    //                 table.rows((idx, data) => 
-    //                     data.JobNumber == jobNumber && 
-    //                     data.ComponentNumber == componentNumber
-    //                 ).every(function() {
-    //                     const rowNode = $(this.node());
-    //                     rowNode.addClass('pulse');
-    //                     setTimeout(() => rowNode.removeClass('pulse'), 2000);
-    //                     return true;
-    //                 });
-    //             });
-                
-    //             // Reapply sort if needed
-    //             if (table.order().length > 0) {
-    //                 table.order(table.order()).draw();
-    //             }
-                
-    //             console.groupEnd();
-    //         }
-
-    //     } catch (error) {
-    //         console.error("Error applying updates:", error);
-    //     }
-    // }
+    function insertSortedByShipDate(rowData, allRows) {
+        const newDate = new Date(rowData.Ship_Date || '9999-12-31');
+        for (let i = 0; i < allRows.length; i++) {
+            const compDate = new Date(allRows[i].Ship_Date || '9999-12-31');
+            if (newDate < compDate) {
+                allRows.splice(i, 0, rowData);
+                return i;
+            }
+        }
+        allRows.push(rowData);
+        return allRows.length - 1;
+    }
 
     function areDatesEqual(date1, date2) {
         if (!date1 || !date2) return false;
@@ -1739,6 +1417,13 @@ function insertSortedByShipDate(rowData, allRows) {
             console.log("reconnectAttempts should be 0: " + reconnectAttempts);
             setupHeartbeat();
             updateConnectionStatus('connected');
+            
+            // Request initial data immediately after connection opens
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ 
+                    type: 'initialData'
+                }));
+            }
         };
 
         socket.onerror = function(error) {
@@ -1795,16 +1480,6 @@ function insertSortedByShipDate(rowData, allRows) {
                         console.error("Invalid initialData format - missing data or changes");
                     }
                     break;
-
-                    //                 case 'initialData':
-                    // if (!isInitialized) {
-                    //     initializeAll(response.data);
-                    //     isInitialized = true;
-                    // } else {
-                    //     // Just update data instead of re-initializing
-                    //     handleDataUpdate(response.changes);
-                    // } 
-                    // break;
                     
                 case 'dataUpdate':
                     handleDataUpdate(response.changes);
