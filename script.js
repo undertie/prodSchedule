@@ -4,6 +4,18 @@ $(document).ready(function() {
     let currentDeptFilter = null;
     let isTableInitialized = false;
     let initialDataRequested = false;
+
+    // variables for automatic reconnect
+    let socket;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+    const reconnectDelay = 5000; // 5 seconds
+    let isReconnecting = false;
+
+    // variable for checking if rows are opon on data refresh
+    var drawHandler = null;
+    const openRows = new Set();
+
     const departmentMapping = [
         {
             text: "Coating",
@@ -1114,6 +1126,33 @@ $(document).ready(function() {
             if (inserts.length > 0 || updates.length > 0) {
                 console.group('─── INSERT/UPDATE WITH SORTING ───');
 
+                const selectedText = $('#deptFilter option:selected').text();
+                const isPrePress = selectedText === 'PrePress' || 
+                                  selectedText === 'Needs Proof' || 
+                                  selectedText === 'Proof Out' || 
+                                  selectedText === 'Imposition';
+
+                // Only preserve colors if we're not in PrePress mode
+                const classPreservation = new Map();
+                if (!isPrePress) {
+                    table.rows().every(function() {
+                        const rowData = this.data();
+                        const key = `${rowData.JobNumber}-${rowData.ComponentNumber}`;
+                        const rowNode = $(this.node());
+                        
+                        // Store all color classes
+                        const currentClasses = rowNode.attr('class') || '';
+                        const colorClasses = currentClasses.split(' ').filter(cls => 
+                            cls.includes(colorSessionId)
+                        );
+                        
+                        if (colorClasses.length) {
+                            classPreservation.set(key, colorClasses);
+                        }
+                    });
+                }
+
+                // Get current rows and create a mapping
                 const currentRows = table.rows().data().toArray();
                 const rowMap = new Map(currentRows.map(r => [`${r.JobNumber}-${r.ComponentNumber}`, r]));
 
@@ -1148,52 +1187,60 @@ $(document).ready(function() {
                     return c1.localeCompare(c2);
                 });
 
-                // Replace table contents (minimal redraw)
-                table.clear();
-                table.rows.add(sortedRows).draw(false);
+                // Replace table contents
+                    table.clear();
+                    table.rows.add(sortedRows).draw(false);
 
-                // Animate affected rows
-                const keysToAnimate = new Set([
-                    ...updates.map(u => u.key),
-                    ...inserts.map(i => `${i.data.JobNumber}-${i.data.ComponentNumber}`)
-                ]);
-                setTimeout(() => {
-                    table.rows().every(function () {
-                        const data = this.data();
-                        const key = `${data.JobNumber}-${data.ComponentNumber}`;
-                        if (keysToAnimate.has(key)) {
-                            const node = $(this.node());
-                            node.addClass('pulse');
-                            setTimeout(() => node.removeClass('pulse'), 2000);
+                    // Handle color restoration or reapplication
+                    setTimeout(() => {
+                        if (isPrePress) {
+                            // Reapply PrePress coloring using our shared function
+                            table.rows().every(function() {
+                                applyPrePressHighlighting($(this.node()), this.data());
+                            });
+                        } else {
+                            // Restore preserved colors for non-PrePress
+                            table.rows().every(function() {
+                                const rowData = this.data();
+                                const key = `${rowData.JobNumber}-${rowData.ComponentNumber}`;
+                                const preservedClasses = classPreservation.get(key);
+                                
+                                if (preservedClasses) {
+                                    const rowNode = $(this.node());
+                                    // Remove any existing color classes
+                                    const currentClasses = (rowNode.attr('class') || '').split(' ');
+                                    const cleanClasses = currentClasses
+                                        .filter(cls => !cls.includes(colorSessionId))
+                                        .join(' ');
+                                    
+                                    // Add back the preserved classes
+                                    rowNode.attr('class', `${cleanClasses} ${preservedClasses.join(' ')}`.trim());
+                                }
+                            });
                         }
-                    });
-                }, 10);
 
-                console.groupEnd();
-            }
+                        // Animate affected rows
+                        const keysToAnimate = new Set([
+                            ...updates.map(u => u.key),
+                            ...inserts.map(i => `${i.data.JobNumber}-${i.data.ComponentNumber}`)
+                        ]);
+                        
+                        table.rows().every(function() {
+                            const data = this.data();
+                            const key = `${data.JobNumber}-${data.ComponentNumber}`;
+                            if (keysToAnimate.has(key)) {
+                                const node = $(this.node());
+                                node.addClass('pulse');
+                                setTimeout(() => node.removeClass('pulse'), 2000);
+                            }
+                        });
+                    }, 50);
 
-
+                    console.groupEnd();
+                }
         } catch (error) {
             console.error("Error applying updates:", error);
         }
-    }
-
-    function insertSortedByShipDate(rowData, allRows) {
-        const newDate = new Date(rowData.Ship_Date || '9999-12-31');
-        for (let i = 0; i < allRows.length; i++) {
-            const compDate = new Date(allRows[i].Ship_Date || '9999-12-31');
-            if (newDate < compDate) {
-                allRows.splice(i, 0, rowData);
-                return i;
-            }
-        }
-        allRows.push(rowData);
-        return allRows.length - 1;
-    }
-
-    function areDatesEqual(date1, date2) {
-        if (!date1 || !date2) return false;
-        return new Date(date1).getTime() === new Date(date2).getTime();
     }
 
     function applyDepartmentFilter() {
@@ -1261,16 +1308,13 @@ $(document).ready(function() {
 
     function applyRowFilter(deptValue) {
         const selectedText = $('#deptFilter option:selected').text();
-        const isPrePress =
-            selectedText === 'PrePress' ||
-            selectedText === 'Needs Proof' ||
-            selectedText === 'Proof Out' ||
-            selectedText === 'Imposition';
+        const isPrePress = selectedText === 'PrePress' ||
+                          selectedText === 'Needs Proof' ||
+                          selectedText === 'Proof Out' ||
+                          selectedText === 'Imposition';
 
         const values = deptValue.split(',');
         const columnsToCheck = ['Next_Comp_Process'];
-        //const columnsToCheck = ['Next_Cover_Process', 'Next_Body_Process', 'C1MP_M_Proc', 'C2MP_M_Proc'];
-        //const columnsToCheck = ['Last_Cover_Process', 'Last_Body_Process', 'Next_Cover_Process', 'Next_Body_Process'];
 
         // Clear existing filter
         if (currentDeptFilter) {
@@ -1290,36 +1334,17 @@ $(document).ready(function() {
                     matchFound = true;
                     const rowNode = table.row(dataIndex).node();
                     
-                    // Remove any existing session classes
-                    $(rowNode).removeClass(function(index, className) {
-                        return (className.match(new RegExp(`(^|\\s)${colorSessionId}-\\S+`, 'g')) || []).join(' ');
-                    });
-
                     if (isPrePress) {
-                    // PrePress department coloring logic
-                    if (rowData.Designer) {
-                        const designerExists = designers.some(d => d.EmployeeName === rowData.Designer);
-                        if (designerExists) {
-                            // Valid designer - use their specific color
-                            const safeName = rowData.Designer.replace(/\s+/g, '-');
-                            $(rowNode).addClass(`${colorSessionId}-designer-${safeName}`);
-                        } else {
-                            // Unknown designer - use default color
-                            $(rowNode).addClass(`${colorSessionId}-designer-default`);
-                        }
+                        applyPrePressHighlighting(rowNode, rowData);
                     } else {
-                        // No designer assigned - use default color
-                        $(rowNode).addClass(`${colorSessionId}-designer-default`);
+                        // Other departments - process-based coloring
+                        const processClass = `${colorSessionId}-match-col-${colName.replace(/_/g, '-')}`;
+                        $(rowNode).addClass(processClass);
                     }
-                } else {
-                    // Other departments - process-based coloring
-                    const processClass = `${colorSessionId}-match-col-${colName.replace(/_/g, '-')}`;
-                    $(rowNode).addClass(processClass);
+                    break;
                 }
-                break;
             }
-        }
-        return matchFound;
+            return matchFound;
         };
 
         // Clear any existing filters first
@@ -1331,6 +1356,29 @@ $(document).ready(function() {
         $.fn.dataTable.ext.search.push(currentDeptFilter);
         
         table.draw();
+    }
+
+    // Shared function for PrePress highlighting
+    function applyPrePressHighlighting(rowNode, rowData) {
+        // Remove any existing session classes
+        $(rowNode).removeClass(function(index, className) {
+            return (className.match(new RegExp(`(^|\\s)${colorSessionId}-\\S+`, 'g')) || []).join(' ');
+        });
+
+        if (rowData.Designer) {
+            const designerExists = designers.some(d => d.EmployeeName === rowData.Designer);
+            if (designerExists) {
+                // Valid designer - use their specific color
+                const safeName = rowData.Designer.replace(/\s+/g, '-');
+                $(rowNode).addClass(`${colorSessionId}-designer-${safeName}`);
+            } else {
+                // Unknown designer - use default color
+                $(rowNode).addClass(`${colorSessionId}-designer-default`);
+            }
+        } else {
+            // No designer assigned - use default color
+            $(rowNode).addClass(`${colorSessionId}-designer-default`);
+        }
     }
 
     function applyColumnVisibility(deptText) {
@@ -1390,16 +1438,6 @@ $(document).ready(function() {
         }
     }
 
-    // variables for automatic reconnect
-    let socket;
-    let reconnectAttempts = 0;
-    const maxReconnectAttempts = 5;
-    const reconnectDelay = 5000; // 5 seconds
-
-    // variable for checking if rows are opon on data refresh
-    var drawHandler = null;
-    const openRows = new Set();
-
     // Initialize WebSocket
     function initializeWebSocket() {
         socket = new WebSocket('wss://ampd.documation.com:8080');
@@ -1419,7 +1457,8 @@ $(document).ready(function() {
 
         socket.onopen = function(event) {
             console.log("WebSocket is open now.");
-            reconnectAttempts = 0;
+            reconnectAttempts = 0; // Reset counter on successful connection
+            isReconnecting = false;
             console.log("reconnectAttempts should be 0: " + reconnectAttempts);
             setupHeartbeat();
             updateConnectionStatus('connected');
@@ -1439,7 +1478,7 @@ $(document).ready(function() {
             updateConnectionStatus('disconnected');
             console.log('WebSocket disconnected:', event.code, event.reason);
 
-            if (event.code !== 1000) { // Don't reconnect if closed normally
+            if (event.code !== 1000 && !isReconnecting) { // Don't reconnect if closed normally
               attemptReconnect();
             }
         };
@@ -1727,7 +1766,7 @@ $(document).ready(function() {
         table.rows().every(function() {
             if (this.child.isShown()) {
                 this.child.hide();
-                $(this.node()).removeClass('shown');
+                $(this.node()).removeClass('shown dt-hasChild');
             }
         });
 
@@ -1745,13 +1784,25 @@ $(document).ready(function() {
 
     // force recconection functions
     function attemptReconnect() {
-        if (reconnectAttempts < maxReconnectAttempts) {
-            updateConnectionStatus('reconnecting');
-            reconnectAttempts++;
-            const delay = reconnectAttempts * reconnectDelay;
-            console.log(`Attempting to reconnect in ${delay/1000} seconds... (Attempt ${reconnectAttempts}/${maxReconnectAttempts})`);
+        if (isReconnecting) return;
         
-            setTimeout(initializeWebSocket, delay);
+        if (reconnectAttempts < maxReconnectAttempts) {
+            isReconnecting = true;
+            updateConnectionStatus('reconnecting');
+            
+            // Exponential backoff with jitter
+            const delay = Math.min(
+                reconnectDelay * Math.pow(2, reconnectAttempts),
+                30000 // max 30 seconds
+            ) + Math.random() * 1000; // add some jitter
+            
+            console.log(`Attempting to reconnect in ${Math.round(delay/1000)} seconds... (Attempt ${reconnectAttempts + 1}/${maxReconnectAttempts})`);
+            
+            setTimeout(() => {
+                reconnectAttempts++;
+                isReconnecting = false;
+                initializeWebSocket();
+            }, delay);
         } else {
             console.log('Max reconnection attempts reached. Please refresh the page.');
             updateConnectionStatus('disconnected');

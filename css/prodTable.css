@@ -18,7 +18,7 @@ label {
     height: 110px;
     top: 0; /* Stick to the top of the viewport */
     background-color: #f6891f; /* Match your design */
-    z-index: 1000; /* Ensure it stays above other elements */
+    z-index: 999; /* Ensure it stays above other elements */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add shadow for separation */
 }
 
@@ -116,7 +116,7 @@ label {
     background-color: gray; /* Default/unknown state */
     border: 2px solid white;
     box-shadow: 0 0 3px rgba(0,0,0,0.2);
-    z-index: 9999; /* Higher than everything else */
+    z-index: 999; /* Higher than everything else */
     transition: background-color 0.3s ease;
 }
 
@@ -199,7 +199,7 @@ label {
     text-align: left;
     position: sticky;
     top: 120px; /* Adjust based on header height */
-    z-index: 998; /* Ensure headers stay above table rows */
+    z-index: 222; /* Ensure headers stay above table rows */
     font-family: Proxima Nova ExtraBold,Arial, sans-serif;
 }
 
@@ -207,7 +207,7 @@ label {
 #prodTable thead th:first-child {
     position: sticky;
     left: 0; /* Stick to the left for horizontal scrolling */
-    z-index: 999; /* Higher z-index to ensure it stays above other headers */
+    z-index: 333 /* Higher z-index to ensure it stays above other headers */
     background-color: #00478a; /* Match the header background color */
 }
 

@@ -221,13 +221,13 @@ async function updateNotes(jobNumber, componentNumber, field, value) {
         const result = await request.query(query);
         console.log('Update successful, rows affected:', result.rowsAffected);
 
-        if (result.rowsAffected[0] > 0) {
-            // Fetch the updated data
-            const updatedData = await fetchInitialData();
+        // if (result.rowsAffected[0] > 0) {
+        //     // Fetch the updated data
+        //     const updatedData = await fetchInitialData();
 
-            // Broadcast only the changes
-            broadcastData(updatedData, 'initialData');
-        }
+        //     // Broadcast only the changes
+        //     broadcastData(updatedData, 'initialData');
+        // }
         return true;
     } catch (err) {
         console.error('Update notes failed:', {

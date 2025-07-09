@@ -1,9 +1,14 @@
+<?php
+session_start();
+?>
+
 <html>
 <head>
     <meta charset="utf-8">
     <title>Production Schedule</title>
 
 	<link rel="stylesheet" type="text/css" href="css/prodTable.css?version=1.5">
+	<link rel="stylesheet" type="text/css" href="css/emailCSS.css">
     <!-- Load in Google fonts -->
     <link href="https://fonts.googleapis.com/css?family=Muli" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Baloo+Chettan" rel="stylesheet">
@@ -35,6 +40,7 @@
 	<script src="https://cdn.datatables.net/rowreorder/1.5.0/js/dataTables.rowReorder.min.js"></script>
 
    <script type="text/javascript" src="script.js"></script>
+   <script type="text/javascript" src="emailJS.js"></script>
 </head>
 	<script>
 	
@@ -44,6 +50,58 @@
 	        <div id="makeFixed">
 	            <h1>Production Schedule</h1>
 	            <div class="header-row">
+
+					<?php
+					if (isset($_SESSION['bug_report_status'])) {
+					    $alertType = $_SESSION['bug_report_status'] === 'success' ? 'alert-success' : 'alert-danger';
+					    echo '<div class="alert ' . $alertType . '" style="position: static; z-index: 1000;">
+					            ' . htmlspecialchars($_SESSION['bug_report_message']) . '
+					          </div>';
+					    
+					    // Clear the message after displaying
+					    unset($_SESSION['bug_report_status']);
+					    unset($_SESSION['bug_report_message']);
+					}
+					?>
+
+				 	<!-- Report Bug Button -->
+				    <button id="reportBugBtn" class="report-bug-btn">Report Bug <i class="fa fa-bug" aria-hidden="true"></i></button>
+
+				    <!-- Bug Report Modal -->
+				    <div id="bugReportModal" class="modal">
+				        <div class="modal-content">
+				            <span class="close">&times;</span>
+				            <h2>Report a Bug</h2>
+				            <form id="bugReportForm" action="emailBackend.php" method="POST" enctype="multipart/form-data">
+				                <div class="form-group">
+				                    <label for="name">Your Name:</label>
+				                    <input type="text" id="name" name="name" required>
+				                </div>
+				                <div class="form-group">
+				                    <label for="subject">Subject:</label>
+				                    <input type="text" id="subject" name="subject" required>
+				                </div>
+				                <div class="form-group">
+				                    <label for="description">Description:</label>
+				                    <textarea id="description" name="description" rows="5" required></textarea>
+				                </div>
+				                <div class="form-group">
+				                    <label for="screenshot">Screenshot:</label>
+				                    <div class="screenshot-container">
+				                        <div id="screenshotPreview" class="screenshot-preview"></div>
+				                        <input type="file" id="screenshotUpload" name="screenshot" accept="image/*" style="display: none;">
+				                    </div>
+				                </div>
+				                <input type="hidden" id="screenshotData" name="screenshotData">
+				                <input type="hidden" name="redirect_to" value="index.php">
+				                <button type="submit" class="submit-btn">Send Report</button>
+				            </form>
+				        </div>
+				    </div>
+
+
+
+
 	                <!-- Buttons on the left -->
 	                <div class="buttons-container">
 	                </div>
