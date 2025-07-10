@@ -134,7 +134,7 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
-    margin-right: 20px; /* Space before h1 */
+    margin-left: 210px; /* Space before h1 */
 }
 
 .report-bug-btn:hover {

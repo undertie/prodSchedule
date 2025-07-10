@@ -48,6 +48,7 @@ label {
 /* Sticky h1 */
 #makeFixed h1 {
     margin: 0; /* Remove default margin */
+    left: 200px;
     color: #333;
     font-size: 33px; /* Adjust as needed */
     font-family: Proxima Nova ExtraBold,Arial, sans-serif;
@@ -65,8 +66,17 @@ label {
 /* Buttons container */
 #makeFixed .buttons-container {
     display: flex;
-    gap: 10px; /* Space between buttons */
-    margin-left: 10px;
+    gap: 10px;
+    position: absolute;
+    bottom: 0;
+    left: 10px;
+    order: 3;
+}
+
+.dt-button {
+    background-color: #00478a !important;
+    color: white !important;
+    border-radius: 7px !important;
 }
 
 /* Filters container */

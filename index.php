@@ -17,28 +17,16 @@ session_start();
     <!-- Use Google CDN to host the jQuery library for quicker load times -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <!-- The link and script tags here are loading the classes and functions for 'Datatables Buttons' -->
-	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css"/>
-	<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-
+	<link rel="stylesheet" href="https://cdn.datatables.net/v/dt/dt-1.13.6/b-2.4.1/b-html5-2.4.1/datatables.min.css">
+	<script src="https://cdn.datatables.net/v/dt/dt-1.13.6/b-2.4.1/b-html5-2.4.1/datatables.min.js"></script>
 	<!-- Optional: Column Reorder -->
 	<link rel="stylesheet" href="https://cdn.datatables.net/colreorder/1.6.2/css/colReorder.dataTables.min.css">
 	<script src="https://cdn.datatables.net/colreorder/1.6.2/js/dataTables.colReorder.min.js"></script>
-
 	<!-- CSS -->
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
-
 	<!-- JS (after jQuery) -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-	
 	<!-- Add this before your DataTables script -->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-
-	<!-- RowReorder CSS -->
-	<link rel="stylesheet" href="https://cdn.datatables.net/rowreorder/1.5.0/css/rowReorder.dataTables.min.css">
-
-	<!-- RowReorder JS -->
-	<script src="https://cdn.datatables.net/rowreorder/1.5.0/js/dataTables.rowReorder.min.js"></script>
-
    <script type="text/javascript" src="script.js"></script>
    <script type="text/javascript" src="emailJS.js"></script>
 </head>
@@ -99,26 +87,17 @@ session_start();
 				        </div>
 				    </div>
 
-
-
-
 	                <!-- Buttons on the left -->
 	                <div class="buttons-container">
 	                </div>
+	                
 	                <!-- Filters in the middle -->
 	                <div class="filters">
 	                    <label for="deptFilter">Department:</label>
 	                    <select id="deptFilter">
 	                    </select>
 	                </div>
-	                <!--
-                    <div class="process-status-container">
-                        <div class="process-box match-col-Last-Cover-Process-Header">Last-Cover-Process</div>
-                        <div class="process-box match-col-Last-Body-Process-Header">Last-Body-Process</div>
-                        <div class="process-box match-col-Next-Cover-Process-Header">Next-Cover-Process</div>
-                        <div class="process-box match-col-Next-Body-Process-Header">Next-Body-Process</div>
-                    </div>
-	                -->
+
 	                <!-- Search on the right -->
 	                <div class="search-container">
 	                </div>

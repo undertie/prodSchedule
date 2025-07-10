@@ -490,10 +490,6 @@ $(document).ready(function() {
                 stateSave: false // Disable state saving
             },
             dom: 'Brtip',
-            buttons: [
-                { extend: 'copy', className: "columnsButton" },
-                { extend: 'excel', className: "columnsButton" }
-            ],
             columns: [
                 { data: 'JobNumber' , name: 'JobNumber' }, // 0
                 { data: 'ComponentNumber' , name: 'ComponentNumber' }, // 40
