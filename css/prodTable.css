@@ -387,9 +387,9 @@ tr.fade-out td {
 /* end designer prepress dropdown */
 
 /* Designer-specific highlighting */
-[class*="-designer-Samantha-Jaskowski"] { background-color: #FFD700 !important; }
+[class*="-designer-Samantha-Jaskowski"] { background-color: #478331 !important; }
 [class*="-designer-Kyle-Stuttgen"] { background-color: #87CEEB !important; }
-[class*="-designer-Adam-Mueller"] { background-color: #98FB98 !important; }
+[class*="-designer-Adam-Mueller"] { background-color: #fff708 !important; }
 
 /* Fallback for unassigned designers */
 [class*="-designer-default"] { background-color: #E6E6FA !important; }
