@@ -79,13 +79,6 @@ label {
     border-radius: 7px !important;
 }
 
-/* Filters container */
-#makeFixed .filters {
-    display: flex;
-    gap: 10px; /* Space between filter elements */
-    align-items: center; /* Center vertically */
-}
-
 /* Search container */
 #makeFixed .search-container {
     display: flex;
@@ -394,6 +387,36 @@ tr.fade-out td {
 /* Fallback for unassigned designers */
 [class*="-designer-default"] { background-color: #E6E6FA !important; }
 /* End Designer-specific highlighting */
+
+/* Priority color classes */
+[class*="-priority-single"] { background-color: #FFFF99 !important; }
+[class*="-priority-double"] { background-color: #FF9980 !important; }
+
+/* Left-aligned priority indicators */
+#leftTemplateTable {
+    display: flex;
+    gap: 15px;
+    position: relative;
+    margin-right: auto; /* Pushes everything else to the right */
+    padding-left: 7%;
+}
+
+/* Priority indicator items */
+#priority-indicator {
+    padding: 10px 15px 10px 15px;
+    border-radius: 7px;
+    font-weight: bold;
+}
+
+/* Center-aligned filters */
+.filters {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
 
 /* Responsive table */
 @media screen and (max-width: 768px) {

@@ -77,7 +77,6 @@ async function fetchInitialData() {
 }
 
 async function sendInitialData(ws, clientId) {
-    console.log("I am in sendInitialData!");
     try {
         const data = await fetchInitialData();
         
@@ -290,9 +289,9 @@ function broadcastData(newData, type = 'initialData') {
 
     // Apply the same sorting as your stored procedure
     const sortedData = [...newData].sort((a, b) => {
-        // 1. Compare Ship_Date (handle null/undefined dates)
-        const dateA = a.Ship_Date ? new Date(a.Ship_Date) : new Date(0);
-        const dateB = b.Ship_Date ? new Date(b.Ship_Date) : new Date(0);
+        // 1. Compare Projected Ship_Date (handle null/undefined dates)
+        const dateA = a.Projected_Ship_Date ? new Date(a.Projected_Ship_Date) : new Date(0);
+        const dateB = b.Projected_Ship_Date ? new Date(b.Projected_Ship_Date) : new Date(0);
         const dateDiff = dateA - dateB;
         if (dateDiff !== 0) return dateDiff;
 
@@ -319,7 +318,7 @@ function broadcastData(newData, type = 'initialData') {
     const message = {
         type,
         timestamp: Date.now(),
-        sortOrder: ['Ship_date', 'JobNumber', 'ComponentNumber'] // Include sort criteria
+        sortOrder: ['Projected_Ship_date', 'JobNumber', 'ComponentNumber'] // Include sort criteria
     };
 
     if (type === 'initialData') {
@@ -344,24 +343,23 @@ function broadcastData(newData, type = 'initialData') {
                 );
             }
             // Add this for updates that affect sorting
-            if (change.type === 'update' && 'Ship_Date' in change.fields) {
+            if (change.type === 'update' && 'Projected_Ship_Date' in change.fields) {
                 const [jobNumber, componentNumber] = change.key.split('-');
                 change.position = sortedData.findIndex(item => 
                     item.JobNumber === jobNumber && 
                     item.ComponentNumber.toString() === componentNumber &&
-                    item.Ship_Date === change.fields.Ship_Date // Verify exact match
+                    item.Projected_Ship_Date === change.fields.Projected_Ship_Date // Verify exact match
                 );
                 
                 // Include full row data for client verification
                 change.newData = sortedData[change.position];
                 
                 console.log(`Update ${change.key} confirmed position: ${change.position}`, {
-                    expectedShipDate: change.fields.Ship_Date,
-                    actualShipDate: sortedData[change.position]?.Ship_Date
+                    expectedShipDate: change.fields.Projected_Ship_Date,
+                    actualShipDate: sortedData[change.position]?.Projected_Ship_Date
                 });
             }
-            console.log('Update positions:');
-            if (change.type === 'update' && 'Ship_Date' in change.fields) {
+            if (change.type === 'update' && 'Projected_Ship_Date' in change.fields) {
                 console.log(`- ${change.key}: position ${change.position}`);
             }
         });
@@ -372,11 +370,11 @@ function broadcastData(newData, type = 'initialData') {
         // Add search preservation flag
         message.preserveSearch = true;
 
-        console.log('Sorted data order (first 10 rows):');
-        sortedData.slice(0, 10).forEach((item, index) => {
-            console.log(`#${index}: ${item.JobNumber}-${item.ComponentNumber}`, 
-                       `Ship_Date: ${item.Ship_Date}`);
-        });
+        // console.log('Sorted data order (first 10 rows):');
+        // sortedData.slice(0, 10).forEach((item, index) => {
+        //     console.log(`#${index}: ${item.JobNumber}-${item.ComponentNumber}`, 
+        //                `Projected_Ship_Date: ${item.Projected_Ship_Date}`);
+        // });
     }
 
     // Stringify once
@@ -384,17 +382,13 @@ function broadcastData(newData, type = 'initialData') {
 
     let sentCount = 0;
     clients.forEach(({ ws, metadata }) => {
-        console.log("broadcastData test1:");
         if (ws.readyState === WebSocket.OPEN) {
-        console.log("broadcastData test2:");
             ws.send(messageString, (err) => {
-        console.log("broadcastData test3:");
                 if (err) {
                     console.error(`Error sending to ${metadata.id}:`, err);
                     ws.terminate();
                     clients.delete(metadata.id);
                 } else {
-        console.log("broadcastData test4:");
                     sentCount++;
                     metadata.lastActivity = Date.now();
                 }
@@ -617,7 +611,7 @@ setInterval(async () => {
     } catch (err) {
         console.error('Periodic update failed:', err);
     }
-}, 25000);
+}, 420000); // broadcast every 7 minutes
 
 // WebSocket server
 wss.on('connection', (ws) => {
