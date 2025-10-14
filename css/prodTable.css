@@ -392,6 +392,24 @@ tr.fade-out td {
 [class*="-priority-single"] { background-color: #FFFF99 !important; }
 [class*="-priority-double"] { background-color: #FF9980 !important; }
 
+/* First cell priority highlighting */
+td[class*="-priority-single-cell"] { background-color: #FFFF99 !important; }
+td[class*="-priority-double-cell"] { background-color: #FF9980 !important; }
+
+/* Whole row priority highlighting */
+tr[class*="-priority-single"] { background-color: #FFFF99 !important; }
+tr[class*="-priority-double"] { background-color: #FF9980 !important; }
+
+/* PrePress designer highlighting */
+tr[class*="-designer-"] > td:not(:first-child) {
+    background-color: inherit;
+}
+
+/* For designer highlighting */
+td[class*="-designer-"] {
+    font-weight: bold;
+}
+
 /* Left-aligned priority indicators */
 #leftTemplateTable {
     display: flex;

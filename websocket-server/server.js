@@ -4,11 +4,20 @@ const fs = require('fs');
 const sql = require('mssql');
 
 // Paths to your SSL/TLS certificate and key files
+// const options = {
+//     cert: fs.readFileSync('/etc/apache2/ssl/walsworth.crt'), // Primary certificate
+//     key: fs.readFileSync('/etc/apache2/ssl/walsworth.key'),  // Private key
+//     ca: fs.readFileSync('/etc/apache2/ssl/intermediate.crt'),  // Intermediate certificate chain
+//     servername: 'ampd.walsworth.com',
+// };
+
 const options = {
-    cert: fs.readFileSync('/etc/apache2/ssl/documation.cer'), // Primary certificate
-    key: fs.readFileSync('/etc/apache2/ssl/documation.key'),  // Private key
-    ca: fs.readFileSync('/etc/apache2/ssl/intermediate.crt'),  // Intermediate certificate chain
-    servername: 'ampd.documation.com',
+    cert: fs.readFileSync('./cert.pem'),  // Self-signed certificate
+    key: fs.readFileSync('./key.pem'),    // Private key
+    // No CA needed for self-signed in development
+    // Add these to handle self-signed certificates better
+    rejectUnauthorized: false,
+    requestCert: false
 };
 
 // Database config with increased timeout
@@ -28,6 +37,69 @@ const poolConnect = pool.connect();
 
 // Create server
 const server = https.createServer(options);
+server.on('request', (req, res) => {
+    console.log(`HTTP ${req.method} ${req.url} from ${req.socket.remoteAddress}`);
+    
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    
+    // Handle preflight OPTIONS request
+    if (req.method === 'OPTIONS') {
+        res.writeHead(200);
+        res.end();
+        return;
+    }
+    
+    // Serve a simple HTML page for certificate acceptance
+    if (req.method === 'GET' && (req.url === '/' || req.url === '/health')) {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>WebSocket Server - Certificate Acceptance</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 40px; text-align: center; }
+                    .success { color: green; font-size: 24px; }
+                    .info { color: #666; margin: 20px 0; }
+                    .link { 
+                        display: inline-block; 
+                        background: #007bff; 
+                        color: white; 
+                        padding: 12px 24px; 
+                        text-decoration: none; 
+                        border-radius: 5px; 
+                        margin: 10px 0;
+                        font-size: 16px;
+                    }
+                    .link:hover {
+                        background: #0056b3;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="success"> WebSocket Server is Running</div>
+                <div class="info">SSL Certificate accepted successfully.</div>
+                <div class="info">
+                    <a href="https://ampd.walsworth.com/prodSchedule/index.php" class="link">
+                        Go to Production Schedule
+                    </a>
+                </div>
+                <div class="info">You can now close this tab or click the link above.</div>
+            
+                <script>
+                    console.log('WebSocket server health check - SSL certificate accepted');
+                </script>
+            </body>
+            </html>
+        `);
+    } else {
+        res.writeHead(200, { 'Content-Type': 'text/plain' });
+        res.end('WebSocket Server OK\n');
+    }
+});
 const wss = new WebSocket.Server({ server });
 
 // Track active clients
@@ -611,7 +683,7 @@ setInterval(async () => {
     } catch (err) {
         console.error('Periodic update failed:', err);
     }
-}, 420000); // broadcast every 7 minutes
+}, 30000); // broadcast every 7 minutes
 
 // WebSocket server
 wss.on('connection', (ws) => {
@@ -777,8 +849,11 @@ wss.on('connection', (ws) => {
 });
 
 // Start server
-server.listen(8080, () => {
-    console.log('Secure WebSocket server running on wss://10.0.0.111:8080');
+server.listen(8080, '0.0.0.0', () => {
+    console.log('✅ Secure WebSocket server running on:');
+    console.log('   - wss://localhost:8080');
+    console.log('   - wss://ampd.walsworth.com:8080');
+    console.log('   - wss://[server-ip]:8080');
 });
 
 // Cleanup on exit

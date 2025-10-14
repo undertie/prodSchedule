@@ -4,6 +4,7 @@ $(document).ready(function() {
     let currentDeptFilter = null;
     let isTableInitialized = false;
     let initialDataRequested = false;
+    let currentNotSearch = null;
 
     // variables for automatic reconnect
     let socket;
@@ -32,37 +33,40 @@ $(document).ready(function() {
             ]
         },
         {
-            text: "CSR", //Eventually Filter by CSR Name instead of Next_Process except for "Review" which would be for the daily review of the schedule
+            text: "CSR", 
             values: [],
             subsections: [
                 {
                     text: "Amber",
-                    values: ["Amber Henke", "6610", "6611", "6612", "6613", "6625", "6615", "6616", "6620", "6621", "6505", "6506", "6510", "6151", "6126", "6305", "6306", "6325", "6540", "5900", "5901", "5906", "6800", "6832", "5951", "5952", "6525", "6425", "6427", "6404", "6405", "6411", "6421", "1000", "1055", "1060", "1062", "1064", "1066", "1160", "1165", "1305", "1310", "1445", "1460", "5301", "5302", "5303", "3000", "3010", "3011", "3012", "3019", "3020", "3022", "5100", "5110", "5120", "5500", "5515", "5525", "5545", "5555", "5565", "5800", "5801", "5803", "5804", "5805", "5806", "5807", "5808", "5809", "5802", "5851", "5852", "6251", "6252", "6705", "6710", "6715", "6719", "6720", "6723", "6729", "6728", "6730", "6731", "6700", "6702", "6725", "6451", "6453", "6452", "6460", "6461", "6385", "6390", "6395", "6415", "6416", "6417", "6450", "6455"]
+                    values: ["Amber Henke"]
                 },
                 {
                     text: "Brent",
-                    values: ["Brent Squires", "6610", "6611", "6612", "6613", "6625", "6615", "6616", "6620", "6621", "6505", "6506", "6510", "6151", "6126", "6305", "6306", "6325", "6540", "5900", "5901", "5906", "6800", "6832", "5951", "5952", "6525", "6425", "6427", "6404", "6405", "6411", "6421", "1000", "1055", "1060", "1062", "1064", "1066", "1160", "1165", "1305", "1310", "1445", "1460", "5301", "5302", "5303", "3000", "3010", "3011", "3012", "3019", "3020", "3022", "5100", "5110", "5120", "5500", "5515", "5525", "5545", "5555", "5565", "5800", "5801", "5803", "5804", "5805", "5806", "5807", "5808", "5809", "5802", "5851", "5852", "6251", "6252", "6705", "6710", "6715", "6719", "6720", "6723", "6729", "6728", "6730", "6731", "6700", "6702", "6725", "6451", "6453", "6452", "6460", "6461", "6385", "6390", "6395", "6415", "6416", "6417", "6450", "6455"]
+                    values: ["Brent Squires"]
+                },
+                {
+                    text: "Capstone",
+                    values: ["cpstone"]
                 },
                 {
                     text: "Cathy",
-                    values: ["Cathy Rosolack", "6610", "6611", "6612", "6613", "6625", "6615", "6616", "6620", "6621", "6505", "6506", "6510", "6151", "6126", "6305", "6306", "6325", "6540", "5900", "5901", "5906", "6800", "6832", "5951", "5952", "6525", "6425", "6427", "6404", "6405", "6411", "6421", "1000", "1055", "1060", "1062", "1064", "1066", "1160", "1165", "1305", "1310", "1445", "1460", "5301", "5302", "5303", "3000", "3010", "3011", "3012", "3019", "3020", "3022", "5100", "5110", "5120", "5500", "5515", "5525", "5545", "5555", "5565", "5800", "5801", "5803", "5804", "5805", "5806", "5807", "5808", "5809", "5802", "5851", "5852", "6251", "6252", "6705", "6710", "6715", "6719", "6720", "6723", "6729", "6728", "6730", "6731", "6700", "6702", "6725", "6451", "6453", "6452", "6460", "6461", "6385", "6390", "6395", "6415", "6416", "6417", "6450", "6455"]
+                    values: ["Cathy Rosolack"]
                 },
                 {
                     text: "Gabbi",
-                    values: ["Gabrielle Gentry", "6610", "6611", "6612", "6613", "6625", "6615", "6616", "6620", "6621", "6505", "6506", "6510", "6151", "6126", "6305", "6306", "6325", "6540", "5900", "5901", "5906", "6800", "6832", "5951", "5952", "6525", "6425", "6427", "6404", "6405", "6411", "6421", "1000", "1055", "1060", "1062", "1064", "1066", "1160", "1165", "1305", "1310", "1445", "1460", "5301", "5302", "5303", "3000", "3010", "3011", "3012", "3019", "3020", "3022", "5100", "5110", "5120", "5500", "5515", "5525", "5545", "5555", "5565", "5800", "5801", "5803", "5804", "5805", "5806", "5807", "5808", "5809", "5802", "5851", "5852", "6251", "6252", "6705", "6710", "6715", "6719", "6720", "6723", "6729", "6728", "6730", "6731", "6700", "6702", "6725", "6451", "6453", "6452", "6460", "6461", "6385", "6390", "6395", "6415", "6416", "6417", "6450", "6455"]
+                    values: ["Gabrielle Gentry"]
                 },
                 {
                     text: "Lisa",
-                    values: ["Lisa Douglas", "6610", "6611", "6612", "6613", "6625", "6615", "6616", "6620", "6621", "6505", "6506", "6510", "6151", "6126", "6305", "6306", "6325", "6540", "5900", "5901", "5906", "6800", "6832", "5951", "5952", "6525", "6425", "6427", "6404", "6405", "6411", "6421", "1000", "1055", "1060", "1062", "1064", "1066", "1160", "1165", "1305", "1310", "1445", "1460", "5301", "5302", "5303", "3000", "3010", "3011", "3012", "3019", "3020", "3022", "5100", "5110", "5120", "5500", "5515", "5525", "5545", "5555", "5565", "5800", "5801", "5803", "5804", "5805", "5806", "5807", "5808", "5809", "5802", "5851", "5852", "6251", "6252", "6705", "6710", "6715", "6719", "6720", "6723", "6729", "6728", "6730", "6731", "6700", "6702", "6725", "6451", "6453", "6452", "6460", "6461", "6385", "6390", "6395", "6415", "6416", "6417", "6450", "6455"]
+                    values: ["Lisa Douglas"]
                 },
                 {
                     text: "Sarah",
-                    values: ["Sarah Woodford", "6610", "6611", "6612", "6613", "6625", "6615", "6616", "6620", "6621", "6505", "6506", "6510", "6151", "6126", "6305", "6306", "6325", "6540", "5900", "5901", "5906", "6800", "6832", "5951", "5952", "6525", "6425", "6427", "6404", "6405", "6411", "6421", "1000", "1055", "1060", "1062", "1064", "1066", "1160", "1165", "1305", "1310", "1445", "1460", "5301", "5302", "5303", "3000", "3010", "3011", "3012", "3019", "3020", "3022", "5100", "5110", "5120", "5500", "5515", "5525", "5545", "5555", "5565", "5800", "5801", "5803", "5804", "5805", "5806", "5807", "5808", "5809", "5802", "5851", "5852", "6251", "6252", "6705", "6710", "6715", "6719", "6720", "6723", "6729", "6728", "6730", "6731", "6700", "6702", "6725", "6451", "6453", "6452", "6460", "6461", "6385", "6390", "6395", "6415", "6416", "6417", "6450", "6455"]
+                    values: ["Sarah Woodford"]
                 },
                 {
                     text: "Review",
-                    values: ["In Production"]
-                    //values: [ "6610", "6611", "6612", "6613", "6625", "6615", "6616", "6620", "6621", "6505", "6506", "6510", "6151", "6126", "6305", "6306", "6325", "6540", "5900", "5901", "5906", "6800", "6832", "5951", "5952", "6525", "6425", "6427", "6404", "6405", "6411", "6421", "1000", "1055", "1060", "1062", "1064", "1066", "1160", "1165", "1305", "1310", "1445", "1460", "5301", "5302", "5303", "3000", "3010", "3011", "3012", "3019", "3020", "3022", "5100", "5110", "5120", "5500", "5515", "5525", "5545", "5555", "5565", "5800", "5801", "5803", "5804", "5805", "5806", "5807", "5808", "5809", "5802", "5851", "5852", "6251", "6252", "6705", "6710", "6715", "6719", "6720", "6723", "6729", "6728", "6730", "6731", "6700", "6702", "6725", "6451", "6453", "6452", "6460", "6461", "6385", "6390", "6395", "6415", "6416", "6417", "6450", "6455"]
+                    values: ["In Production", "NoCap"]
                 },
                 {
                     text: "*",
@@ -156,7 +160,7 @@ $(document).ready(function() {
                 }
             ]
         },
-        {   // Added 29 April -EH
+        {   
             text: "Saddle-Stitch",
             values: ["6251", "6252"]
         },
@@ -200,11 +204,12 @@ $(document).ready(function() {
         "CSR": ['Customer_CSR'],
         "Amber": ['Customer_CSR'], // Customer_CSR = Amber
         "Brent": ['Customer_CSR'], // Customer_CSR = Brent
+        "Capstone": ['Is_It_Capstone'], //cpstone
         "Cathy": ['Customer_CSR'], // Customer_CSR = Cathy
         "Gabbi": ['Customer_CSR'], // Customer_CSR = Gabbi
         "Lisa": ['Customer_CSR'], // Customer_CSR = Lisa
         "Sarah": ['Customer_CSR'], // Customer_CSR = Sarah
-        "Review": ['Status'], // does not include any shipdate = 1/1/1900
+        "Review": ['Status', 'Is_It_Capstone'], // In Production and Not Capstone
         "*": ['JobPriority'],
         "Drill": ['Drill_Process'], 
         "Folders": ['Next_Comp_Process'],
@@ -241,52 +246,46 @@ $(document).ready(function() {
         //added 17June EH
         "Amber": ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Projected_Ship_Date'],
         "Brent": ['JobNumber', 'PrepressNotes', 'PostpressNotes', 'Job_In_Date', 'Proof_Due_Date', 'Projected_Ship_Date', 'JobDescription', 'CustName', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description', 'MP_Description', 'Designer'],
+        "Capstone": ['JobNumber', 'Projected_Ship_Date', 'PostpressNotes', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Next_Comp_Description'],
         "Cathy": ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Projected_Ship_Date'],
-        "Gabbi": ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Projected_Ship_Date'],
+        "Gabbi": ['JobNumber', 'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Mat_BWT', 'Mat_Description', 'Projected_Ship_Date'],
         "Lisa":  ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Projected_Ship_Date'],
         "Sarah": ['JobNumber', 'PrepressNotes', 'PostpressNotes', 'Job_In_Date', 'Proof_Due_Date', 'Projected_Ship_Date', 'JobDescription', 'CustName', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description', 'MP_Description', 'Designer'],
-        "Review": ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Projected_Ship_Date'],
-        //added 17June -EH
-        "*": ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Projected_Ship_Date'],
-        "Lamination": ['JobNumber', 'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Cover_Description', 'NCP_Time'],
-        "UV Coating": ['JobNumber', 'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Cover_Description', 'NCP_Time'],
-            // "Drill" Defined by "C1MP_M_Proc" OR "C2MP_M_Proc" IN ["6505", "6506", "6510"] Until "NEXT_Comp_Process" > 6510
+        "Review": ['JobNumber', 'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Next_Comp_Description', 'Does_it_blend', 'Main_Process', 'Select_Main_Process', 'Print_Type', 'Select_Department', 'Master_Ship'],
+        "*": ['JobNumber', 'Projected_Ship_Date', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Projected_Ship_Date'],
+        "Lamination": ['JobNumber', 'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Cover_Description', 'NCP_Time'],
+        "UV Coating": ['JobNumber', 'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Cover_Description', 'NCP_Time'],
         "Drill": ['JobNumber',  'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
-        "Folders": ['JobNumber',  'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
-        "Hand Bindery": ['JobNumber',  'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
-        "Hunkler": ['JobNumber',  'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
-            //"Mail" Defined by a "Yes" answer in the "Does it blend" column
-        "Mail": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'Does_it_blend', 'Did_it_blend','Is_It_Wednesday', 'Carrier', 'ShipType'],
-            // "MBO" Defined by "C1MP_M_Proc" IN ["5951", "5952"]
-        "MBO": ['JobNumber',  'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity',  'Last_Completed_Comp_Description', 'Next_Comp_Time'],
-        "Morgana": ['JobNumber',  'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'Next_Comp_Description', 'NBP_Time'],
-        "Perfect Binders": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'Last_Comp3_Description', 'NBP_Time', 'Mat_Description'],
-            // "BQ 470" Defined by "C2MP_M_Proc" IN ["6425", "6427"] Until Next_Comp_Process is > 6500
-        "BQ 470": ['JobNumber',  'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
-            // "SB-07" Defined by "C2MP_M_Proc" IN ["6404", "6405"] Until Next_Comp_Process is > 6500
-        "SB-07": ['JobNumber',  'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'], 
-            // "SB-09" Defined by "C2MP_M_Proc" IN ["6411", "6421"] Until Next_Comp_Process is > 6500
-        "SB-09": ['JobNumber',  'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
+        "Folders": ['JobNumber',  'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
+        "Hand Bindery": ['JobNumber',  'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
+        "Hunkler": ['JobNumber',  'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
+        "Mail": ['JobNumber', 'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'Does_it_blend', 'Did_it_blend','Is_It_Wednesday', 'Carrier', 'ShipType'],
+        "MBO": ['JobNumber',  'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity',  'Last_Completed_Comp_Description', 'Next_Comp_Time'],
+        "Morgana": ['JobNumber',  'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'Next_Comp_Description', 'NBP_Time'],
+        "Perfect Binders": ['JobNumber', 'Main_Process', 'Select_Main_Process', 'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'Mat_Description'],
+        "BQ 470": ['JobNumber',  'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
+        "SB-07": ['JobNumber',  'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'], 
+        "SB-09": ['JobNumber',  'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
         // "PrePress": ['JobNumber',  'JobStatus', 'PrepressNotes', 'Designer', 'JobStatus', 'ComponentNumber', 'CustName', 'JobDescription', 'NCP_Time', 'NBP_Time', 'Proof_Due_Date', 'Customer_CSR', 'Projected_Ship_Date'],
         "Needs Proof": ['JobNumber', 'PrepressNotes', 'Designer', 'JobStatus', 'ComponentNumber', 'CustName', 'JobDescription', 'NCP_Time', 'NBP_Time', 'Proof_Due_Date', 'Customer_CSR', 'JobStatus', 'Projected_Ship_Date'],
         "Proof Out": ['JobNumber', 'PrepressNotes', 'Designer', 'JobStatus', 'ComponentNumber', 'CustName', 'JobDescription', 'NCP_Time', 'NBP_Time', 'Proof_Due_Date', 'Customer_CSR', 'JobStatus', 'Projected_Ship_Date'],
         "Imposition": ['JobNumber', 'PrepressNotes', 'Designer', 'JobStatus', 'ComponentNumber', 'CustName', 'JobDescription', 'NCP_Time', 'NBP_Time', 'Proof_Due_Date', 'Customer_CSR', 'JobStatus', 'Projected_Ship_Date'],
         "Priming": ['JobNumber', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Next_Comp_Time'],
         // "Print"
-        "Print":  ['JobNumber', 'JobStatus', 'PostpressNotes', 'ComponentNumber', 'Print_Time', 'JobStatus', 'Projected_Ship_Date',  'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Cover_Description', 'Mat_Qty', 'Mat_BWT', 'Mat_Description', 'Mat_Code', 'Press_Size', 'Press_Out', 'Customer_CSR', 'Does_it_blend', 'Did_it_blend', 'Parent_Sheet_Size', 'Parent_Out', 'Print_Type'],
-        "HP100K": ['JobNumber', 'JobStatus', 'PostpressNotes', 'ComponentNumber', 'Print_Time', 'JobStatus', 'Projected_Ship_Date',  'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Cover_Description', 'Mat_Qty', 'Mat_BWT', 'Mat_Description', 'Mat_Code', 'Press_Size', 'Press_Out', 'Customer_CSR'],
+        "Print":  ['JobNumber', 'JobStatus', 'Print_Type', 'Select_Department', 'Next_Comp_Description', 'PostpressNotes', 'ComponentNumber', 'Print_Time', 'Projected_Ship_Date',  'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Cover_Description', 'Mat_Qty', 'Mat_BWT', 'Mat_Description', 'Mat_Code', 'Press_Size', 'Press_Out', 'Customer_CSR', 'Does_it_blend', 'Did_it_blend', 'Parent_Sheet_Size', 'Parent_Out'],
+        "HP100K": ['JobNumber', 'JobStatus', 'PostpressNotes', 'ComponentNumber', 'Print_Time', 'JobStatus', 'Projected_Ship_Date',  'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'Mat_Qty', 'Mat_BWT', 'Mat_Description', 'Mat_Code', 'Press_Size', 'Press_Out', 'Customer_CSR'],
         "T200 Inkjet": ['JobNumber', 'JobStatus', 'PostpressNotes', 'ComponentNumber', 'Print_Time', 'JobStatus', 'Projected_Ship_Date',  'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Mat_Code', 'Mat_Qty', 'Mat_BWT', 'Mat_Description', 'Press_Size', 'Customer_CSR'],
         "Toner": ['JobNumber', 'JobStatus', 'PostpressNotes', 'ComponentNumber', 'Print_Time', 'JobStatus', 'Projected_Ship_Date',  'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Cover_Description', 'Mat_Code', 'Mat_Qty', 'Mat_BWT', 'Mat_Description', 'Parent_Sheet_Size', 'Parent_Out', 'Press_Size', 'Press_Out', 'Print_Type', 'Customer_CSR'],
             // "Saddle-Stitch" Defined by "C1MP_M_Proc" OR "C2MP_M_Proc" IN ["6251", "6252"]
-        "Saddle-Stitch": ['JobNumber', 'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
-        "Shipping": ['JobNumber', 'JobStatus', 'PostpressNotes', 'JobStatus', 'Projected_Ship_Date', 'CustName', 'JobDescription', 'Customer_CSR', 'Quantity', 'Carrier', 'ShipType', 'PONumber'],
+        "Saddle-Stitch": ['JobNumber', 'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
+        "Shipping": ['JobNumber', 'Projected_Ship_Date', 'PostpressNotes', 'Master_Ship', 'Ships_With', 'CustName', 'JobDescription', 'Customer_CSR', 'Quantity', 'Carrier', 'ShipType', 'Next_Comp_Description'],
             // "Shrink-Wrap" Defined by a "Yes" in the "Is_It_Wednesday" column 
-        "Shrink-Wrap": ['JobNumber', 'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'Last_Cover_Description', 'Last_Body_Description', 'Next_Comp_Time'],
-        "Spiral": ['JobNumber', 'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time', 'Next_Comp_Description' ],
+        "Shrink-Wrap": ['JobNumber', 'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Size', 'Last_Cover_Description', 'Last_Body_Description', 'Next_Comp_Time'],
+        "Spiral": ['JobNumber', 'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time', 'Next_Comp_Description' ],
         // "Smart-Binders"
-        "BQ-480": ['JobNumber', 'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
-        "BQ-500": ['JobNumber', 'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
-        "Wire-O": ['JobNumber', 'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time']
+        "BQ-480": ['JobNumber', 'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
+        "BQ-500": ['JobNumber', 'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time'],
+        "Wire-O": ['JobNumber', 'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Comp2_Pages', 'Quantity', 'Size', 'CoverCoating', 'Last_Cover_Description', 'Last_Body_Description', 'NBP_Time']
 
         // Add more rules as needed
     };
@@ -375,7 +374,7 @@ $(document).ready(function() {
                             <th>MP_Time</th> <!-- 35 -->
                             <th>Does It Blend</th> <!-- 37 -->
                             <th>Did It Blend</th> <!-- 38 -->
-                            <th>Is It Wednesday</th> <!-- 39 -->
+                            <th>Does It SW</th> <!-- 39 Is It Wednesday -->
                             <th>Mat Code</th> <!-- 41 -->
                             <th>Mat Qty</th> <!-- 42 -->
                             <th>Mat BWT</th> <!-- 43 -->
@@ -405,6 +404,11 @@ $(document).ready(function() {
                             <th>Hunkler_Process</th> <!-- 67 -->
                             <th>Hunkler_Description</th> <!-- 68 -->
                             <th>Hunkler_Time</th> <!-- 69 -->
+                            <th>Is_It_Capstone</th> <!-- 70 -->
+                            <th>Master_Ship</th> <!-- 71 -->
+                            <th>Ships_With</th> <!-- 72 -->
+                            <th>Select Main Process</th> <!-- 73 -->
+                            <th>Select Department</th> <!-- 74 -->
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -538,6 +542,26 @@ $(document).ready(function() {
                 fixedColumnsLeft: 1,
                 stateSave: false // Disable state saving
             },
+            "order": [[7, 'asc']], // Order by Projected_Ship_Date (column 7)
+            "drawCallback": function(settings) {
+                addShipDateSeparators();
+            },
+                // adds a seperator after each unique projected ship date
+                // "rowGroup": {
+                //     dataSrc: 'Projected_Ship_Date',
+                //     startRender: function (rows, group) {
+                //         // Use a large colspan that will cover all columns
+                //         return $('<tr style="background-color: #ebebe0;">')
+                //             .append('<td colspan="100" style="font-weight: bold; padding: 8px;">')
+                //             .html('Ship Date: ' + group);
+                //     },
+                //     endRender: function (rows, group) {
+                //         // Use a large colspan that will cover all columns
+                //         return $('<tr style="background-color: #ebebe0;">')
+                //             .append('<td colspan="100">')
+                //             .html('<hr style="margin: 10px 0; border: 1px solid #ebebe0 background-color: #ebebe0;">');
+                //     }
+                // },
             dom: 'Brtip',
             columns: [
                 { data: 'JobNumber' , name: 'JobNumber' }, // 0
@@ -596,7 +620,8 @@ $(document).ready(function() {
                 { data: 'MP_Time' , name: 'MP_Time' }, // 35        Changed 30 May
                 { data: 'Does_it_blend' , name: 'Does_it_blend' }, // 37
                 { data: 'Did_it_blend' , name: 'Did_it_blend' }, // 38
-                { data: 'Is_It_Wednesday' , name: 'Is_It_Wednesday' }, // 39
+                { data: 'Is_It_Wednesday' , name: 'Is_It_Wednesday',
+                        defaultContent: ''}, // provides empty string if field is missing }, // 39
                 { data: 'Mat_Code' , name: 'Mat_Code' }, // 41
                 { data: 'Mat_Qty' , name: 'Mat_Qty' }, // 42
                 { data: 'Mat_BWT' , name: 'Mat_BWT' }, // 43
@@ -692,7 +717,95 @@ $(document).ready(function() {
                 { data: 'Drill_Time' , name: 'Drill_Time' }, // 66
                 { data: 'Hunkler_Process' , name: 'Hunkler_Process' }, // 67
                 { data: 'Hunkler_Description' , name: 'Hunkler_Description' }, // 68
-                { data: 'Hunkler_Time' , name: 'Hunkler_Time' } // 69
+                { data: 'Hunkler_Time' , name: 'Hunkler_Time' }, // 69
+                { data: 'Is_It_Capstone' , name: 'Is_It_Capstone' ,
+                        defaultContent: ''}, // provides empty string if field is missing // 70
+                { data: 'Master_Ship' , name: 'Master_Ship'  ,
+                        defaultContent: ''}, // 71
+                { data: 'Ships_With' , name: 'Ships_With'  ,
+                        defaultContent: ''}, // 72
+                {
+                    data: 'Select_Main_Process',
+                    name: 'Select_Main_Process',
+                    defaultContent: '',
+                    render: function(data, type, row) {
+                        if (type !== 'display') {
+                            return data;
+                        }
+                        
+                        let options = '<option value="">Select main process</option>';
+                        
+                        // Get main process options from departmentMapping
+                        const mainProcesses = [];
+                        
+                        // Add Perfect Binders subsections (corrected from Smart-Binders)
+                        const perfectBindersSection = departmentMapping.find(dept => dept.text === "Perfect Binders");
+                        if (perfectBindersSection && perfectBindersSection.subsections) {
+                            perfectBindersSection.subsections.forEach(subsection => {
+                                mainProcesses.push({
+                                    displayText: subsection.text,
+                                    value: subsection.values[0] // First value from the array
+                                });
+                            });
+                        }
+                        
+                        // Create options
+                        if (mainProcesses.length > 0) {
+                            mainProcesses.forEach(process => {
+                                // FIX: Compare the actual value, not the object
+                                const selected = (row.Select_Main_Process === process.value) ? 'selected' : '';
+                                options += `<option value="${process.value}" ${selected}>${process.displayText}</option>`;
+                            });
+                        }
+                        
+                        return `<select class="main-process-select form-control" 
+                                  data-job="${row.JobNumber}" 
+                                  data-component="${row.ComponentNumber}">
+                                ${options}
+                              </select>`;
+                    }
+                }, // 73
+                {
+                    data: 'Select_Department',
+                    name: 'Select_Department', 
+                    defaultContent: '',
+                    render: function(data, type, row) {
+                        if (type !== 'display') {
+                            return data;
+                        }
+                        
+                        let options = '<option value="">Select department</option>';
+                        
+                        // Get department options from departmentMapping
+                        const departments = [];
+                        
+                        // Add Print subsections
+                        const printSection = departmentMapping.find(dept => dept.text === "Print");
+                        if (printSection && printSection.subsections) {
+                            printSection.subsections.forEach(subsection => {
+                                departments.push({
+                                    displayText: subsection.text,
+                                    value: subsection.values[0] // First value from the array
+                                });
+                            });
+                        }
+                        
+                        // Create options
+                        if (departments.length > 0) {
+                            departments.forEach(dept => {
+                                // FIX: Compare the actual value, not the object
+                                const selected = (row.Select_Department === dept.value) ? 'selected' : '';
+                                options += `<option value="${dept.value}" ${selected}>${dept.displayText}</option>`;
+                            });
+                        }
+                        
+                        return `<select class="department-select form-control" 
+                                  data-job="${row.JobNumber}" 
+                                  data-component="${row.ComponentNumber}">
+                                ${options}
+                              </select>`;
+                    }
+                } // 74
             ],
             initComplete: function() {
                 // Set up search handler INSIDE initComplete
@@ -710,6 +823,58 @@ $(document).ready(function() {
             }
         });
         // end Initialize DataTable
+
+        function addShipDateSeparators() {
+    const table = $('#prodTable').DataTable();
+    const rows = table.rows({ order: 'applied', search: 'applied' }).nodes();
+    const data = table.rows({ order: 'applied', search: 'applied' }).data().toArray();
+    
+    // Remove existing separators and headers
+    $('.ship-date-separator, .ship-date-header').remove();
+    
+    if (rows.length === 0) return;
+    
+    let lastShipDate = null;
+    
+    $(rows).each(function(index) {
+        const currentShipDate = data[index].Projected_Ship_Date;
+        
+        if (currentShipDate !== lastShipDate) {
+            const colCount = table.columns().count();
+            
+            // Add ship date header
+            const header = $(`<tr class="ship-date-header">
+                <td colspan="${colCount}" style="background-color: #ebebe0; font-weight: bold; padding: 8px 12px; border-bottom: 2px solid #ccc;">
+                    Ship Date: ${currentShipDate}
+                </td>
+            </tr>`);
+            $(this).before(header);
+            
+            // Add HR line separator after the group
+            if (lastShipDate !== null) {
+                const separator = $(`<tr class="ship-date-separator">
+                    <td colspan="${colCount}" style="background-color: #ebebe0; padding: 5px 0;">
+                        <hr style="margin: 0; border: none; border-top: 2px solid #666;">
+                    </td>
+                </tr>`);
+                $(rows[index - 1]).after(separator);
+            }
+            
+            lastShipDate = currentShipDate;
+        }
+    });
+    
+    // Add final HR line after the last group
+    if (data.length > 0) {
+        const colCount = table.columns().count();
+        const finalSeparator = $(`<tr class="ship-date-separator">
+            <td colspan="${colCount}" style="background-color: #ebebe0; padding: 5px 0;">
+                <hr style="margin: 0; border: none; border-top: 2px solid #666;">
+            </td>
+        </tr>`);
+        $(rows[data.length - 1]).after(finalSeparator);
+    }
+}
 
         // Add event handlers for notes editing
         setupNotesEditing();
@@ -758,6 +923,54 @@ $(document).ready(function() {
             select.append(option);
         });
     }
+
+    // Start dropdown select
+    // Event handler for main process changes
+    $(document).on('change', '.main-process-select, .department-select', function() {
+        const select = $(this);
+        const job = select.data('job');
+        const component = select.data('component');
+        const value = select.val();
+        const field = select.hasClass('main-process-select') ? 'Select_Main_Process' : 'Select_Department';
+        
+        // Debug alert
+        //alert(`Change detected:\nJob: ${job}\nComponent: ${component}\nField: ${field}\nValue: ${value}`);
+        
+        // Use UPSERT approach
+        $.post('handle_component_upsert.php', {
+            job: job,
+            component: component,
+            field: field,
+            value: value
+        }).done(function(response) {
+            //alert(`UPSERT response: ${JSON.stringify(response)}`);
+            if (response.success) {
+                console.log(`${field} ${response.action}`);
+                showSaveStatus(select.closest('.notes-container').find('.save-status'), true);
+            } else {
+                showSaveStatus(select.closest('.notes-container').find('.save-status'), false);
+            }
+        }).fail(function(xhr, status, error) {
+            //alert(`UPSERT failed: ${error}`);
+            showSaveStatus(select.closest('.notes-container').find('.save-status'), false);
+        });
+    });
+
+    // Helper function to show save status
+    function showSaveStatus(element, success) {
+        const status = $(element);
+        if (success) {
+            status.html('<i class="fa fa-check text-success"></i> Saved');
+            status.fadeIn();
+            setTimeout(function() {
+                status.fadeOut();
+            }, 2000);
+        } else {
+            status.html('<i class="fa fa-times text-danger"></i> Error');
+            status.fadeIn();
+        }
+    }
+    // End dropdown select
 
     // Handle designer change
     $(document).on('change', '.designer-select', function() {
@@ -1039,44 +1252,48 @@ $(document).ready(function() {
         });
     }
 
+    // Modified executeSearch to work with the department filter
     function executeSearch(searchTerm) {
-        // Get the DataTable instance
         const table = $('#prodTable').DataTable();
         
-        // Check for NOT operator (!)
+        // Clear previous NOT search if exists
+        if (currentNotSearch) {
+            $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(
+                fn => fn !== currentNotSearch
+            );
+            currentNotSearch = null;
+        }
+        
         if (searchTerm.startsWith('!')) {
             const excludeTerm = searchTerm.substring(1).trim();
             
-            // Custom search function for NOT operator
-            $.fn.dataTable.ext.search.push(
-                function(settings, data, dataIndex) {
-                    // Search all columns (or specify which ones to search)
-                    const rowData = table.row(dataIndex).data();
-                    let found = false;
-                    
-                    // Loop through all columns (or specific columns you want to search)
-                    for (let i = 0; i < data.length; i++) {
-                        if (data[i] && data[i].toString().toLowerCase().includes(excludeTerm.toLowerCase())) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    
-                    // Return true to keep rows that DON'T contain the term
-                    return !found;
+            const notSearchFunction = function(settings, data, dataIndex) {
+                // First apply department filter if it exists
+                if (currentDeptFilter && !currentDeptFilter(settings, data, dataIndex)) {
+                    return false;
                 }
-            );
+                
+                const rowData = table.row(dataIndex).data();
+                let found = false;
+                
+                for (let i = 0; i < data.length; i++) {
+                    if (data[i] && data[i].toString().toLowerCase().includes(excludeTerm.toLowerCase())) {
+                        found = true;
+                        break;
+                    }
+                }
+                
+                return !found;
+            };
+            
+            currentNotSearch = notSearchFunction;
+            $.fn.dataTable.ext.search.push(notSearchFunction);
+            table.draw();
         } 
         else {
-            // Normal search behavior
+            // Use DataTables built-in search but maintain department filter
             table.search(searchTerm).draw();
         }
-        
-        // Apply the search
-        table.draw();
-        
-        // Clear any previous custom search functions
-        $.fn.dataTable.ext.search.pop();
     }
 
     function applyDataUpdates(changes) {
@@ -1096,7 +1313,7 @@ $(document).ready(function() {
                 const removals = changes.filter(c => c.type === 'remove');
 
                 if (removals.length > 0) {
-                    console.group('─── REMOVAL PROCESSING ───');
+                    console.group('--- REMOVAL PROCESSING ---');
                     console.log('Total removals:', removals.length);
                     
                     // 1. Collect all rows to be removed
@@ -1206,7 +1423,7 @@ $(document).ready(function() {
             const updates = changes.filter(c => c.type === 'update');
 
             if (inserts.length > 0 || updates.length > 0) {
-                console.group('─── INSERT/UPDATE WITH SORTING ───');
+                console.group('--- INSERT/UPDATE WITH SORTING ---');
 
                 const selectedText = $('#deptFilter option:selected').text();
                 const isPrePress = selectedText === 'PrePress' || 
@@ -1327,6 +1544,8 @@ $(document).ready(function() {
     }
 
     function applyDepartmentFilter() {
+        const table = $('#prodTable').DataTable();
+        
         if (!table || !$.fn.DataTable.isDataTable('#prodTable')) {
             console.error('DataTable not properly initialized');
             return false;
@@ -1348,9 +1567,19 @@ $(document).ready(function() {
                 currentDeptFilter = null;
             }
 
-            // ALWAYS apply row filtering
+            // Clear NOT search if it exists
+            if (currentNotSearch) {
+                $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(
+                    fn => fn !== currentNotSearch
+                );
+                currentNotSearch = null;
+            }
+
+            // ALWAYS apply row filtering (using your existing applyRowFilter function)
             if (deptValue) {
                 applyRowFilter(deptValue);
+                // Store the reference to the current filter
+                currentDeptFilter = $.fn.dataTable.ext.search[$.fn.dataTable.ext.search.length - 1];
             } else {
                 $.fn.dataTable.ext.search = [];
             }
@@ -1363,8 +1592,13 @@ $(document).ready(function() {
                 table.colReorder.reset();
             }
 
-            // Trigger single draw
-            table.draw();
+            // Re-apply current search if one exists
+            const searchTerm = $('#customSearch').val();
+            if (searchTerm) {
+                executeSearch(searchTerm);
+            } else {
+                table.draw();
+            }
 
         } catch (e) {
             console.error('Filter error:', e);
@@ -1389,100 +1623,133 @@ $(document).ready(function() {
         });
     }
 
-    function applyRowFilter(deptValue) {
-        const selectedText = $('#deptFilter option:selected').text();
-        const isPrePress = selectedText === 'PrePress' ||
-                          selectedText === 'Needs Proof' ||
-                          selectedText === 'Proof Out' ||
-                          selectedText === 'Imposition';
+function applyPriorityHighlighting() {
+    // Get current filter state
+    const selectedText = $('#deptFilter option:selected').text();
+    const isPrePress = selectedText === 'PrePress' ||
+                      selectedText === 'Needs Proof' ||
+                      selectedText === 'Proof Out' ||
+                      selectedText === 'Imposition';
 
-        const values = deptValue.split(',');
+    // Process all visible rows at once
+    const rows = table.rows({ search: 'applied', page: 'current' }).nodes();
+    
+    $(rows).each(function() {
+        const rowNode = this;
+        const rowData = table.row(rowNode).data();
+        if (!rowData) return;
+
+        const firstCell = $(rowNode).find('td:first');
         
-        // Get columns to check based on department mapping
-        const columnsToCheck = departmentColumnMapping[selectedText] || ['Next_Comp_Process'];
+        // Clear existing classes
+        $(rowNode).removeClass(`${colorSessionId}-priority-single ${colorSessionId}-priority-double`);
+        firstCell.removeClass(`${colorSessionId}-priority-single-cell ${colorSessionId}-priority-double-cell`);
 
-        // Clear existing filter
-        if (currentDeptFilter) {
-            $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(
-                fn => fn !== currentDeptFilter
-            );
-        }
-
-        currentDeptFilter = function(settings, data, dataIndex) {
-            const rowData = table.row(dataIndex).data();
-            if (!rowData) return false;
-
-            let matchFound = false;
-            for (const colName of columnsToCheck) {
-                const cellValue = rowData[colName];
-                if (cellValue && values.includes(cellValue.toString())) {
-                    matchFound = true;
-                    const rowNode = table.row(dataIndex).node();
-                    
-                    if (isPrePress) {
-                        applyPrePressHighlighting(rowNode, rowData);
-                    } else {
-                        // Other departments - process-based coloring
-                        const processClass = `${colorSessionId}-match-col-${colName.replace(/_/g, '-')}`;
-                        $(rowNode).addClass(processClass);
-                    }
-                    break;
-                }
-            }
-            return matchFound;
-        };
-
-        // Apply the new filter
-        $.fn.dataTable.ext.search.push(currentDeptFilter);
-        table.draw();
-    }
-
-    // Shared function for PrePress highlighting
-    function applyPrePressHighlighting(rowNode, rowData) {
-        // Remove any existing session classes
-        $(rowNode).removeClass(function(index, className) {
-            return (className.match(new RegExp(`(^|\\s)${colorSessionId}-\\S+`, 'g')) || []).join(' ');
-        });
-
-        if (rowData.Designer) {
-            const designerExists = designers.some(d => d.EmployeeName === rowData.Designer);
-            if (designerExists) {
-                // Valid designer - use their specific color
-                const safeName = rowData.Designer.replace(/\s+/g, '-');
-                $(rowNode).addClass(`${colorSessionId}-designer-${safeName}`);
+        // Apply priority highlighting
+        const jobPriority = rowData.JobPriority?.toString()?.trim() || '';
+        if (jobPriority === '*') {
+            if (isPrePress) {
+                firstCell.addClass(`${colorSessionId}-priority-single-cell`);
             } else {
-                // Unknown designer - use default color
-                $(rowNode).addClass(`${colorSessionId}-designer-default`);
-            }
-        } else {
-            // No designer assigned - use default color
-            $(rowNode).addClass(`${colorSessionId}-designer-default`);
-        }
-    }
-
-    function applyPriorityHighlighting() {
-        // Process all rows in the current DataTable view
-        table.rows({ search: 'applied' }).every(function() {
-            const rowData = this.data();
-            if (!rowData) return; // Skip if no data
-            
-            const rowNode = this.node();
-            if (!rowNode) return; // Skip if no DOM node
-            
-            // Remove existing priority classes
-            $(rowNode).removeClass(function(index, className) {
-                return (className.match(new RegExp(`${colorSessionId}-priority-(single|double)`, 'g')) || []).join(' ');
-            });
-
-            // Apply new priority class if needed
-            const jobPriority = (rowData.JobPriority || '').toString().trim();
-            if (jobPriority === '*') {
                 $(rowNode).addClass(`${colorSessionId}-priority-single`);
-            } else if (jobPriority === '**') {
+            }
+        } else if (jobPriority === '**') {
+            if (isPrePress) {
+                firstCell.addClass(`${colorSessionId}-priority-double-cell`);
+            } else {
                 $(rowNode).addClass(`${colorSessionId}-priority-double`);
             }
-        });
+        }
+        
+        // Apply PrePress highlighting if needed
+        if (isPrePress) {
+            applyPrePressHighlighting(rowNode, rowData);
+        }
+    });
+}
+
+
+function applyRowFilter(deptValue) {
+    const selectedText = $('#deptFilter option:selected').text();
+    const isPrePress = selectedText === 'PrePress' ||
+                      selectedText === 'Needs Proof' ||
+                      selectedText === 'Proof Out' ||
+                      selectedText === 'Imposition';
+
+    const values = deptValue.split(',');
+    
+    // Get columns to check based on department mapping
+    const columnsToCheck = departmentColumnMapping[selectedText] || ['Next_Comp_Process'];
+
+    // Clear existing filter
+    if (currentDeptFilter) {
+        $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(
+            fn => fn !== currentDeptFilter
+        );
     }
+
+    currentDeptFilter = function(settings, data, dataIndex) {
+        const rowData = table.row(dataIndex).data();
+        if (!rowData) return false;
+
+        let matchFound = false;
+        for (const colName of columnsToCheck) {
+            const cellValue = rowData[colName];
+            if (cellValue && values.includes(cellValue.toString())) {
+                matchFound = true;
+                const rowNode = table.row(dataIndex).node();
+                
+                // Always apply priority highlighting first
+                applyPriorityHighlighting(rowNode, rowData, isPrePress);
+                
+                if (isPrePress) {
+                    applyPrePressHighlighting(rowNode, rowData);
+                } else {
+                    // Other departments - process-based coloring
+                    const processClass = `${colorSessionId}-match-col-${colName.replace(/_/g, '-')}`;
+                    $(rowNode).addClass(processClass);
+                }
+                break;
+            }
+        }
+        return matchFound;
+    };
+
+    // Apply the new filter and highlighting
+    $.fn.dataTable.ext.search.push(currentDeptFilter);
+    table.draw();
+    
+    // Apply highlighting to all visible rows (including non-filtered in current page)
+    table.rows({ page: 'current' }).every(function() {
+        const rowData = this.data();
+        const rowNode = this.node();
+        if (rowData && rowNode) {
+            applyPriorityHighlighting(rowNode, rowData, isPrePress);
+            if (isPrePress) {
+                applyPrePressHighlighting(rowNode, rowData);
+            }
+        }
+    });
+}
+
+// Keep this as is for PrePress highlighting
+function applyPrePressHighlighting(rowNode, rowData) {
+    $(rowNode).removeClass(function(index, className) {
+        return (className.match(new RegExp(`(^|\\s)${colorSessionId}-designer-\\S+`, 'g')) || []).join(' ');
+    });
+
+    if (rowData.Designer) {
+        const designerExists = designers.some(d => d.EmployeeName === rowData.Designer);
+        const safeName = rowData.Designer.replace(/\s+/g, '-');
+        $(rowNode).addClass(designerExists 
+            ? `${colorSessionId}-designer-${safeName}`
+            : `${colorSessionId}-designer-default`
+        );
+    //} else {
+        //$(rowNode).addClass(`${colorSessionId}-designer-default`);
+    }
+}
+
 
     function applyColumnVisibility(deptText) {
         try {
@@ -1543,7 +1810,9 @@ $(document).ready(function() {
 
     // Initialize WebSocket
     function initializeWebSocket() {
-        socket = new WebSocket('wss://ampd.documation.com:8080');
+        //socket = new WebSocket('wss://lamp.walsworth.com:8080');
+        socket = new WebSocket('wss://ampd.walsworth.com:8080');
+        //socket = new WebSocket('wss://localhost:8080');
         let reconnectTimeout;
         let pingInterval;
         let clickedRow = null;
@@ -1859,6 +2128,11 @@ $(document).ready(function() {
                 Hunkler_Process: sourceData.Hunkler_Process,
                 Hunkler_Description: sourceData.Hunkler_Description,
                 Hunkler_Time: sourceData.Hunkler_Time,
+                Is_It_Capstone: sourceData.Is_It_Capstone,
+                Master_Ship: sourceData.Master_Ship,
+                Ships_With: sourceData.Ships_With,
+                Select_Main_Process: sourceData.Select_Main_Process,
+                Select_Department: sourceData.Select_Department,
             _rawData: sourceData // Store original data for details view
         };
     }

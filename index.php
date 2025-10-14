@@ -29,6 +29,13 @@ session_start();
     <!-- Add this before your DataTables script -->
    <script type="text/javascript" src="script.js"></script>
    <script type="text/javascript" src="emailJS.js"></script>
+
+   <!-- DataTables RowGroup CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/rowgroup/1.3.1/css/rowGroup.dataTables.min.css">
+
+<!-- DataTables RowGroup JS -->
+<script src="https://cdn.datatables.net/rowgroup/1.3.1/js/dataTables.rowGroup.min.js"></script>
+
 </head>
     <script>
     
@@ -92,9 +99,9 @@ session_start();
                     </div>
 
                     <div id="leftTemplateTable">
-						<div id="priority-indicator" class="*-priority-single">Priority - <i class="fa fa-star"></i></div>
-						<div id="priority-indicator" class="*-priority-double">Priority - <i class="fa fa-star"></i><i class="fa fa-star"></i></div>
-					</div>
+                        <div id="priority-indicator" class="*-priority-single">Priority - <i class="fa fa-star"></i></div>
+                        <div id="priority-indicator" class="*-priority-double">Priority - <i class="fa fa-star"></i><i class="fa fa-star"></i></div>
+                    </div>
                     
                     <!-- Filters in the middle -->
                     <div class="filters">
@@ -149,11 +156,11 @@ session_start();
                 <th>Next Body Description</th> <!-- 31 -->
                 <th>NBP Time</th> <!-- 32 -->
                 <th>Main Process</th> <!-- 33 -->
-                <th>MP_Description</th> <!-- 34 -->
-                <th>MP_Time</th> <!-- 35 -->
-                <th>Does It Blend</th> <!-- 37 -->
-                <th>Did It Blend</th> <!-- 38 -->
-                <th>Is It Wednesday</th> <!-- 39 -->
+                <th>Main Process Description</th> <!-- 34 MP_Description -->
+                <th>Main Process Time</th> <!-- 35 MP_Time-->
+                <th>Does It Mail</th> <!-- 37 Does It Blend -->
+                <th>List Process Complete</th> <!-- 38 Did It Blend-->
+                <th>Does It SW</th> <!-- 39 Is It Wednesday -->
                 <th>Mat Code</th> <!-- 41 -->
                 <th>Mat Qty</th> <!-- 42 -->
                 <th>Mat BWT</th> <!-- 43 -->
@@ -183,6 +190,11 @@ session_start();
                 <th>Hunkler_Process</th> <!-- 67 -->
                 <th>Hunkler_Description</th> <!-- 68 -->
                 <th>Hunkler_Time</th> <!-- 69 -->
+                <th>Is_It_Capstone</th> <!-- 70 -->
+                <th>Master_Ship</th> <!-- 71 -->
+                <th>Ships_With</th> <!-- 72 -->
+                <th>Select Main Process</th> <!-- 72 -->
+                <th>Select Department</th> <!-- 72 -->
             </thead>
             <tbody>
                 <!-- Data will be populated by DataTables -->
