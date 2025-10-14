@@ -546,22 +546,6 @@ $(document).ready(function() {
             "drawCallback": function(settings) {
                 addShipDateSeparators();
             },
-                // adds a seperator after each unique projected ship date
-                // "rowGroup": {
-                //     dataSrc: 'Projected_Ship_Date',
-                //     startRender: function (rows, group) {
-                //         // Use a large colspan that will cover all columns
-                //         return $('<tr style="background-color: #ebebe0;">')
-                //             .append('<td colspan="100" style="font-weight: bold; padding: 8px;">')
-                //             .html('Ship Date: ' + group);
-                //     },
-                //     endRender: function (rows, group) {
-                //         // Use a large colspan that will cover all columns
-                //         return $('<tr style="background-color: #ebebe0;">')
-                //             .append('<td colspan="100">')
-                //             .html('<hr style="margin: 10px 0; border: 1px solid #ebebe0 background-color: #ebebe0;">');
-                //     }
-                // },
             dom: 'Brtip',
             columns: [
                 { data: 'JobNumber' , name: 'JobNumber' }, // 0
@@ -720,8 +704,29 @@ $(document).ready(function() {
                 { data: 'Hunkler_Time' , name: 'Hunkler_Time' }, // 69
                 { data: 'Is_It_Capstone' , name: 'Is_It_Capstone' ,
                         defaultContent: ''}, // provides empty string if field is missing // 70
-                { data: 'Master_Ship' , name: 'Master_Ship'  ,
-                        defaultContent: ''}, // 71
+                {
+                    data: 'Master_Ship',
+                    name: 'Master_Ship',
+                    className: 'ships-with-cell',
+                    render: function(data, type, row) {
+                        if (type === 'display') {
+                            return `
+                                <div class="ships-with-container">
+                                    <textarea class="ships-with-input form-control" 
+                                        data-job="${row.JobNumber}" 
+                                        data-component="${row.ComponentNumber}"
+                                        data-field="ShipsWith"
+                                        placeholder="Enter shipping notes...">${data || ''}</textarea>
+                                    <button class="btn-save-ships-with btn-xs btn-primary">
+                                        <i class="fa fa-save"></i> Save
+                                    </button>
+                                    <span class="save-status"></span>
+                                </div>
+                            `;
+                        }
+                        return data;
+                    }
+                }, // 71
                 { data: 'Ships_With' , name: 'Ships_With'  ,
                         defaultContent: ''}, // 72
                 {
@@ -825,56 +830,56 @@ $(document).ready(function() {
         // end Initialize DataTable
 
         function addShipDateSeparators() {
-    const table = $('#prodTable').DataTable();
-    const rows = table.rows({ order: 'applied', search: 'applied' }).nodes();
-    const data = table.rows({ order: 'applied', search: 'applied' }).data().toArray();
-    
-    // Remove existing separators and headers
-    $('.ship-date-separator, .ship-date-header').remove();
-    
-    if (rows.length === 0) return;
-    
-    let lastShipDate = null;
-    
-    $(rows).each(function(index) {
-        const currentShipDate = data[index].Projected_Ship_Date;
-        
-        if (currentShipDate !== lastShipDate) {
-            const colCount = table.columns().count();
+            const table = $('#prodTable').DataTable();
+            const rows = table.rows({ order: 'applied', search: 'applied' }).nodes();
+            const data = table.rows({ order: 'applied', search: 'applied' }).data().toArray();
             
-            // Add ship date header
-            const header = $(`<tr class="ship-date-header">
-                <td colspan="${colCount}" style="background-color: #ebebe0; font-weight: bold; padding: 8px 12px; border-bottom: 2px solid #ccc;">
-                    Ship Date: ${currentShipDate}
-                </td>
-            </tr>`);
-            $(this).before(header);
+            // Remove existing separators and headers
+            $('.ship-date-separator, .ship-date-header').remove();
             
-            // Add HR line separator after the group
-            if (lastShipDate !== null) {
-                const separator = $(`<tr class="ship-date-separator">
+            if (rows.length === 0) return;
+            
+            let lastShipDate = null;
+            
+            $(rows).each(function(index) {
+                const currentShipDate = data[index].Projected_Ship_Date;
+                
+                if (currentShipDate !== lastShipDate) {
+                    const colCount = table.columns().count();
+                    
+                    // Add ship date header
+                    const header = $(`<tr class="ship-date-header">
+                        <td colspan="${colCount}" style="background-color: #ebebe0; font-weight: bold; padding: 8px 12px; border-bottom: 2px solid #ccc;">
+                            Ship Date: ${currentShipDate}
+                        </td>
+                    </tr>`);
+                    $(this).before(header);
+                    
+                    // Add HR line separator after the group
+                    if (lastShipDate !== null) {
+                        const separator = $(`<tr class="ship-date-separator">
+                            <td colspan="${colCount}" style="background-color: #ebebe0; padding: 5px 0;">
+                                <hr style="margin: 0; border: none; border-top: 2px solid #666;">
+                            </td>
+                        </tr>`);
+                        $(rows[index - 1]).after(separator);
+                    }
+                    
+                    lastShipDate = currentShipDate;
+                }
+            });
+            
+            // Add final HR line after the last group
+            if (data.length > 0) {
+                const colCount = table.columns().count();
+                const finalSeparator = $(`<tr class="ship-date-separator">
                     <td colspan="${colCount}" style="background-color: #ebebe0; padding: 5px 0;">
                         <hr style="margin: 0; border: none; border-top: 2px solid #666;">
                     </td>
                 </tr>`);
-                $(rows[index - 1]).after(separator);
+                $(rows[data.length - 1]).after(finalSeparator);
             }
-            
-            lastShipDate = currentShipDate;
         }
-    });
-    
-    // Add final HR line after the last group
-    if (data.length > 0) {
-        const colCount = table.columns().count();
-        const finalSeparator = $(`<tr class="ship-date-separator">
-            <td colspan="${colCount}" style="background-color: #ebebe0; padding: 5px 0;">
-                <hr style="margin: 0; border: none; border-top: 2px solid #666;">
-            </td>
-        </tr>`);
-        $(rows[data.length - 1]).after(finalSeparator);
-    }
-}
 
         // Add event handlers for notes editing
         setupNotesEditing();
@@ -954,6 +959,43 @@ $(document).ready(function() {
             //alert(`UPSERT failed: ${error}`);
             showSaveStatus(select.closest('.notes-container').find('.save-status'), false);
         });
+    });
+
+    // Handle ShipsWith input changes and save button clicks
+    $(document).on('click', '.btn-save-ships-with', function() {
+        const button = $(this);
+        const container = button.closest('.ships-with-container');
+        const textarea = container.find('.ships-with-input');
+        const status = container.find('.save-status');
+        
+        const job = textarea.data('job');
+        const component = textarea.data('component');
+        const value = textarea.val().trim();
+        const field = textarea.data('field');
+        
+        // Use UPSERT approach
+        $.post('handle_upsert_master_ship.php', {
+            job: job,
+            component: component,
+            field: field,
+            value: value
+        }).done(function(response) {
+            if (response.success) {
+                console.log(`${field} ${response.action}`);
+                showSaveStatus(status, true);
+            } else {
+                showSaveStatus(status, false, response.error || 'Save failed');
+            }
+        }).fail(function(xhr, status, error) {
+            console.error('UPSERT failed:', error);
+            showSaveStatus(status, false, 'Save failed');
+        });
+    });
+
+    // Add auto-resize functionality
+    $(document).on('input', '.ships-with-input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
     });
 
     // Helper function to show save status

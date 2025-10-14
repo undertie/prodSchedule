@@ -476,23 +476,6 @@ function broadcastData(newData, type = 'initialData') {
     console.log('[CACHE] Updated cache after broadcast');
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function findMeaningfulDifferences(oldData, newData) {
     const changes = [];
     const getItemKey = item => `${item.JobNumber}-${item.ComponentNumber}`;
@@ -594,13 +577,6 @@ function areValuesEqual(a, b) {
     // Default comparison
     return a === b;
 }
-
-
-
-
-
-
-
 
 // Helper to send messages to all clients with rate limiting checks
 function sendToAllClients(message, excludeClient = null) {
