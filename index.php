@@ -6,6 +6,7 @@ session_start();
 <head>
     <meta charset="utf-8">
     <title>Production Schedule</title>
+    <link rel="shortcut icon" type="image/png" href="/globalAssets/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="css/prodTable.css?version=1.5">
     <link rel="stylesheet" type="text/css" href="css/emailCSS.css">
@@ -106,8 +107,12 @@ session_start();
                     <!-- Filters in the middle -->
                     <div class="filters">
                         <label for="deptFilter">Department:</label>
-                        <select id="deptFilter">
-                        </select>
+                        <select id="deptFilter"></select>
+                        <div id="filterLoading" class="loading-indicator" style="display: none;">
+                            <span class="spinner"></span>
+                            <span class="loading-text">Filtering...</span>
+                            <span class="loading-timer">(0.0s)</span>
+                        </div>
                     </div>
 
                     <!-- Search on the right -->

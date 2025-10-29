@@ -830,35 +830,52 @@ $(document).ready(function() {
         // end Initialize DataTable
 
         function addShipDateSeparators() {
-    const table = $('#prodTable').DataTable();
-    const rows = table.rows({ order: 'applied', search: 'applied' }).nodes();
-    const data = table.rows({ order: 'applied', search: 'applied' }).data().toArray();
-    
-    // Remove existing separators and headers
-    $('.ship-date-separator, .ship-date-header').remove();
-    
-    if (rows.length === 0) return;
-    
-    let lastShipDate = null;
-    const totalColCount = table.columns().count();
-    const remainingColCount = totalColCount - 2; // We're using 2 sticky columns
-    
-    $(rows).each(function(index) {
-        const currentShipDate = data[index].Projected_Ship_Date;
-        
-        if (currentShipDate !== lastShipDate) {
-            // Add ship date header with 2 sticky columns
-            const header = $(`<tr class="ship-date-header">
-                <td colspan="2" style="background-color: #ebebe0; font-weight: bold; padding: 8px 12px; border-bottom: 2px solid #ccc;">
-                    Ship Date: ${currentShipDate}
-                </td>
-                <td colspan="${remainingColCount}" style="background-color: #ebebe0; border-bottom: 2px solid #ccc;"></td>
-            </tr>`);
-            $(this).before(header);
+            const table = $('#prodTable').DataTable();
+            const rows = table.rows({ order: 'applied', search: 'applied' }).nodes();
+            const data = table.rows({ order: 'applied', search: 'applied' }).data().toArray();
             
-            // Add HR line separator after the group (except for first group)
-            if (lastShipDate !== null) {
-                const separator = $(`<tr class="ship-date-separator">
+            // Remove existing separators and headers
+            $('.ship-date-separator, .ship-date-header').remove();
+            
+            if (rows.length === 0) return;
+            
+            let lastShipDate = null;
+            const totalColCount = table.columns().count();
+            const remainingColCount = totalColCount - 2; // We're using 2 sticky columns
+            
+            $(rows).each(function(index) {
+                const currentShipDate = data[index].Projected_Ship_Date;
+                
+                if (currentShipDate !== lastShipDate) {
+                    // Add ship date header with 2 sticky columns
+                    const header = $(`<tr class="ship-date-header">
+                        <td colspan="2" style="background-color: #ebebe0; font-weight: bold; padding: 8px 12px; border-bottom: 2px solid #ccc;">
+                            Ship Date: ${currentShipDate}
+                        </td>
+                        <td colspan="${remainingColCount}" style="background-color: #ebebe0; border-bottom: 2px solid #ccc;"></td>
+                    </tr>`);
+                    $(this).before(header);
+                    
+                    // Add HR line separator after the group (except for first group)
+                    if (lastShipDate !== null) {
+                        const separator = $(`<tr class="ship-date-separator">
+                            <td colspan="2" style="background-color: #ebebe0; padding: 5px 0;">
+                                <hr style="margin: 0; border: none; border-top: 2px solid #666;">
+                            </td>
+                            <td colspan="${remainingColCount}" style="background-color: #ebebe0; padding: 5px 0;">
+                                <hr style="margin: 0; border: none; border-top: 2px solid #666;">
+                            </td>
+                        </tr>`);
+                        $(rows[index - 1]).after(separator);
+                    }
+                    
+                    lastShipDate = currentShipDate;
+                }
+            });
+            
+            // Add final HR line after the last group
+            if (data.length > 0) {
+                const finalSeparator = $(`<tr class="ship-date-separator">
                     <td colspan="2" style="background-color: #ebebe0; padding: 5px 0;">
                         <hr style="margin: 0; border: none; border-top: 2px solid #666;">
                     </td>
@@ -866,78 +883,9 @@ $(document).ready(function() {
                         <hr style="margin: 0; border: none; border-top: 2px solid #666;">
                     </td>
                 </tr>`);
-                $(rows[index - 1]).after(separator);
+                $(rows[data.length - 1]).after(finalSeparator);
             }
-            
-            lastShipDate = currentShipDate;
         }
-    });
-    
-    // Add final HR line after the last group
-    if (data.length > 0) {
-        const finalSeparator = $(`<tr class="ship-date-separator">
-            <td colspan="2" style="background-color: #ebebe0; padding: 5px 0;">
-                <hr style="margin: 0; border: none; border-top: 2px solid #666;">
-            </td>
-            <td colspan="${remainingColCount}" style="background-color: #ebebe0; padding: 5px 0;">
-                <hr style="margin: 0; border: none; border-top: 2px solid #666;">
-            </td>
-        </tr>`);
-        $(rows[data.length - 1]).after(finalSeparator);
-    }
-}
-
-        // function addShipDateSeparators() {
-        //     const table = $('#prodTable').DataTable();
-        //     const rows = table.rows({ order: 'applied', search: 'applied' }).nodes();
-        //     const data = table.rows({ order: 'applied', search: 'applied' }).data().toArray();
-            
-        //     // Remove existing separators and headers
-        //     $('.ship-date-separator, .ship-date-header').remove();
-            
-        //     if (rows.length === 0) return;
-            
-        //     let lastShipDate = null;
-            
-        //     $(rows).each(function(index) {
-        //         const currentShipDate = data[index].Projected_Ship_Date;
-                
-        //         if (currentShipDate !== lastShipDate) {
-        //             const colCount = table.columns().count();
-                    
-        //             // Add ship date header
-        //             const header = $(`<tr class="ship-date-header">
-        //                 <td colspan="${colCount}" style="background-color: #ebebe0; font-weight: bold; padding: 8px 12px; border-bottom: 2px solid #ccc;">
-        //                     Ship Date: ${currentShipDate}
-        //                 </td>
-        //             </tr>`);
-        //             $(this).before(header);
-                    
-        //             // Add HR line separator after the group
-        //             if (lastShipDate !== null) {
-        //                 const separator = $(`<tr class="ship-date-separator">
-        //                     <td colspan="${colCount}" style="background-color: #ebebe0; padding: 5px 0;">
-        //                         <hr style="margin: 0; border: none; border-top: 2px solid #666;">
-        //                     </td>
-        //                 </tr>`);
-        //                 $(rows[index - 1]).after(separator);
-        //             }
-                    
-        //             lastShipDate = currentShipDate;
-        //         }
-        //     });
-            
-        //     // Add final HR line after the last group
-        //     if (data.length > 0) {
-        //         const colCount = table.columns().count();
-        //         const finalSeparator = $(`<tr class="ship-date-separator">
-        //             <td colspan="${colCount}" style="background-color: #ebebe0; padding: 5px 0;">
-        //                 <hr style="margin: 0; border: none; border-top: 2px solid #666;">
-        //             </td>
-        //         </tr>`);
-        //         $(rows[data.length - 1]).after(finalSeparator);
-        //     }
-        // }
 
         // Add event handlers for notes editing
         setupNotesEditing();
@@ -1235,8 +1183,45 @@ $(document).ready(function() {
     });
 
     // Set up department dropdown
+    // function setupDepartmentDropdown() {
+    //     const deptFilter = $('#deptFilter').empty().append('<option value="">All</option>');
+
+    //     departmentMapping.forEach(dept => {
+    //         deptFilter.append(`<option value="${dept.values.join(',')}">${dept.text}</option>`);
+            
+    //         if (dept.subsections) {
+    //             const optgroup = $('<optgroup>').attr('label', `${dept.text} Subsections`);
+    //             dept.subsections.forEach(sub => {
+    //                 optgroup.append(`<option value="${sub.values.join(',')}">${sub.text}</option>`);
+    //             });
+    //             deptFilter.append(optgroup);
+    //         }
+    //     });
+
+    //     // Load saved filter
+    //     const savedDeptFilter = localStorage.getItem('deptFilter');
+    //     if (savedDeptFilter) {
+    //         deptFilter.val(savedDeptFilter);
+    //     }
+
+    //     let filterTimeout;
+    //     $('#deptFilter').on('change', function() {
+    //         clearTimeout(filterTimeout);
+    //         filterTimeout = setTimeout(() => {
+    //             localStorage.setItem('deptFilter', $(this).val());
+
+    //             applyDepartmentFilter();
+
+    //             // Scroll to top of the page
+    //             window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    //         }, 300); // 300ms delay
+    //     });
+    // }
+
     function setupDepartmentDropdown() {
         const deptFilter = $('#deptFilter').empty().append('<option value="">All</option>');
+        const loadingIndicator = $('#filterLoading');
 
         departmentMapping.forEach(dept => {
             deptFilter.append(`<option value="${dept.values.join(',')}">${dept.text}</option>`);
@@ -1257,17 +1242,35 @@ $(document).ready(function() {
         }
 
         let filterTimeout;
-        $('#deptFilter').on('change', function() {
+        deptFilter.on('change', function() {
             clearTimeout(filterTimeout);
-            filterTimeout = setTimeout(() => {
+            
+            // Show loading indicator with initial time
+            const startTime = Date.now();
+            loadingIndicator.show();
+            loadingIndicator.find('.loading-timer').text('(0.0s)');
+            
+            filterTimeout = setTimeout(async () => {
                 localStorage.setItem('deptFilter', $(this).val());
 
-                applyDepartmentFilter();
+                try {
+                    await applyDepartmentFilter();
+                    
+                    // Calculate and show final time
+                    const totalTime = (Date.now() - startTime) / 1000;
+                    loadingIndicator.find('.loading-timer').text(`(${totalTime.toFixed(1)}s)`);
+                    
+                    // Hide after showing final time for a moment
+                    setTimeout(() => {
+                        loadingIndicator.hide();
+                    }, 1000); // Show final time for 1 second
+                    
+                } catch (e) {
+                    loadingIndicator.hide();
+                }
 
-                // Scroll to top of the page
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            }, 300); // 300ms delay
+            }, 300);
         });
     }
 
