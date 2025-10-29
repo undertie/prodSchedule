@@ -659,7 +659,7 @@ setInterval(async () => {
     } catch (err) {
         console.error('Periodic update failed:', err);
     }
-}, 30000); // broadcast every 7 minutes
+}, 300000); // broadcast every 7 minutes
 
 // WebSocket server
 wss.on('connection', (ws) => {
