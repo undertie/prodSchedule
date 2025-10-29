@@ -218,7 +218,14 @@ async function fetchDetailedData(jobNumber, componentNumber) {
                 AND pjn.ComponentNumber LIKE @componentNumber
             ORDER BY pjn.ComponentNumber, p.CreateDatim
         `);
-        return result.recordset;
+        
+        // Format the dates in the result set
+        const formattedResult = result.recordset.map(record => ({
+            ...record,
+            CreateDatim: formatDateTime(record.CreateDatim)
+        }));
+        
+        return formattedResult;
     } catch (err) {
         console.error('Detailed query failed:', err);
         return {
@@ -227,6 +234,39 @@ async function fetchDetailedData(jobNumber, componentNumber) {
             data: [] // Return empty array but with identifiers
         };
     }
+}
+
+// Helper function to format date/time with manual UTC to Central conversion
+function formatDateTime(dateTimeValue) {
+    if (!dateTimeValue) return '';
+    
+    let date;
+    
+    if (dateTimeValue instanceof Date) {
+        date = dateTimeValue;
+    } else {
+        date = new Date(dateTimeValue);
+    }
+    
+    if (isNaN(date.getTime())) {
+        console.error('Invalid date:', dateTimeValue);
+        return 'Invalid Date';
+    }
+    
+    // Convert UTC to Central Time (UTC-5)
+    // Central Time is UTC-5, so to convert UTC to CT, we ADD 5 hours
+    const centralOffset = 5 * 60 * 60 * 1000; // 5 hours in milliseconds
+    const centralTime = new Date(date.getTime() + centralOffset);
+    
+    // Format the adjusted time
+    return centralTime.toLocaleString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    });
 }
 
 // Update notes

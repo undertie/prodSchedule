@@ -830,56 +830,114 @@ $(document).ready(function() {
         // end Initialize DataTable
 
         function addShipDateSeparators() {
-            const table = $('#prodTable').DataTable();
-            const rows = table.rows({ order: 'applied', search: 'applied' }).nodes();
-            const data = table.rows({ order: 'applied', search: 'applied' }).data().toArray();
+    const table = $('#prodTable').DataTable();
+    const rows = table.rows({ order: 'applied', search: 'applied' }).nodes();
+    const data = table.rows({ order: 'applied', search: 'applied' }).data().toArray();
+    
+    // Remove existing separators and headers
+    $('.ship-date-separator, .ship-date-header').remove();
+    
+    if (rows.length === 0) return;
+    
+    let lastShipDate = null;
+    const totalColCount = table.columns().count();
+    const remainingColCount = totalColCount - 2; // We're using 2 sticky columns
+    
+    $(rows).each(function(index) {
+        const currentShipDate = data[index].Projected_Ship_Date;
+        
+        if (currentShipDate !== lastShipDate) {
+            // Add ship date header with 2 sticky columns
+            const header = $(`<tr class="ship-date-header">
+                <td colspan="2" style="background-color: #ebebe0; font-weight: bold; padding: 8px 12px; border-bottom: 2px solid #ccc;">
+                    Ship Date: ${currentShipDate}
+                </td>
+                <td colspan="${remainingColCount}" style="background-color: #ebebe0; border-bottom: 2px solid #ccc;"></td>
+            </tr>`);
+            $(this).before(header);
             
-            // Remove existing separators and headers
-            $('.ship-date-separator, .ship-date-header').remove();
-            
-            if (rows.length === 0) return;
-            
-            let lastShipDate = null;
-            
-            $(rows).each(function(index) {
-                const currentShipDate = data[index].Projected_Ship_Date;
-                
-                if (currentShipDate !== lastShipDate) {
-                    const colCount = table.columns().count();
-                    
-                    // Add ship date header
-                    const header = $(`<tr class="ship-date-header">
-                        <td colspan="${colCount}" style="background-color: #ebebe0; font-weight: bold; padding: 8px 12px; border-bottom: 2px solid #ccc;">
-                            Ship Date: ${currentShipDate}
-                        </td>
-                    </tr>`);
-                    $(this).before(header);
-                    
-                    // Add HR line separator after the group
-                    if (lastShipDate !== null) {
-                        const separator = $(`<tr class="ship-date-separator">
-                            <td colspan="${colCount}" style="background-color: #ebebe0; padding: 5px 0;">
-                                <hr style="margin: 0; border: none; border-top: 2px solid #666;">
-                            </td>
-                        </tr>`);
-                        $(rows[index - 1]).after(separator);
-                    }
-                    
-                    lastShipDate = currentShipDate;
-                }
-            });
-            
-            // Add final HR line after the last group
-            if (data.length > 0) {
-                const colCount = table.columns().count();
-                const finalSeparator = $(`<tr class="ship-date-separator">
-                    <td colspan="${colCount}" style="background-color: #ebebe0; padding: 5px 0;">
+            // Add HR line separator after the group (except for first group)
+            if (lastShipDate !== null) {
+                const separator = $(`<tr class="ship-date-separator">
+                    <td colspan="2" style="background-color: #ebebe0; padding: 5px 0;">
+                        <hr style="margin: 0; border: none; border-top: 2px solid #666;">
+                    </td>
+                    <td colspan="${remainingColCount}" style="background-color: #ebebe0; padding: 5px 0;">
                         <hr style="margin: 0; border: none; border-top: 2px solid #666;">
                     </td>
                 </tr>`);
-                $(rows[data.length - 1]).after(finalSeparator);
+                $(rows[index - 1]).after(separator);
             }
+            
+            lastShipDate = currentShipDate;
         }
+    });
+    
+    // Add final HR line after the last group
+    if (data.length > 0) {
+        const finalSeparator = $(`<tr class="ship-date-separator">
+            <td colspan="2" style="background-color: #ebebe0; padding: 5px 0;">
+                <hr style="margin: 0; border: none; border-top: 2px solid #666;">
+            </td>
+            <td colspan="${remainingColCount}" style="background-color: #ebebe0; padding: 5px 0;">
+                <hr style="margin: 0; border: none; border-top: 2px solid #666;">
+            </td>
+        </tr>`);
+        $(rows[data.length - 1]).after(finalSeparator);
+    }
+}
+
+        // function addShipDateSeparators() {
+        //     const table = $('#prodTable').DataTable();
+        //     const rows = table.rows({ order: 'applied', search: 'applied' }).nodes();
+        //     const data = table.rows({ order: 'applied', search: 'applied' }).data().toArray();
+            
+        //     // Remove existing separators and headers
+        //     $('.ship-date-separator, .ship-date-header').remove();
+            
+        //     if (rows.length === 0) return;
+            
+        //     let lastShipDate = null;
+            
+        //     $(rows).each(function(index) {
+        //         const currentShipDate = data[index].Projected_Ship_Date;
+                
+        //         if (currentShipDate !== lastShipDate) {
+        //             const colCount = table.columns().count();
+                    
+        //             // Add ship date header
+        //             const header = $(`<tr class="ship-date-header">
+        //                 <td colspan="${colCount}" style="background-color: #ebebe0; font-weight: bold; padding: 8px 12px; border-bottom: 2px solid #ccc;">
+        //                     Ship Date: ${currentShipDate}
+        //                 </td>
+        //             </tr>`);
+        //             $(this).before(header);
+                    
+        //             // Add HR line separator after the group
+        //             if (lastShipDate !== null) {
+        //                 const separator = $(`<tr class="ship-date-separator">
+        //                     <td colspan="${colCount}" style="background-color: #ebebe0; padding: 5px 0;">
+        //                         <hr style="margin: 0; border: none; border-top: 2px solid #666;">
+        //                     </td>
+        //                 </tr>`);
+        //                 $(rows[index - 1]).after(separator);
+        //             }
+                    
+        //             lastShipDate = currentShipDate;
+        //         }
+        //     });
+            
+        //     // Add final HR line after the last group
+        //     if (data.length > 0) {
+        //         const colCount = table.columns().count();
+        //         const finalSeparator = $(`<tr class="ship-date-separator">
+        //             <td colspan="${colCount}" style="background-color: #ebebe0; padding: 5px 0;">
+        //                 <hr style="margin: 0; border: none; border-top: 2px solid #666;">
+        //             </td>
+        //         </tr>`);
+        //         $(rows[data.length - 1]).after(finalSeparator);
+        //     }
+        // }
 
         // Add event handlers for notes editing
         setupNotesEditing();
