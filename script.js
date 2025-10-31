@@ -16,6 +16,7 @@ $(document).ready(function() {
     // variable for checking if rows are opon on data refresh
     var drawHandler = null;
     const openRows = new Set();
+    const SHIPDATE_KEY = 'hiddenShipDates';
 
     const departmentMapping = [
         {
@@ -250,8 +251,8 @@ $(document).ready(function() {
         "Cathy": ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Projected_Ship_Date'],
         "Gabbi": ['JobNumber', 'JobStatus', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Mat_BWT', 'Mat_Description', 'Projected_Ship_Date'],
         "Lisa":  ['JobNumber', 'JobStatus', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Projected_Ship_Date'],
-        "Sarah": ['JobNumber', 'PrepressNotes', 'PostpressNotes', 'Job_In_Date', 'Proof_Due_Date', 'Projected_Ship_Date', 'JobDescription', 'CustName', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description', 'MP_Description', 'Designer'],
-        "Review": ['JobNumber',  'Customer_CSR', 'JobStatus', 'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Next_Comp_Description', 'Does_it_blend', 'Main_Process', 'Select_Main_Process', 'Print_Type', 'Select_Department', 'Master_Ship'],
+        "Sarah": ['JobNumber', 'PrepressNotes', 'PostpressNotes', 'Master_Ship', 'Job_In_Date', 'Proof_Due_Date', 'Projected_Ship_Date', 'JobDescription', 'CustName', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description', 'MP_Description', 'Designer'],
+        "Review": ['JobNumber',  'Customer_CSR', 'JobStatus', 'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Next_Comp_Description', 'Mat_Description', 'Does_it_blend', 'Main_Process', 'Select_Main_Process', 'Print_Type', 'Select_Department', 'Master_Ship'],
         "*": ['JobNumber', 'Projected_Ship_Date', 'PrepressNotes', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'Last_Cover_Description', 'Last_Body_Description',  'Last_Comp3_Description', 'Next_Comp_Description', 'Does_it_blend', 'Did_it_blend', 'Projected_Ship_Date'],
         "Lamination": ['JobNumber', 'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Cover_Description', 'NCP_Time'],
         "UV Coating": ['JobNumber', 'Projected_Ship_Date', 'PostpressNotes', 'CustName', 'JobDescription', 'Quantity', 'CoverCoating', 'Last_Cover_Description', 'NCP_Time'],
@@ -543,9 +544,6 @@ $(document).ready(function() {
                 stateSave: false // Disable state saving
             },
             "order": [[7, 'asc']], // Order by Projected_Ship_Date (column 7)
-            "drawCallback": function(settings) {
-                addShipDateSeparators();
-            },
             dom: 'Brtip',
             columns: [
                 { data: 'JobNumber' , name: 'JobNumber' }, // 0
@@ -825,6 +823,16 @@ $(document).ready(function() {
 
                 // Initialize dropdown after row is created
                 initializeDesignerDropdown(row, data);
+            },
+            preDrawCallback: function() {
+                $('#prodTable').css('visibility', 'hidden'); // hide table to prevent flicker
+            },
+
+            drawCallback: function() {
+                let openRows = JSON.parse(sessionStorage.getItem('openRows')) || [];
+                restoreOpenRows(openRows, table); // pass instance
+                $('#prodTable').css('visibility', ''); // show table
+                addShipDateSeparators();
             }
         });
         // end Initialize DataTable
@@ -833,59 +841,130 @@ $(document).ready(function() {
             const table = $('#prodTable').DataTable();
             const rows = table.rows({ order: 'applied', search: 'applied' }).nodes();
             const data = table.rows({ order: 'applied', search: 'applied' }).data().toArray();
-            
+
             // Remove existing separators and headers
             $('.ship-date-separator, .ship-date-header').remove();
-            
+
             if (rows.length === 0) return;
-            
+
+            const hiddenDates = JSON.parse(sessionStorage.getItem(SHIPDATE_KEY)) || [];
+
             let lastShipDate = null;
             const totalColCount = table.columns().count();
-            const remainingColCount = totalColCount - 2; // We're using 2 sticky columns
-            
-            $(rows).each(function(index) {
+            const remainingColCount = totalColCount - 2; // two sticky columns
+
+            $(rows).each(function (index) {
                 const currentShipDate = data[index].Projected_Ship_Date;
-                
                 if (currentShipDate !== lastShipDate) {
-                    // Add ship date header with 2 sticky columns
-                    const header = $(`<tr class="ship-date-header">
-                        <td colspan="2" style="background-color: #ebebe0; font-weight: bold; padding: 8px 12px; border-bottom: 2px solid #ccc;">
-                            Ship Date: ${currentShipDate}
-                        </td>
-                        <td colspan="${remainingColCount}" style="background-color: #ebebe0; border-bottom: 2px solid #ccc;"></td>
-                    </tr>`);
+                    const isCollapsed = hiddenDates.includes(currentShipDate);
+
+                    const header = $(`
+                        <tr class="ship-date-header ${isCollapsed ? 'collapsed' : ''}" data-ship-date="${currentShipDate}">
+                            <td colspan="2" style="background-color: ${isCollapsed ? '#cfcf9c' : '#ebebe0'}; font-weight: bold; padding: 8px 12px; border-bottom: 2px solid #ccc; cursor: pointer;">
+                                <span class="toggle-icon">${isCollapsed ? '►' : '▼'}</span> Ship Date: ${currentShipDate}
+                            </td>
+                            <td colspan="${remainingColCount}" style="background-color: ${isCollapsed ? '#cfcf9c' : '#ebebe0'}; border-bottom: 2px solid #ccc;"></td>
+                        </tr>
+                    `);
                     $(this).before(header);
-                    
-                    // Add HR line separator after the group (except for first group)
+
+header.click(function () {
+    const date = currentShipDate;
+    let hiddenDates = JSON.parse(sessionStorage.getItem(SHIPDATE_KEY)) || [];
+
+    const isHidden = hiddenDates.includes(date);
+
+    // Toggle row visibility
+    $(rows).each(function(i) {
+        if (data[i].Projected_Ship_Date === date) {
+            $(this).toggle(!isHidden);
+        }
+    });
+
+    // Update session storage
+    if (isHidden) {
+        hiddenDates = hiddenDates.filter(d => d !== date);
+        $(this).css("background-color", "#ebebe0"); // normal color
+    } else {
+        hiddenDates.push(date);
+        $(this).css("background-color", "#cfcf9c"); // collapse indicator
+    }
+
+    sessionStorage.setItem(SHIPDATE_KEY, JSON.stringify(hiddenDates));
+});
+
+
+
+                    // Add HR separator after the group (except for first)
                     if (lastShipDate !== null) {
-                        const separator = $(`<tr class="ship-date-separator">
-                            <td colspan="2" style="background-color: #ebebe0; padding: 5px 0;">
-                                <hr style="margin: 0; border: none; border-top: 2px solid #666;">
-                            </td>
-                            <td colspan="${remainingColCount}" style="background-color: #ebebe0; padding: 5px 0;">
-                                <hr style="margin: 0; border: none; border-top: 2px solid #666;">
-                            </td>
-                        </tr>`);
+                        const separator = $(`
+                            <tr class="ship-date-separator">
+                                <td colspan="2" style="background-color: #ebebe0; padding: 5px 0;"><hr style="margin:0;border:none;border-top:2px solid #666;"></td>
+                                <td colspan="${remainingColCount}" style="background-color: #ebebe0; padding: 5px 0;"><hr style="margin:0;border:none;border-top:2px solid #666;"></td>
+                            </tr>
+                        `);
                         $(rows[index - 1]).after(separator);
+
+                        // Hide if this group is collapsed
+                        if (isCollapsed) separator.hide();
                     }
-                    
+
                     lastShipDate = currentShipDate;
                 }
+
+                // Hide row if collapsed
+                if (hiddenDates.includes(currentShipDate)) {
+                    $(this).hide();
+                }
             });
-            
-            // Add final HR line after the last group
+
+            // Final separator after last group
             if (data.length > 0) {
-                const finalSeparator = $(`<tr class="ship-date-separator">
-                    <td colspan="2" style="background-color: #ebebe0; padding: 5px 0;">
-                        <hr style="margin: 0; border: none; border-top: 2px solid #666;">
-                    </td>
-                    <td colspan="${remainingColCount}" style="background-color: #ebebe0; padding: 5px 0;">
-                        <hr style="margin: 0; border: none; border-top: 2px solid #666;">
-                    </td>
-                </tr>`);
+                const finalSeparator = $(`
+                    <tr class="ship-date-separator">
+                        <td colspan="2" style="background-color:#ebebe0;padding:5px 0;"><hr style="margin:0;border:none;border-top:2px solid #666;"></td>
+                        <td colspan="${remainingColCount}" style="background-color:#ebebe0;padding:5px 0;"><hr style="margin:0;border:none;border-top:2px solid #666;"></td>
+                    </tr>
+                `);
                 $(rows[data.length - 1]).after(finalSeparator);
+
+                // Hide if last group is collapsed
+                const lastDate = data[data.length - 1].Projected_Ship_Date;
+                if (hiddenDates.includes(lastDate)) finalSeparator.hide();
             }
         }
+
+        $(document).on('click', '.ship-date-header', function () {
+            const clickedHeader = $(this);
+            const shipDate = clickedHeader.data('ship-date');
+            let reachedNextGroup = false;
+
+            // Toggle collapsed class
+            clickedHeader.toggleClass('collapsed');
+
+            // Change visual state (background + icon)
+            const isCollapsed = clickedHeader.hasClass('collapsed');
+            clickedHeader.find('.toggle-icon').text(isCollapsed ? '►' : '▼');
+
+            // Walk through next rows until next header separator
+            clickedHeader.nextAll().each(function () {
+                // Stop when hitting the next date group header
+                if ($(this).hasClass('ship-date-header')) {
+                    reachedNextGroup = true;
+                    return false;
+                }
+                if (!reachedNextGroup && !$(this).hasClass('ship-date-separator')) {
+                    $(this).toggle(!isCollapsed);
+                }
+            });
+
+            // Also hide the separator after this group when collapsed
+            if (isCollapsed) {
+                clickedHeader.nextAll('.ship-date-separator:first').hide();
+            } else {
+                clickedHeader.nextAll('.ship-date-separator:first').show();
+            }
+        });
 
         // Add event handlers for notes editing
         setupNotesEditing();
@@ -1181,43 +1260,6 @@ $(document).ready(function() {
         const saveBtn = $(this).closest('.notes-container').find('.btn-save-notes');
         saveBtn.prop('disabled', $(this).val() === originalValues[key]);
     });
-
-    // Set up department dropdown
-    // function setupDepartmentDropdown() {
-    //     const deptFilter = $('#deptFilter').empty().append('<option value="">All</option>');
-
-    //     departmentMapping.forEach(dept => {
-    //         deptFilter.append(`<option value="${dept.values.join(',')}">${dept.text}</option>`);
-            
-    //         if (dept.subsections) {
-    //             const optgroup = $('<optgroup>').attr('label', `${dept.text} Subsections`);
-    //             dept.subsections.forEach(sub => {
-    //                 optgroup.append(`<option value="${sub.values.join(',')}">${sub.text}</option>`);
-    //             });
-    //             deptFilter.append(optgroup);
-    //         }
-    //     });
-
-    //     // Load saved filter
-    //     const savedDeptFilter = localStorage.getItem('deptFilter');
-    //     if (savedDeptFilter) {
-    //         deptFilter.val(savedDeptFilter);
-    //     }
-
-    //     let filterTimeout;
-    //     $('#deptFilter').on('change', function() {
-    //         clearTimeout(filterTimeout);
-    //         filterTimeout = setTimeout(() => {
-    //             localStorage.setItem('deptFilter', $(this).val());
-
-    //             applyDepartmentFilter();
-
-    //             // Scroll to top of the page
-    //             window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    //         }, 300); // 300ms delay
-    //     });
-    // }
 
     function setupDepartmentDropdown() {
         const deptFilter = $('#deptFilter').empty().append('<option value="">All</option>');
@@ -1726,132 +1768,131 @@ $(document).ready(function() {
         });
     }
 
-function applyPriorityHighlighting() {
-    // Get current filter state
-    const selectedText = $('#deptFilter option:selected').text();
-    const isPrePress = selectedText === 'PrePress' ||
-                      selectedText === 'Needs Proof' ||
-                      selectedText === 'Proof Out' ||
-                      selectedText === 'Imposition';
+    function applyPriorityHighlighting() {
+        // Get current filter state
+        const selectedText = $('#deptFilter option:selected').text();
+        const isPrePress = selectedText === 'PrePress' ||
+                          selectedText === 'Needs Proof' ||
+                          selectedText === 'Proof Out' ||
+                          selectedText === 'Imposition';
 
-    // Process all visible rows at once
-    const rows = table.rows({ search: 'applied', page: 'current' }).nodes();
-    
-    $(rows).each(function() {
-        const rowNode = this;
-        const rowData = table.row(rowNode).data();
-        if (!rowData) return;
-
-        const firstCell = $(rowNode).find('td:first');
+        // Process all visible rows at once
+        const rows = table.rows({ search: 'applied', page: 'current' }).nodes();
         
-        // Clear existing classes
-        $(rowNode).removeClass(`${colorSessionId}-priority-single ${colorSessionId}-priority-double`);
-        firstCell.removeClass(`${colorSessionId}-priority-single-cell ${colorSessionId}-priority-double-cell`);
+        $(rows).each(function() {
+            const rowNode = this;
+            const rowData = table.row(rowNode).data();
+            if (!rowData) return;
 
-        // Apply priority highlighting
-        const jobPriority = rowData.JobPriority?.toString()?.trim() || '';
-        if (jobPriority === '*') {
-            if (isPrePress) {
-                firstCell.addClass(`${colorSessionId}-priority-single-cell`);
-            } else {
-                $(rowNode).addClass(`${colorSessionId}-priority-single`);
-            }
-        } else if (jobPriority === '**') {
-            if (isPrePress) {
-                firstCell.addClass(`${colorSessionId}-priority-double-cell`);
-            } else {
-                $(rowNode).addClass(`${colorSessionId}-priority-double`);
-            }
-        }
-        
-        // Apply PrePress highlighting if needed
-        if (isPrePress) {
-            applyPrePressHighlighting(rowNode, rowData);
-        }
-    });
-}
+            const firstCell = $(rowNode).find('td:first');
+            
+            // Clear existing classes
+            $(rowNode).removeClass(`${colorSessionId}-priority-single ${colorSessionId}-priority-double`);
+            firstCell.removeClass(`${colorSessionId}-priority-single-cell ${colorSessionId}-priority-double-cell`);
 
-
-function applyRowFilter(deptValue) {
-    const selectedText = $('#deptFilter option:selected').text();
-    const isPrePress = selectedText === 'PrePress' ||
-                      selectedText === 'Needs Proof' ||
-                      selectedText === 'Proof Out' ||
-                      selectedText === 'Imposition';
-
-    const values = deptValue.split(',');
-    
-    // Get columns to check based on department mapping
-    const columnsToCheck = departmentColumnMapping[selectedText] || ['Next_Comp_Process'];
-
-    // Clear existing filter
-    if (currentDeptFilter) {
-        $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(
-            fn => fn !== currentDeptFilter
-        );
-    }
-
-    currentDeptFilter = function(settings, data, dataIndex) {
-        const rowData = table.row(dataIndex).data();
-        if (!rowData) return false;
-
-        let matchFound = false;
-        for (const colName of columnsToCheck) {
-            const cellValue = rowData[colName];
-            if (cellValue && values.includes(cellValue.toString())) {
-                matchFound = true;
-                const rowNode = table.row(dataIndex).node();
-                
-                // Always apply priority highlighting first
-                applyPriorityHighlighting(rowNode, rowData, isPrePress);
-                
+            // Apply priority highlighting
+            const jobPriority = rowData.JobPriority?.toString()?.trim() || '';
+            if (jobPriority === '*') {
                 if (isPrePress) {
-                    applyPrePressHighlighting(rowNode, rowData);
+                    firstCell.addClass(`${colorSessionId}-priority-single-cell`);
                 } else {
-                    // Other departments - process-based coloring
-                    const processClass = `${colorSessionId}-match-col-${colName.replace(/_/g, '-')}`;
-                    $(rowNode).addClass(processClass);
+                    $(rowNode).addClass(`${colorSessionId}-priority-single`);
                 }
-                break;
+            } else if (jobPriority === '**') {
+                if (isPrePress) {
+                    firstCell.addClass(`${colorSessionId}-priority-double-cell`);
+                } else {
+                    $(rowNode).addClass(`${colorSessionId}-priority-double`);
+                }
             }
-        }
-        return matchFound;
-    };
-
-    // Apply the new filter and highlighting
-    $.fn.dataTable.ext.search.push(currentDeptFilter);
-    table.draw();
-    
-    // Apply highlighting to all visible rows (including non-filtered in current page)
-    table.rows({ page: 'current' }).every(function() {
-        const rowData = this.data();
-        const rowNode = this.node();
-        if (rowData && rowNode) {
-            applyPriorityHighlighting(rowNode, rowData, isPrePress);
+            
+            // Apply PrePress highlighting if needed
             if (isPrePress) {
                 applyPrePressHighlighting(rowNode, rowData);
             }
-        }
-    });
-}
-
-// Keep this as is for PrePress highlighting
-function applyPrePressHighlighting(rowNode, rowData) {
-    $(rowNode).removeClass(function(index, className) {
-        return (className.match(new RegExp(`(^|\\s)${colorSessionId}-designer-\\S+`, 'g')) || []).join(' ');
-    });
-
-    if (rowData.Designer) {
-        const designerExists = designers.some(d => d.EmployeeName === rowData.Designer);
-        const safeName = rowData.Designer.replace(/\s+/g, '-');
-        $(rowNode).addClass(designerExists 
-            ? `${colorSessionId}-designer-${safeName}`
-            : `${colorSessionId}-designer-default`
-        );
-    //} else {
-        //$(rowNode).addClass(`${colorSessionId}-designer-default`);
+        });
     }
-}
+
+    function applyRowFilter(deptValue) {
+        const selectedText = $('#deptFilter option:selected').text();
+        const isPrePress = selectedText === 'PrePress' ||
+                          selectedText === 'Needs Proof' ||
+                          selectedText === 'Proof Out' ||
+                          selectedText === 'Imposition';
+
+        const values = deptValue.split(',');
+        
+        // Get columns to check based on department mapping
+        const columnsToCheck = departmentColumnMapping[selectedText] || ['Next_Comp_Process'];
+
+        // Clear existing filter
+        if (currentDeptFilter) {
+            $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(
+                fn => fn !== currentDeptFilter
+            );
+        }
+
+        currentDeptFilter = function(settings, data, dataIndex) {
+            const rowData = table.row(dataIndex).data();
+            if (!rowData) return false;
+
+            let matchFound = false;
+            for (const colName of columnsToCheck) {
+                const cellValue = rowData[colName];
+                if (cellValue && values.includes(cellValue.toString())) {
+                    matchFound = true;
+                    const rowNode = table.row(dataIndex).node();
+                    
+                    // Always apply priority highlighting first
+                    applyPriorityHighlighting(rowNode, rowData, isPrePress);
+                    
+                    if (isPrePress) {
+                        applyPrePressHighlighting(rowNode, rowData);
+                    } else {
+                        // Other departments - process-based coloring
+                        const processClass = `${colorSessionId}-match-col-${colName.replace(/_/g, '-')}`;
+                        $(rowNode).addClass(processClass);
+                    }
+                    break;
+                }
+            }
+            return matchFound;
+        };
+
+        // Apply the new filter and highlighting
+        $.fn.dataTable.ext.search.push(currentDeptFilter);
+        table.draw();
+        
+        // Apply highlighting to all visible rows (including non-filtered in current page)
+        table.rows({ page: 'current' }).every(function() {
+            const rowData = this.data();
+            const rowNode = this.node();
+            if (rowData && rowNode) {
+                applyPriorityHighlighting(rowNode, rowData, isPrePress);
+                if (isPrePress) {
+                    applyPrePressHighlighting(rowNode, rowData);
+                }
+            }
+        });
+    }
+
+    // Keep this as is for PrePress highlighting
+    function applyPrePressHighlighting(rowNode, rowData) {
+        $(rowNode).removeClass(function(index, className) {
+            return (className.match(new RegExp(`(^|\\s)${colorSessionId}-designer-\\S+`, 'g')) || []).join(' ');
+        });
+
+        if (rowData.Designer) {
+            const designerExists = designers.some(d => d.EmployeeName === rowData.Designer);
+            const safeName = rowData.Designer.replace(/\s+/g, '-');
+            $(rowNode).addClass(designerExists 
+                ? `${colorSessionId}-designer-${safeName}`
+                : `${colorSessionId}-designer-default`
+            );
+        //} else {
+            //$(rowNode).addClass(`${colorSessionId}-designer-default`);
+        }
+    }
 
 
     function applyColumnVisibility(deptText) {
@@ -2050,7 +2091,8 @@ function applyPrePressHighlighting(rowNode, rowData) {
                 sessionStorage.setItem('openRows', JSON.stringify([]));
             }
             
-            restoreOpenRows(openRows);
+            //restoreOpenRows(openRows);
+            restoreHiddenShipDates();
         }
 
         function handleUpdateSuccess(jobNumber, componentNumber) {
@@ -2241,16 +2283,18 @@ function applyPrePressHighlighting(rowNode, rowData) {
     }
 
     // Function to reopen rows after the table refresh
-    function restoreOpenRows(openRows) {
-        // First close all existing rows
-        table.rows().every(function() {
-            if (this.child.isShown()) {
+    function restoreOpenRows(openRows, tableInstance) {
+        if (!tableInstance) return; // safety guard
+
+        // First close all existing child rows safely
+        tableInstance.rows().every(function() {
+            if (this.child && this.child.isShown && this.child.isShown()) {
                 this.child.hide();
                 $(this.node()).removeClass('shown dt-hasChild');
             }
         });
 
-        // Reopen saved rows with delay between each
+        // Reopen saved rows with staggered requests
         openRows.forEach((row, index) => {
             setTimeout(() => {
                 socket.send(JSON.stringify({
@@ -2259,6 +2303,27 @@ function applyPrePressHighlighting(rowNode, rowData) {
                     componentNumber: row.componentNumber
                 }));
             }, index * 150); // Stagger requests
+        });
+    }
+
+    function restoreHiddenShipDates() {
+        let hiddenDates = JSON.parse(sessionStorage.getItem(SHIPDATE_KEY)) || [];
+
+        if (!hiddenDates.length) return;
+
+        const table = $('#prodTable').DataTable();
+        const rows = table.rows({ order: 'applied', search: 'applied' }).nodes();
+        const data = table.rows({ order: 'applied', search: 'applied' }).data().toArray();
+
+        hiddenDates.forEach(date => {
+            $(rows).each(function(i) {
+                if (data[i].Projected_Ship_Date === date) {
+                    $(this).hide();
+                }
+            });
+
+            // Tint the header row back to hidden color
+            $(`tr.ship-date-header:contains(${date})`).css("background-color", "#cfcf9c");
         });
     }
 

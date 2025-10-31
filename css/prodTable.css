@@ -149,7 +149,8 @@ label {
     min-width: 150px;
 }
 
-.notes-container {
+.notes-container,
+.ships-with-container {
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -164,7 +165,7 @@ label {
     resize: vertical;
 }
 
-.btn-save-notes {
+.btn-primary{
     align-self: flex-end;
 }
 
@@ -331,6 +332,14 @@ tr.pulse td {
 tr.fade-out td {
   opacity: 0;
   transition: opacity 0.5s ease;
+}
+
+.ship-date-header {
+    cursor: pointer;
+}
+
+.ship-date-header.collapsed td {
+    background-color: #d6d6c2 !important; /* darker when collapsed */
 }
 
 /* details table */
